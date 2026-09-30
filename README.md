@@ -15,6 +15,10 @@
 
 ---
 
+| <img alt="Dart in CodeView with line numbers and highlighted lines" src="screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="TSX in the midnight theme" src="screenshots/dark-theme.png"><br>**Themes**<br>Eight built in, or import a VS Code theme. |
+|---|---|
+| <img alt="Markdown with bash, Python and JSON code fences" src="screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. | <img alt="Python being edited in CodeField" src="screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. |
+
 ## 📦 Packages
 
 | Package | Use it for |
@@ -100,8 +104,8 @@ for AI agents.
 
 ## 💬 Community
 
-Issues and pull requests are welcome. Run `just check` before opening a pull
-request.
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for setup, tests and what we look for in a pull request.
 
 ## 📄 License
 

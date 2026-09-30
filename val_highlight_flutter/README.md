@@ -21,6 +21,10 @@
 
 ---
 
+| <img alt="Dart in CodeView with line numbers and highlighted lines" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="TSX in the midnight theme" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/dark-theme.png"><br>**Themes**<br>Eight built in, or import a VS Code theme. |
+|---|---|
+| <img alt="Markdown with bash, Python and JSON code fences" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. | <img alt="Python being edited in CodeField" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. |
+
 ## ✨ Why val_highlight_flutter?
 
 - **Two widgets, one line each** — `CodeView(source, language: dartLanguage)`
@@ -189,7 +193,8 @@ layer for AI agents.
 ## 💬 Community
 
 Issues and pull requests are welcome on
-[GitHub](https://github.com/useval/highlight). If the package helps your
+[GitHub](https://github.com/useval/highlight); see the
+[contributing guide](https://github.com/useval/highlight/blob/main/CONTRIBUTING.md). If the package helps your
 project, consider giving it a like on
 [pub.dev](https://pub.dev/packages/val_highlight_flutter) or a star on
 GitHub.

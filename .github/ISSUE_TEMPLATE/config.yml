@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: val_highlight documentation
+    url: https://github.com/useval/highlight/tree/main/val_highlight#readme
+    about: Languages, themes, customising grammars, and HTML output.
+  - name: val_highlight_flutter documentation
+    url: https://github.com/useval/highlight/tree/main/val_highlight_flutter#readme
+    about: CodeView, CodeField, CodeTheme, and large files.

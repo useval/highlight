@@ -259,7 +259,8 @@ for AI agents.
 ## 💬 Community
 
 Issues and pull requests are welcome on
-[GitHub](https://github.com/useval/highlight). If the package helps your
+[GitHub](https://github.com/useval/highlight); see the
+[contributing guide](https://github.com/useval/highlight/blob/main/CONTRIBUTING.md). If the package helps your
 project, consider giving it a like on
 [pub.dev](https://pub.dev/packages/val_highlight) or a star on GitHub.
 

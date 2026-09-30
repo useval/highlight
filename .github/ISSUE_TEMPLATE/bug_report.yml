@@ -1,0 +1,112 @@
+name: Bug report
+description: Code highlights wrong, something crashes, or a widget behaves unexpectedly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. The quickest fix comes from
+        the smallest code that still shows the problem.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: >-
+        What you see, and what you expected to see instead. For wrong
+        highlighting, name the tokens that are wrong, for example "the `//`
+        inside the string is shown as a comment".
+    validations:
+      required: true
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: The grammar you highlight with, or "detected" if you let it guess.
+      placeholder: kotlin
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Code that reproduces it
+      description: The smallest input that still shows the problem. Paste it as-is.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: How you call it
+      description: >-
+        The widget or API call — `CodeView`, `CodeField`, `Highlighter`,
+        `IncrementalHighlighter` — with its arguments, and any custom
+        grammar or theme.
+      render: dart
+      placeholder: |
+        CodeView(
+          source,
+          language: kotlinLanguage,
+          lineNumbers: true,
+        )
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - val_highlight
+        - val_highlight_flutter
+    validations:
+      required: true
+
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: flutter-version
+    attributes:
+      label: Dart or Flutter version
+      description: Paste the output of `flutter --version` or `dart --version`.
+      render: text
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms where it happens
+      options:
+        - label: Android
+        - label: iOS
+        - label: Web
+        - label: macOS
+        - label: Windows
+        - label: Linux
+        - label: Dart VM (server or command line)
+
+  - type: checkboxes
+    id: context
+    attributes:
+      label: Does any of this apply?
+      description: These change which code path highlights your text.
+      options:
+        - label: It happens while editing (`CodeField`, `HighlightTextController`, `IncrementalHighlighter`), not on first display
+        - label: The code is inside another language (Markdown fence, HTML `<script>` or `<style>`, Vue or Svelte)
+        - label: I use a custom or extended grammar
+        - label: I use a custom theme or one imported from VS Code
+        - label: The file is large (more than 1,000 lines)
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, logs, anything else
+      description: Error messages, stack traces, or a screenshot of the wrong output.

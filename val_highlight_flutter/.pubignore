@@ -13,6 +13,9 @@ build/
 # something a consumer compiles against.
 test/
 
+# The README screenshot generator and its font.
+tool/
+
 # The example ships for its source: `example/lib`, its pubspec and README
 # are what pub.dev shows. Its platform scaffolding, device tests, benchmark
 # driver and sample generator belong in the repository only.

@@ -103,6 +103,10 @@ example-web:
 samples:
     cd {{example}} && {{dart}} run tool/generate_samples.dart && {{dart}} format lib/samples.g.dart
 
+# Regenerate the README images in screenshots/. Review them before committing.
+screenshots:
+    cd val_highlight_flutter && {{flutter}} test tool/screenshots/generate_test.dart --update-goldens
+
 # Build the Flutter example for the web into val_highlight_flutter/example/build/web.
 build-web:
     cd {{example}} && {{flutter}} build web

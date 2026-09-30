@@ -1,0 +1,64 @@
+«keyword:package» com.example.cart
+
+«keyword:import» kotlinx.coroutines.flow.«operator:*»
+«keyword:import» java.time.Instant
+
+«comment.doc:/**
+ * A shopping cart. Totals are in cents.
+ * »«comment.doc>keyword:@property»«comment.doc: owner who the cart belongs to
+ * »«comment.doc>comment.doc:/* nested comment in docs */»«comment.doc:
+ */»
+«meta:@JvmInline»
+value «keyword:class» «type:Cents»(«keyword:val» amount«operator::» «type.builtin:Long»)
+
+«keyword:sealed» «keyword:interface» «type:Event» {
+    «keyword:data» «keyword:class» «type:Added»(«keyword:val» sku«operator::» «type.builtin:String», «keyword:val» qty«operator::» «type.builtin:Int» «operator:=» «number:1») «operator::» «type:Event»
+    «keyword:data» «keyword:object» «type:Cleared» «operator::» «type:Event»
+}
+
+«keyword:class» «type:Cart»(«keyword:private» «keyword:val» owner«operator::» «type.builtin:String») {
+    «keyword:private» «keyword:val» items «operator:=» «function:mutableMapOf»«operator:<»«type.builtin:String», «type.builtin:Int»«operator:>»()
+    «keyword:var» updatedAt«operator::» «type:Instant»«operator:?» «operator:=» «literal:null»
+        «keyword:private» «keyword:set»
+
+    «keyword:companion» «keyword:object» {
+        «keyword:const» «keyword:val» «type:MAX_ITEMS» «operator:=» «number:1_000»
+        «keyword:private» «keyword:const» «keyword:val» «type:MASK» «operator:=» «number:0xFF_FFL»
+    }
+
+    «keyword:suspend» «keyword:fun» «function:apply»(event«operator::» «type:Event»)«operator::» «type.builtin:Boolean» «operator:=» «keyword:when» (event) {
+        «keyword:is» «type:Event».Added «operator:->» {
+            «function:require»(event.qty «operator:>» «number:0») { «string:"qty must be positive, got »«string>interpolation:${event.qty}»«string:"» }
+            items.«function:merge»(event.sku, event.qty, «type.builtin:Int»«operator:::»plus)
+            updatedAt «operator:=» «type:Instant».«function:now»()
+            «literal:true»
+        }
+        «type:Event».Cleared «operator:->» items.«function:clear»().let { «literal:false» }
+    }
+
+    «keyword:fun» «function:summary»()«operator::» «type.builtin:String» {
+        «keyword:val» lines «operator:=» items.entries.«function:joinToString»(«string:"»«string>string.escape:\n»«string:"») { (sku, qty) «operator:->» «string:"»«string>interpolation:$sku»«string: x»«string>interpolation:$qty»«string:"» }
+        «keyword:return» «string:"""
+            |Cart for »«string>interpolation:$owner»«string: (»«string>interpolation:${items.size}»«string: items)
+            |»«string>interpolation:$lines»«string: \n stays raw
+        """».«function:trimMargin»()
+    }
+
+    «keyword:inline» «keyword:fun» «operator:<»«keyword:reified» «type:T»«operator:>» «function:find»(predicate«operator::» («type:T») «operator:->» «type.builtin:Boolean»)«operator::» «type:T»«operator:?» «operator:=» «literal:null»
+
+    «keyword:fun» «function:loop»() {
+        «meta:outer@» «keyword:for» (i «keyword:in» «number:0» until «number:10») {
+            «keyword:if» (i «operator:%» «number:2» «operator:==» «number:0») «keyword:continue»«meta:@outer»
+            «keyword:val» c «operator:=» «string:'x'»; «keyword:val» tab «operator:=» «string:'\t'»; «keyword:val» pi «operator:=» «number:3.14f»
+            «function:println»(`is`(i) «operator:&&» c «operator:!=» tab «operator:&&» pi «operator:>» «number:1e-3»)
+        }
+    }
+
+    «keyword:private» «keyword:fun» `is`(n«operator::» «type.builtin:Int») «operator:=» n «keyword:in» «number:1»..9 «operator:&&» n «operator:!»«keyword:in» «function:setOf»(«number:4», «number:5»)
+}
+
+«keyword:fun» «function:main»() «operator:=» runBlocking {
+    «keyword:val» cart «operator:=» «type:Cart»(«string:"ada"»)
+    «function:listOf»(«type:Event».«function:Added»(«string:"apple"», «number:2»), «type:Event».Cleared).«function:asFlow»().collect { cart.«function:apply»(«variable.language:it») }
+    «function:println»(cart.«function:summary»() «operator:?:» «string:"empty"»)
+}

@@ -1,0 +1,44 @@
+# Reverse proxy
+user www-data;
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       mime.types;
+    sendfile      on;
+    keepalive_timeout 65s;
+    client_max_body_size 10m;
+    gzip on; gzip_types text/css application/json;
+
+    upstream app {
+        server 127.0.0.1:8080 weight=5;
+        server 127.0.0.1:8081 backup;
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name example.com www.example.com;
+        root /var/www/html;
+
+        location = /health {
+            return 200 "ok\n";
+        }
+
+        location ~* \.(png|jpg|css)$ {
+            expires 30d;
+            add_header Cache-Control "public, max-age=2592000";
+        }
+
+        location / {
+            proxy_pass http://app;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP ${remote_addr};
+            if ($request_method = POST) {
+                return 405;
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard &mdash; Overview</title>
+  <style>
+    .card { padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    .card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="dark">
+  <!-- Main navigation -->
+  <nav id="top"><a href="/" class="brand">Home</a><a href="/about">About</a></nav>
+  <main>
+    <section class="card" data-id="42">
+      <h2>Stats</h2>
+      <p>Visitors: <strong id="count">0</strong></p>
+    </section>
+  </main>
+  <script type="module">
+    const el = document.getElementById('count');
+    let n = 0;
+    setInterval(() => { el.textContent = String(++n); }, 1000);
+  </script>
+</body>
+</html>

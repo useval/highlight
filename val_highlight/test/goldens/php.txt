@@ -1,0 +1,54 @@
+«meta:<?php»
+
+«keyword:declare»(strict_types«operator:=»«number:1»);
+
+«keyword:namespace» «type:App»«operator:\»«type:Http»«operator:\»«type:Controllers»;
+
+«keyword:use» «type:App»«operator:\»«type:Models»«operator:\»«type:User»;
+«keyword:use» «type:Illuminate»«operator:\»«type:Http»«operator:\»«type:Request»;
+
+«comment.doc:/**
+ * Handles user profile pages.
+ */»
+«meta:#[Route(»«meta>string:'/users'»«meta:, methods: [»«meta>string:'GET'»«meta:])]»
+«keyword:final» «keyword:class» «type:UserController» «keyword:extends» «type:Controller»
+{
+    «keyword:private» «keyword:const» «type:PAGE_SIZE» «operator:=» «number:25»;
+
+    «keyword:public» «keyword:function» «function:__construct»(«keyword:private» «keyword:readonly» «type:UserRepository» «variable:$users») {}
+
+    «keyword:public» «keyword:function» «function:show»(«type:Request» «variable:$request», «type.builtin:int» «variable:$id»)«operator::» «keyword:array»«operator:|»«literal:null»
+    {
+        «variable:$user» «operator:=» «variable.language:$this»«operator:->»users«operator:->»«function:find»(«variable:$id») «operator:??» «keyword:throw» «keyword:new» «type:NotFoundException»(«string:"User »«string>interpolation:{»«string>interpolation>variable:$id»«string>interpolation:}»«string: not found"»);
+        «variable:$name» «operator:=» «variable:$user»«operator:?->»profile[«string:'display'»] «operator:??» «string:'anonymous'»;
+        «comment:// Null-safe access and the null-coalescing operator.»
+        «variable:$greeting» «operator:=» «string:"Hello, »«string>variable:$name»«string:! You have »«string>interpolation:{»«string>interpolation>variable:$user»«string>interpolation>operator:->»«string>interpolation:unread}»«string: messages."»;
+        «variable:$query» «operator:=» «operator:<<<»«meta:SQL»
+«string:            SELECT * FROM users»
+«string:            WHERE id = »«interpolation:{»«interpolation>variable:$id»«interpolation:}»«string: AND name = '»«variable:$name»«string:'»
+«meta:            SQL»;
+        «variable:$raw» «operator:=» «operator:<<<»'«meta:TEXT»'
+«string:            No $interpolation here.»
+«meta:            TEXT»;
+
+        «keyword:return» «keyword:match» («literal:true») {
+            «variable:$id» «operator:<» «number:0» «operator:=>» «literal:null»,
+            «keyword:default» «operator:=>» [«string:'greeting'» «operator:=>» «variable:$greeting», «string:'size'» «operator:=>» «variable.language:self»«operator:::»«type:PAGE_SIZE», «string:'hex'» «operator:=>» «number:0x1F»],
+        };
+    }
+
+    «keyword:public» «keyword:static» «keyword:function» «function:slug»(«type.builtin:string» «variable:$title»)«operator::» «type.builtin:string»
+    {
+        «keyword:return» «function:strtolower»(«function:preg_replace»(«string:'/[^a-z0-9]+/i'», «string:'-'», «function:trim»(«variable:$title»)));
+    }
+}
+
+«variable:$items» «operator:=» «function:array_map»(«keyword:fn»(«variable:$x») «operator:=>» «variable:$x» «operator:*» «number:2», [«number:1», «number:2», «number:3»]);
+«keyword:echo» «function:count»(«variable:$items»), «literal:PHP_EOL»;
+«meta:?>»
+«punctuation:<»«tag:ul» «attribute:class»«punctuation:=»«string:"items"»«punctuation:>»
+  «meta:<?php» «keyword:foreach» («variable:$items» «keyword:as» «variable:$item»)«operator::» «meta:?>»
+    «punctuation:<»«tag:li» «attribute:data-value»«punctuation:=»«string:"»«meta:<?=» «variable:$item» «meta:?>»">Item «meta:<?=» «function:htmlspecialchars»((«type.builtin:string») «variable:$item») «meta:?>»«punctuation:</»«tag:li»«punctuation:>»
+  «meta:<?php» «keyword:endforeach»; «meta:?>»
+«punctuation:</»«tag:ul»«punctuation:>»
+«punctuation:<»«tag:script»«punctuation:>»«keyword:const» total «operator:=» «number:3»;«punctuation:</»«tag:script»«punctuation:>»

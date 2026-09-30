@@ -1,0 +1,58 @@
+#include <iostream>
+#include <memory>
+#include <string_view>
+#include <vector>
+
+namespace geo {
+
+/// A 2D point.
+template <typename T>
+    requires std::is_arithmetic_v<T>
+struct Point {
+    T x{}, y{};
+    constexpr auto operator<=>(const Point&) const = default;
+};
+
+class Shape {
+public:
+    virtual ~Shape() = default;
+    [[nodiscard]] virtual double area() const noexcept = 0;
+};
+
+class Circle final : public Shape {
+public:
+    explicit Circle(double r) : radius_{r} {}
+    [[nodiscard]] double area() const noexcept override {
+        return 3.141'592 * radius_ * radius_;
+    }
+
+private:
+    double radius_ = 1.0;
+};
+
+}  // namespace geo
+
+/* Raw strings keep their contents. */
+static constexpr auto kQuery = R"sql(
+SELECT "name" FROM users WHERE id = ?; -- )" is not the end
+)sql";
+
+consteval int square(int n) { return n * n; }
+
+int main(int argc, char** argv) {
+    using namespace std::string_view_literals;
+    std::vector<std::unique_ptr<geo::Shape>> shapes;
+    shapes.push_back(std::make_unique<geo::Circle>(2.0));
+    auto total = 0.0;
+    for (const auto& shape : shapes) {
+        total += shape->area();
+    }
+    const char* msg = u8"héllo\n";
+    char c = '\x41';
+    unsigned long long big = 0xFFFF'FFFFull;
+    if (argc > 1 && total > 1e3) {
+        std::cout << "total: " << total << '\t' << msg << big << std::endl;
+    }
+    static_assert(square(4) == 16);
+    return nullptr == argv ? 1 : 0;
+}

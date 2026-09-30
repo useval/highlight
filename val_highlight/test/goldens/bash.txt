@@ -1,0 +1,20 @@
+«meta:#!/usr/bin/env bash»
+«function:set» «attribute:-euo» pipefail
+
+«variable:LOG_DIR»=«string:"»«string>variable:${LOG_DIR:-/var/log/app}»«string:"»
+«variable:KEEP»=«number:7»
+
+«comment:# Rotate logs older than $KEEP days.»
+«function:rotate»() {
+  «function:local» «variable:dir»=«string:"»«string>variable:$1»«string:"»
+  find «string:"»«string>variable:$dir»«string:"» «attribute:-name» «string:'*.log'» «attribute:-mtime» +«string:"»«string>variable:$KEEP»«string:"» «attribute:-print0» «operator:|» «keyword:while» «variable:IFS»= «function:read» «attribute:-r» «attribute:-d» «string:''» f«operator:;» «keyword:do»
+    gzip -9 «string:"»«string>variable:$f»«string:"» «operator:&&» «function:echo» «string:"compressed »«string>interpolation:$(basename »«string>interpolation>string:"»«string>interpolation>string>variable:$f»«string>interpolation>string:"»«string>interpolation:)»«string:"»
+  «keyword:done»
+}
+
+«keyword:if» [[ «attribute:-d» «string:"»«string>variable:$LOG_DIR»«string:"» ]]«operator:;» «keyword:then»
+  rotate «string:"»«string>variable:$LOG_DIR»«string:"» «operator:>>» /tmp/rotate.log «number:2»«operator:>&»«number:1»
+«keyword:else»
+  «function:echo» «string:"missing »«string>variable:$LOG_DIR»«string:"» «operator:>&»«number:2»
+  «function:exit» «number:1»
+«keyword:fi»

@@ -1,0 +1,40 @@
+«keyword:syntax» «operator:=» «string:"proto3"»«operator:;»
+
+«keyword:package» example.users.v1«operator:;»
+
+«keyword:import» «string:"google/protobuf/timestamp.proto"»«operator:;»
+«keyword:option» go_package «operator:=» «string:"example.com/users/v1;usersv1"»«operator:;»
+«keyword:option» java_multiple_files «operator:=» «literal:true»«operator:;»
+
+«comment:// A registered user.»
+«keyword:message» «type:User» {
+  «type.builtin:string» id «operator:=» «number:1»«operator:;»
+  «type.builtin:string» display_name «operator:=» «number:2» [json_name «operator:=» «string:"displayName"»]«operator:;»
+  «keyword:repeated» «type.builtin:string» emails «operator:=» «number:3»«operator:;»
+  «keyword:map»<«type.builtin:string», «type.builtin:int64»> counters «operator:=» «number:4»«operator:;»
+  google.protobuf.Timestamp created_at «operator:=» «number:5»«operator:;»
+  «type:Status» status «operator:=» «number:6»«operator:;»
+  «keyword:optional» «type.builtin:bytes» avatar «operator:=» «number:7»«operator:;»
+
+  «keyword:enum» «type:Status» {
+    STATUS_UNSPECIFIED «operator:=» «number:0»«operator:;»
+    STATUS_ACTIVE «operator:=» «number:1»«operator:;»
+    STATUS_BANNED «operator:=» «number:2» [deprecated «operator:=» «literal:true»]«operator:;»
+  }
+
+  «keyword:oneof» contact {
+    «type.builtin:string» phone «operator:=» «number:8»«operator:;»
+    «type.builtin:string» pager «operator:=» «number:9»«operator:;»
+  }
+
+  «keyword:reserved» «number:10» «keyword:to» «number:15», «number:20»«operator:;»
+  «keyword:reserved» «string:"legacy_id"»«operator:;»
+}
+
+«comment:/* The user service. */»
+«keyword:service» «type:UserService» {
+  «keyword:rpc» «function:GetUser»(«type:GetUserRequest») «keyword:returns» («type:User»)«operator:;»
+  «keyword:rpc» «function:WatchUsers»(«keyword:stream» «type:WatchRequest») «keyword:returns» («keyword:stream» «type:User») {}
+}
+
+«keyword:message» «type:GetUserRequest» { «type.builtin:string» id «operator:=» «number:1»«operator:;» «type.builtin:double» weight «operator:=» «number:2»«operator:;» }

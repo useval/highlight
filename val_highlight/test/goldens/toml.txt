@@ -1,0 +1,39 @@
+«comment:# Cargo manifest»
+«heading:[package]»
+«property:name» «operator:=» «string:"val-cli"»
+«property:version» «operator:=» «string:"0.3.1"»
+«property:edition» «operator:=» «string:"2021"»
+«property:authors» «operator:=» «punctuation:[»«string:"Ada <ada@example.com>"»«punctuation:,» «string:'Linus'»«punctuation:]»
+«property:description» «operator:=» «string:"""
+A command-line tool
+with a "multi-line" description."""»
+«property:license-path» «operator:=» «string:'C:\Users\ada\LICENSE'»
+
+«heading:[dependencies]»
+«property:serde» «operator:=» «punctuation:{» «property:version» «operator:=» «string:"1.0"»«punctuation:,» «property:features» «operator:=» «punctuation:[»«string:"derive"»«punctuation:]» «punctuation:}»
+«property:tokio.version» «operator:=» «string:"1"»
+«property:"quoted.key"» «operator:=» «literal:true»
+
+«heading:[profile.release]»
+«property:lto» «operator:=» «literal:true»
+«property:opt-level» «operator:=» «number:3»
+«property:codegen-units» «operator:=» «number:0x10»
+«property:panic» «operator:=» «string:"abort"»
+
+«heading:[[bin]]»
+«property:name» «operator:=» «string:"val"»
+«property:path» «operator:=» «string:"src/main.rs"»
+
+«heading:[tool.limits]»
+«property:ratio» «operator:=» «number:0.75»
+«property:big» «operator:=» «number:1_000_000»
+«property:neg» «operator:=» «number:-42»
+«property:exp» «operator:=» «number:6.02e23»
+«property:infinite» «operator:=» «number:inf»
+«property:missing» «operator:=» «number:-nan»
+«property:created» «operator:=» «number:2026-09-30T08:15:00Z»
+«property:local» «operator:=» «number:2026-09-30 08:15:00»
+«property:day» «operator:=» «number:2026-09-30»
+«property:at» «operator:=» «number:07:32:00.999»
+«property:matrix» «operator:=» «punctuation:[[»«number:1»«punctuation:,» «number:2»«punctuation:],» «punctuation:[»«number:3»«punctuation:,» «number:4»«punctuation:]]»
+«property:empty» «operator:=» «punctuation:{}»

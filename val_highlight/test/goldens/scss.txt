@@ -1,0 +1,43 @@
+«keyword:@use» «string:'sass:math'»;
+«keyword:@import» «string:"base/reset"»;
+
+«comment:// Design tokens»
+«variable:$brand»: «number:#b0226e» «keyword:!default»;
+«variable:$gap»: «number:12px»;
+«variable:$breakpoints»: (small: «number:576px», large: «number:992px»);
+
+«keyword:@mixin» «function:respond»(«variable:$size») {
+  «keyword:@media» («property:min-width»: «function:map-get»(«variable:$breakpoints», «variable:$size»)) {
+    «keyword:@content»;
+  }
+}
+
+«type:%card-base» {
+  «property:border-radius»: math.«function:div»(«variable:$gap», «number:2»);
+}
+
+«comment:/* Components */»
+«type:.card» {
+  «keyword:@extend» «type:%card-base»;
+  «property:padding»: «variable:$gap» «operator:*» «number:2»;
+  «property:color»: «function:darken»(«variable:$brand», «number:10%»);
+
+  «operator:&»«keyword::hover» { «property:transform»: «function:translateY»(«number:-2px»); }
+  «operator:&»«tag:__title» {
+    «property:font»: «interpolation:#{»«interpolation>variable:$gap»«interpolation: »«interpolation>operator:+»«interpolation: »«interpolation>number:4»«interpolation:}»«operator:/»«number:1.2» system-ui, sans-serif;
+    «property:margin-#{$side}»: «number:0»;
+  }
+
+  «keyword:@include» «function:respond»(large) {
+    «property:padding»: «variable:$gap» «operator:*» «number:3»;
+  }
+
+  «keyword:@each» «variable:$name», «variable:$value» «keyword:in» «variable:$breakpoints» {
+    «type:.col-»«interpolation:#{»«interpolation>variable:$name»«interpolation:}» { «property:width»: «variable:$value»; }
+  }
+}
+
+«keyword:@function» «function:rem»(«variable:$px») {
+  «keyword:@if» «variable:$px» «operator:==» «number:0» { «keyword:@return» «number:0»; }
+  «keyword:@return» math.«function:div»(«variable:$px», «number:16px») «operator:*» «number:1rem»;
+}

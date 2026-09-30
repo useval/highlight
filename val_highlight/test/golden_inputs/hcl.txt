@@ -1,0 +1,46 @@
+# Terraform configuration
+terraform {
+  required_version = ">= 1.6"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+variable "environment" {
+  type        = string
+  default     = "staging"
+  description = "Deployment environment"
+}
+
+locals {
+  name   = "app-${var.environment}"
+  tags   = merge(var.common_tags, { Name = local.name })
+  zones  = [for z in data.aws_availability_zones.all.names : upper(z) if z != "us-east-1e"]
+  enable = var.environment == "production" ? true : false
+}
+
+/* Storage */
+resource "aws_s3_bucket" "logs" {
+  bucket        = "${local.name}-logs"
+  force_destroy = false
+  count         = 2
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_iam_policy" "read" {
+  policy = <<-EOT
+    {
+      "Statement": [{ "Resource": "${aws_s3_bucket.logs[0].arn}/*" }]
+    }
+    EOT
+}
+
+output "bucket_name" {
+  value = aws_s3_bucket.logs[0].id // first bucket
+}

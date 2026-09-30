@@ -1,0 +1,56 @@
+«keyword:defmodule» «type:Shop».«type:Cart» «keyword:do»
+  «meta:@moduledoc» «string:"""
+  A shopping cart with »«string>interpolation:#{»«string>interpolation>function:length»«string>interpolation:([»«string>interpolation>number:1»«string>interpolation:, »«string>interpolation>number:2»«string>interpolation:])}»«string: interpolated docs.
+  """»
+  «keyword:use» «type:GenServer»
+  «keyword:alias» «type:Shop».{«type:Item», «type:Pricing»}
+  «keyword:require» «type:Logger»
+
+  «meta:@type» t :: «operator:%»«variable.language:__MODULE__»{«literal.symbol:items:» [«type:Item».«function:t»()], «literal.symbol:currency:» «function:atom»()}
+  «meta:@default_currency» «literal.symbol::usd»
+  «keyword:defstruct» «literal.symbol:items:» [], «literal.symbol:currency:» «meta:@default_currency»
+
+  «meta:@doc» «string:"Adds `qty` of an item."»
+  «meta:@spec» «function:add»(«function:t»(), «type:Item».«function:t»(), «function:pos_integer»()) :: «function:t»()
+  «keyword:def» «function:add»(«operator:%»«variable.language:__MODULE__»{«literal.symbol:items:» items} «operator:=» cart, «operator:%»«type:Item»{} «operator:=» item, qty «operator:\\» «number:1»)
+      «keyword:when» «function:is_integer»(qty) «keyword:and» qty «operator:>» «number:0» «keyword:do»
+    «operator:%»{cart «operator:|» «literal.symbol:items:» «type:List».«function:duplicate»(item, qty) «operator:++» items}
+  «keyword:end»
+
+  «keyword:def» «function:total»(«operator:%»«variable.language:__MODULE__»{«literal.symbol:items:» items, «literal.symbol:currency:» currency}) «keyword:do»
+    items
+    «operator:|>» «type:Enum».«function:map»(«operator:&»«type:Pricing».price«operator:/»«number:1»)
+    «operator:|>» «type:Enum».«function:sum»()
+    «operator:|>» «type:Pricing».«function:round»(currency)
+  «keyword:end»
+
+  «keyword:defp» «function:valid?»(cart), «literal.symbol:do:» cart.items «operator:!=» [] «keyword:and» «keyword:not» «function:is_nil»(cart.currency)
+
+  «keyword:def» «function:handle_call»({«literal.symbol::checkout», opts}, _from, state) «keyword:do»
+    «keyword:case» «type:Pricing».«function:charge»(state, «type:Keyword».«function:get»(opts, «literal.symbol::card»)) «keyword:do»
+      {«literal.symbol::ok», receipt} «operator:->»
+        «type:Logger».«function:info»(«string:"charged »«string>interpolation:#{receipt.amount}»«string: »«string>interpolation:#{»«string>interpolation>function:inspect»«string>interpolation:(receipt.id)}»«string:"»)
+        {«literal.symbol::reply», {«literal.symbol::ok», receipt}, «operator:%»{state «operator:|» «literal.symbol:items:» []}}
+
+      {«literal.symbol::error», reason} «keyword:when» reason «keyword:in» [«literal.symbol::declined», «literal.symbol::expired»] «operator:->»
+        {«literal.symbol::reply», {«literal.symbol::error», reason}, state}
+    «keyword:end»
+  «keyword:end»
+
+  «keyword:def» «function:parse»(line) «keyword:do»
+    «keyword:with» [sku, qty] «operator:<-» «type:String».«function:split»(line, «string:","», «literal.symbol:trim:» «literal:true»),
+         {n, «string:""»} «operator:<-» «type:Integer».«function:parse»(qty) «keyword:do»
+      {«literal.symbol::ok», sku, n}
+    «keyword:else»
+      _ «operator:->» {«literal.symbol::error», «literal.symbol::"bad line"»}
+    «keyword:end»
+  «keyword:end»
+«keyword:end»
+
+words «operator:=» «string:~w(apple banana cherry)a»
+pattern «operator:=» «regexp:~r/^»«regexp>string.escape:\d»«regexp:{3}-»«regexp>string.escape:\d»«regexp:{4}$/i»
+raw «operator:=» «string:~S(no #{interpolation} here)»
+chars «operator:=» «string:~c"abc"»
+hex «operator:=» «number:0xFF» «operator:+» «number:1_000» «operator:+» «number:0b1010»
+fun «operator:=» «keyword:fn» x «operator:->» x «operator:*» «number:2» «keyword:end»
+«type:IO».«function:puts»(«string:"»«string>interpolation:#{hex}»«string: »«string>interpolation:#{fun.(»«string>interpolation>number:21»«string>interpolation:)}»«string: »«string>interpolation:#{»«string>interpolation>string:?a»«string>interpolation:}»«string: »«string>interpolation:#{»«string>interpolation>variable.language:__MODULE__»«string>interpolation:}»«string:"»)

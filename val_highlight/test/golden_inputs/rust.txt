@@ -1,0 +1,63 @@
+//! A tiny key-value store.
+#![allow(dead_code)]
+
+use std::collections::HashMap;
+use std::fmt::{self, Display};
+
+/// A stored value with a lifetime-bound view.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Value {
+    Int(i64),
+    Text(String),
+    Bytes(Vec<u8>),
+}
+
+pub struct Store<'a> {
+    items: HashMap<&'a str, Value>,
+    limit: usize,
+}
+
+impl<'a> Store<'a> {
+    pub fn new(limit: usize) -> Self {
+        Self { items: HashMap::with_capacity(16), limit }
+    }
+
+    pub fn put(&mut self, key: &'a str, value: Value) -> Result<(), String> {
+        if self.items.len() >= self.limit {
+            return Err(format!("store full ({} items)", self.limit));
+        }
+        self.items.insert(key, value);
+        Ok(())
+    }
+
+    fn first_char(&self, key: &str) -> Option<char> {
+        match self.items.get(key)? {
+            Value::Text(s) => s.chars().next(),
+            _ => None,
+        }
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Int(n) => write!(f, "{n}"),
+            Value::Text(s) => write!(f, "{s:?}"),
+            Value::Bytes(b) => write!(f, "{} bytes", b.len()),
+        }
+    }
+}
+
+/* Outer /* nested */ comment. */
+fn main() {
+    let raw = r#"C:\path "quoted""#;
+    let bytes = b"\x00\xff";
+    let (a, b, c) = ('x', '\n', b'\'');
+    let big = 1_000_000u64 + 0xFF_u64 + 0b1010 + 0o17;
+    let pi = 3.141_59_f64;
+    let mut store = Store::new(10);
+    store.put("answer", Value::Int(42)).unwrap();
+    let v: Vec<_> = (0..big).filter(|n| n % 2 == 0).take(3).collect::<Vec<u64>>();
+    println!("{raw} {bytes:?} {a}{b}{c} {pi} {v:?}");
+    'outer: loop { break 'outer; }
+}

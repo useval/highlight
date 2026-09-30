@@ -1,0 +1,46 @@
+«comment:# Terraform configuration»
+«keyword:terraform» {
+  «property:required_version» «operator:=» «string:">= 1.6"»
+  «keyword:required_providers» {
+    «property:aws» «operator:=» {
+      «property:source»  «operator:=» «string:"hashicorp/aws"»
+      «property:version» «operator:=» «string:"~> 5.0"»
+    }
+  }
+}
+
+«keyword:variable» «string:"environment"» {
+  «property:type»        «operator:=» «type.builtin:string»
+  «property:default»     «operator:=» «string:"staging"»
+  «property:description» «operator:=» «string:"Deployment environment"»
+}
+
+«keyword:locals» {
+  «property:name»   «operator:=» «string:"app-»«string>interpolation:${»«string>interpolation>variable.language:var»«string>interpolation:.environment}»«string:"»
+  «property:tags»   «operator:=» «function:merge»(«variable.language:var».common_tags, { Name «operator:=» «variable.language:local».name })
+  «property:zones»  «operator:=» [«keyword:for» z «keyword:in» «variable.language:data».aws_availability_zones.all.names «operator::» «function:upper»(z) «keyword:if» z «operator:!=» «string:"us-east-1e"»]
+  «property:enable» «operator:=» «variable.language:var».environment «operator:==» «string:"production"» «operator:?» «literal:true» «operator::» «literal:false»
+}
+
+«comment:/* Storage */»
+«keyword:resource» «string:"aws_s3_bucket"» «string:"logs"» {
+  «property:bucket»        «operator:=» «string:"»«string>interpolation:${»«string>interpolation>variable.language:local»«string>interpolation:.name}»«string:-logs"»
+  «property:force_destroy» «operator:=» «literal:false»
+  «property:count»         «operator:=» «number:2»
+
+  «keyword:lifecycle» {
+    «property:prevent_destroy» «operator:=» «literal:true»
+  }
+}
+
+«keyword:resource» «string:"aws_iam_policy"» «string:"read"» {
+  «property:policy» «operator:=» «operator:<<-EOT»
+«string:    {»
+«string:      "Statement": [{ "Resource": "»«interpolation:${aws_s3_bucket.logs[»«interpolation>number:0»«interpolation:].arn}»«string:/*" }]»
+«string:    }»
+«operator:    EOT»
+}
+
+«keyword:output» «string:"bucket_name"» {
+  «property:value» «operator:=» aws_s3_bucket.logs[«number:0»].id «comment:// first bucket»
+}

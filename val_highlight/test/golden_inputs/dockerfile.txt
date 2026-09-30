@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1.7
+# Build stage
+ARG DART_VERSION=3.5
+FROM dart:${DART_VERSION} AS build
+
+WORKDIR /app
+COPY pubspec.* ./
+RUN dart pub get && \
+    # keep the cache small
+    rm -rf /root/.pub-cache/_temp
+
+COPY --chown=app:app . .
+RUN --mount=type=cache,target=/root/.pub-cache \
+    dart compile exe bin/server.dart -o bin/server
+
+RUN <<EOF
+echo "building $APP_NAME"
+set -eu
+EOF
+
+# Runtime stage
+FROM scratch
+ENV PORT=8080 \
+    MODE="production"
+LABEL org.opencontainers.image.title="server" version='1.2'
+COPY --from=build /runtime/ /
+COPY --from=build /app/bin/server /app/bin/
+EXPOSE 8080/tcp
+USER 1000
+HEALTHCHECK --interval=30s CMD ["/app/bin/server", "--health"]
+ENTRYPOINT ["/app/bin/server"]
+CMD ["--port", "$PORT"]

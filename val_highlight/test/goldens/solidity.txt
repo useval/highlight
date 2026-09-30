@@ -1,0 +1,57 @@
+«comment:// SPDX-License-Identifier: MIT»
+«meta:pragma solidity ^0.8.24;»
+
+«keyword:import» {«type:IERC20»} from «string:"./interfaces/IERC20.sol"»;
+
+«comment.doc:/// @title A simple vault.»
+«comment.doc:/// @notice Holds deposits until an unlock time.»
+«keyword:contract» «type:Vault» «keyword:is» «type:Ownable» {
+    «keyword:error» «type:TooEarly»(«type.builtin:uint256» unlockAt);
+    «keyword:event» «type:Deposited»(«type.builtin:address» «keyword:indexed» from, «type.builtin:uint256» amount);
+
+    «keyword:struct» «type:Deposit» {
+        «type.builtin:uint128» amount;
+        «type.builtin:uint64» unlockAt;
+        «type.builtin:bool» withdrawn;
+    }
+
+    «keyword:mapping»(«type.builtin:address» «operator:=>» «type:Deposit»[]) «keyword:private» deposits;
+    «type.builtin:uint256» «keyword:public» «keyword:constant» MIN_DEPOSIT «operator:=» «number:0.01» «number:ether»;
+    «type.builtin:uint256» «keyword:public» «keyword:immutable» lockTime;
+    «type.builtin:bytes32» «keyword:private» «keyword:constant» «type:TAG» «operator:=» «string:hex"deadbeef"»;
+    «type.builtin:string» «keyword:private» greeting «operator:=» «string:unicode"Hello 👋"»;
+
+    «comment.doc:/**
+     * »«comment.doc>keyword:@dev»«comment.doc: Sets the lock time.
+     * »«comment.doc>keyword:@param»«comment.doc: lockDays Number of days deposits stay locked.
+     */»
+    «keyword:constructor»(«type.builtin:uint256» lockDays) {
+        lockTime «operator:=» lockDays «operator:*» «number:1» «number:days»;
+    }
+
+    «keyword:modifier» «function:minimum»(«type.builtin:uint256» amount) {
+        «function:require»(amount «operator:>=» MIN_DEPOSIT, «string:"deposit too small"»);
+        _;
+    }
+
+    «keyword:function» «function:deposit»() «keyword:external» «keyword:payable» «function:minimum»(«variable.language:msg».value) {
+        deposits[«variable.language:msg».sender].«function:push»(
+            «type:Deposit»({amount«operator::» «type.builtin:uint128»(«variable.language:msg».value), unlockAt«operator::» «type.builtin:uint64»(«variable.language:block».timestamp «operator:+» lockTime), withdrawn«operator::» «literal:false»})
+        );
+        «keyword:emit» «type:Deposited»(«variable.language:msg».sender, «variable.language:msg».value);
+    }
+
+    «keyword:function» «function:withdraw»(«type.builtin:uint256» index) «keyword:external» {
+        «type:Deposit» «keyword:storage» d «operator:=» deposits[«variable.language:msg».sender][index];
+        «keyword:if» («variable.language:block».timestamp «operator:<» d.unlockAt) «keyword:revert» «type:TooEarly»(d.unlockAt);
+        d.withdrawn «operator:=» «literal:true»;
+        («type.builtin:bool» ok, ) «operator:=» «keyword:payable»(«variable.language:msg».sender).call{value«operator::» d.amount}(«string:""»);
+        «function:assert»(ok);
+    }
+
+    «keyword:function» «function:hash»(«type.builtin:string» «keyword:calldata» text) «keyword:public» «keyword:pure» «keyword:returns» («type.builtin:bytes32») {
+        «keyword:unchecked» {
+            «keyword:return» «function:keccak256»(«variable.language:abi».«function:encodePacked»(text, «type.builtin:uint8»(«number:0x1f»), «string:'single'»));
+        }
+    }
+}

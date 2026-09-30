@@ -1,0 +1,49 @@
+«comment:// Package cache implements a small TTL cache.»
+«keyword:package» cache
+
+«keyword:import» (
+	«string:"errors"»
+	«string:"fmt"»
+	«string:"sync"»
+	«string:"time"»
+)
+
+«keyword:var» ErrMissing «operator:=» errors.«function:New»(«string:"cache: missing key"»)
+
+«keyword:type» «type:entry»[V «type.builtin:any»] «keyword:struct» {
+	value   V
+	expires time.Time
+}
+
+«comment:// Cache is safe for concurrent use.»
+«keyword:type» «type:Cache»[K «type.builtin:comparable», V «type.builtin:any»] «keyword:struct» {
+	mu    sync.RWMutex
+	items «keyword:map»[K]entry[V]
+	ttl   time.Duration
+}
+
+«keyword:func» «function:New»[K «type.builtin:comparable», V «type.builtin:any»](ttl time.Duration) «operator:*»«type:Cache»[K, V] {
+	«keyword:return» «operator:&»«type:Cache»[K, V]{items«operator::» «function:make»(«keyword:map»[K]entry[V]), ttl«operator::» ttl}
+}
+
+«keyword:func» (c «operator:*»Cache[K, V]) «function:Get»(key K) (V, «type.builtin:error») {
+	c.mu.«function:RLock»()
+	«keyword:defer» c.mu.«function:RUnlock»()
+	e, ok «operator::=» c.items[key]
+	«keyword:if» «operator:!»ok «operator:||» time.«function:Now»().«function:After»(e.expires) {
+		«keyword:var» zero V
+		«keyword:return» zero, fmt.«function:Errorf»(«string:"get %v: %w"», key, ErrMissing)
+	}
+	«keyword:return» e.value, «literal:nil»
+}
+
+«keyword:const» raw «operator:=» «string:`line one
+line two`»
+
+«keyword:func» «function:main»() {
+	c «operator::=» «function:New»[«type.builtin:string», «type.builtin:int»](«number:5» «operator:*» time.Second)
+	«keyword:for» i «operator::=» «number:0»; i «operator:<» «number:0x10»; i«operator:++» {
+		«keyword:go» «keyword:func»(n «type.builtin:int») { _ «operator:=» n «operator:+» «string:'a'» }(i)
+	}
+	_ «operator:=» c
+}

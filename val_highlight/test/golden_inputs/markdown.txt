@@ -1,0 +1,19 @@
+# Release notes
+
+## 1.2.0
+
+This release makes highlighting **much faster** and adds *incremental* updates.
+See [the changelog](https://example.com/changelog) for details.
+
+- Faster scanner with `first-character dispatch`
+- New `IncrementalHighlighter`
+- Fixed a bug in YAML keys
+
+> Upgrading is safe; the API is unchanged.
+
+```dart
+final result = const Highlighter().highlight(code, language: dartLanguage);
+```
+
+1. Update the dependency
+2. Run `dart pub get`

@@ -1,0 +1,15 @@
+{
+  "id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+  "name": "val_highlight",
+  "version": "1.2.3",
+  "private": false,
+  "downloads": 128934,
+  "rating": 4.87,
+  "tags": ["syntax", "highlighting", "flutter", "dart"],
+  "maintainers": [
+    {"name": "Ada", "email": "ada@example.com", "active": true},
+    {"name": "Linus", "email": "linus@example.com", "active": null}
+  ],
+  "escaped": "line\nbreak \"quoted\" é",
+  "nested": {"a": {"b": {"c": [1, 2, 3, -4.5e10]}}}
+}

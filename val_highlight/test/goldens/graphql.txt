@@ -1,0 +1,38 @@
+«comment:# Fetch a user with their recent posts.»
+«keyword:query» «type:UserWithPosts»(«variable:$id»: «type.builtin:ID»«operator:!», «variable:$first»: «type.builtin:Int» «operator:=» «number:10», «variable:$published»: «type.builtin:Boolean») {
+  «function:user»(«property:id»: «variable:$id») {
+    id
+    name
+    «operator:...»«type:AvatarFields»
+    «function:posts»(«property:first»: «variable:$first», «property:filter»: { «property:published»: «variable:$published» }) «meta:@include»(«property:if»: «literal:true») {
+      edges {
+        node { title createdAt score }
+      }
+    }
+  }
+}
+
+«keyword:fragment» «type:AvatarFields» «keyword:on» «type:User» {
+  «function:avatar»(«property:size»: «number:128»)
+}
+
+«keyword:mutation» «type:Rename»(«variable:$id»: «type.builtin:ID»«operator:!», «variable:$name»: «type.builtin:String»«operator:!») {
+  «function:renameUser»(«property:input»: { «property:id»: «variable:$id», «property:name»: «variable:$name» }) { ok errors }
+}
+
+«string:"""
+A registered user.
+"""»
+«keyword:type» «type:User» «keyword:implements» «type:Node» «operator:&» «type:Timestamped» {
+  «property:id»: «type.builtin:ID»«operator:!»
+  «string:"The display name."»
+  «property:name»: «type.builtin:String»
+  «property:score»: «type.builtin:Float» «meta:@deprecated»(«property:reason»: «string:"Use rating"»)
+  «function:posts»(«property:first»: «type.builtin:Int» «operator:=» «number:20»): [«type:Post»«operator:!»]«operator:!»
+}
+
+«keyword:enum» «type:Role» { ADMIN EDITOR VIEWER }
+
+«keyword:input» «type:RenameInput» { «property:id»: «type.builtin:ID»«operator:!», «property:name»: «type.builtin:String»«operator:!» }
+
+«keyword:directive» «meta:@auth»(«property:requires»: «type:Role» «operator:=» ADMIN) «keyword:on» OBJECT «operator:|» FIELD_DEFINITION

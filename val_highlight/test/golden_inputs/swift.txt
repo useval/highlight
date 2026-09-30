@@ -1,0 +1,65 @@
+import SwiftUI
+import Foundation
+
+/// A user profile loaded from the network.
+/* An outer comment /* with a nested one */ still a comment */
+struct Profile: Codable, Identifiable, Sendable {
+    let id: UUID
+    var name: String
+    var age: Int?
+}
+
+@MainActor
+final class ProfileStore: ObservableObject {
+    @Published private(set) var profiles: [Profile] = []
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    func load(from url: URL) async throws -> [Profile] {
+        let (data, response) = try await session.data(from: url)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        let decoded = try JSONDecoder().decode([Profile].self, from: data)
+        profiles = decoded.sorted { $0.name < $1.name }
+        return decoded
+    }
+}
+
+enum Level: Int, CaseIterable {
+    case low = 0x01, high = 0b10
+    var label: String { "Level \(rawValue) of \(Self.allCases.count)" }
+}
+
+struct ProfileRow: View {
+    let profile: Profile
+
+    var body: some View {
+        HStack {
+            Text(profile.name).font(.headline)
+            Spacer()
+            if let age = profile.age {
+                Text("age \(age + (age > 99 ? 0 : 1))\t✓")
+            }
+        }
+        .padding(8.5)
+    }
+}
+
+let raw = #"C:\path\n stays "raw" here"#
+let multi = """
+    Line one
+    Interpolated: \(Level.high.label)
+    """
+let `default` = 1_000
+
+#if DEBUG
+let selector = #selector(ProfileStore.reload)
+#endif
+
+#Preview {
+    ProfileRow(profile: Profile(id: UUID(), name: "Ada", age: nil))
+}

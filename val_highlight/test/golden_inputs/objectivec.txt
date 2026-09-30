@@ -1,0 +1,56 @@
+#import <Foundation/Foundation.h>
+#import "ProfileStore.h"
+#define kTimeout 30.0
+
+NS_ASSUME_NONNULL_BEGIN
+
+/** Stores user profiles. */
+@interface ProfileStore : NSObject <NSCopying>
+@property (nonatomic, copy, readonly) NSArray<NSString *> *names;
+@property (nonatomic, weak, nullable) id<ProfileDelegate> delegate;
+- (instancetype)initWithCapacity:(NSUInteger)capacity NS_DESIGNATED_INITIALIZER;
++ (instancetype)sharedStore;
+@end
+
+@implementation ProfileStore {
+    NSMutableArray<NSString *> *_names;
+    BOOL _loaded;
+}
+
++ (instancetype)sharedStore {
+    static ProfileStore *shared = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        shared = [[self alloc] initWithCapacity:16];
+    });
+    return shared;
+}
+
+- (instancetype)initWithCapacity:(NSUInteger)capacity {
+    if ((self = [super init])) {
+        _names = [NSMutableArray arrayWithCapacity:capacity];
+        _loaded = NO;
+    }
+    return self;
+}
+
+- (void)addName:(NSString *)name {
+    if (name.length == 0) return; // ignore empty names
+    [_names addObject:name];
+    NSLog(@"Added %@ (%lu total)\n", name, (unsigned long)_names.count);
+    NSDictionary *info = @{@"name": name, @"count": @(_names.count), @"ok": @YES};
+    NSArray *pair = @[@1, @2.5];
+    [self.delegate store:self didUpdate:info with:pair];
+}
+
+- (id)copyWithZone:(nullable NSZone *)zone {
+    ProfileStore *copy = [[ProfileStore allocWithZone:zone] initWithCapacity:0x10];
+    @synchronized (self) {
+        copy->_names = [_names mutableCopy];
+    }
+    return copy;
+}
+
+@end
+
+NS_ASSUME_NONNULL_END

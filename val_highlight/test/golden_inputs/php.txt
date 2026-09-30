@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+
+/**
+ * Handles user profile pages.
+ */
+#[Route('/users', methods: ['GET'])]
+final class UserController extends Controller
+{
+    private const PAGE_SIZE = 25;
+
+    public function __construct(private readonly UserRepository $users) {}
+
+    public function show(Request $request, int $id): array|null
+    {
+        $user = $this->users->find($id) ?? throw new NotFoundException("User {$id} not found");
+        $name = $user?->profile['display'] ?? 'anonymous';
+        // Null-safe access and the null-coalescing operator.
+        $greeting = "Hello, $name! You have {$user->unread} messages.";
+        $query = <<<SQL
+            SELECT * FROM users
+            WHERE id = {$id} AND name = '$name'
+            SQL;
+        $raw = <<<'TEXT'
+            No $interpolation here.
+            TEXT;
+
+        return match (true) {
+            $id < 0 => null,
+            default => ['greeting' => $greeting, 'size' => self::PAGE_SIZE, 'hex' => 0x1F],
+        };
+    }
+
+    public static function slug(string $title): string
+    {
+        return strtolower(preg_replace('/[^a-z0-9]+/i', '-', trim($title)));
+    }
+}
+
+$items = array_map(fn($x) => $x * 2, [1, 2, 3]);
+echo count($items), PHP_EOL;
+?>
+<ul class="items">
+  <?php foreach ($items as $item): ?>
+    <li data-value="<?= $item ?>">Item <?= htmlspecialchars((string) $item) ?></li>
+  <?php endforeach; ?>
+</ul>
+<script>const total = 3;</script>

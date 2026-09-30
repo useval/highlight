@@ -1,0 +1,56 @@
+«comment:#Requires -Version 7.0»
+«comment:<#
+.SYNOPSIS
+    Cleans up old build artifacts.
+#>»
+[«meta:CmdletBinding»(SupportsShouldProcess)]
+«keyword:param»(
+    [«meta:Parameter»(Mandatory «operator:=» «literal:$true»)]
+    «type:[string]»«variable:$Path»«operator:,»
+
+    «type:[int]»«variable:$Days» «operator:=» «number:30»«operator:,»
+    «type:[switch]»«variable:$WhatIfOnly»
+)
+
+«function:Set-StrictMode» «attribute:-Version» Latest
+«variable:$ErrorActionPreference» «operator:=» «string:'Stop'»
+
+«keyword:function» «function:Get-OldItem» {
+    «keyword:param»(«type:[string]»«variable:$Root»«operator:,» «type:[datetime]»«variable:$Before»)
+    «function:Get-ChildItem» «attribute:-Path» «variable:$Root» «attribute:-Recurse» «attribute:-File» «operator:|»
+        «function:Where-Object» { «variable:$_».LastWriteTime «operator:-lt» «variable:$Before» «operator:-and» «variable:$_».Length «operator:-gt» «number:1KB» }
+}
+
+«variable:$cutoff» «operator:=» («function:Get-Date»).«function:AddDays»(«operator:-»«variable:$Days»)
+«variable:$items» «operator:=» @(«function:Get-OldItem» «attribute:-Root» «variable:$Path» «attribute:-Before» «variable:$cutoff»)
+«variable:$total» «operator:=» («variable:$items» «operator:|» «function:Measure-Object» «attribute:-Property» Length «attribute:-Sum»).Sum
+
+«function:Write-Host» «string:"Found »«string>interpolation:$(»«string>interpolation>variable:$items»«string>interpolation:.Count)»«string: files (»«string>interpolation:$(»«string>interpolation>type:[math]»«string>interpolation:::»«string>interpolation>function:Round»«string>interpolation:(»«string>interpolation>variable:$total»«string>interpolation: »«string>interpolation>operator:/»«string>interpolation: »«string>interpolation>number:1MB»«string>interpolation>operator:,»«string>interpolation: »«string>interpolation>number:2»«string>interpolation:))»«string: MB) under »«string>variable:$Path»«string:"»
+«function:Write-Host» «string:'Single quotes: no $expansion, it»«string>string.escape:''»«string:s literal'»
+«function:Write-Host» «string:"Escapes: tab»«string>string.escape:`t»«string:here, newline»«string>string.escape:`n»«string:, dollar »«string>string.escape:`$»«string:Path"»
+
+«variable:$summary» «operator:=» «string:@"
+Path:   »«string>variable:$Path»«string:
+Before: »«string>interpolation:$(»«string>interpolation>variable:$cutoff»«string>interpolation:.»«string>interpolation>function:ToString»«string>interpolation:(»«string>interpolation>string:'yyyy-MM-dd'»«string>interpolation:))»«string:
+"@»
+
+«variable:$literal» «operator:=» «string:@'
+Nothing $expanded here.
+'@»
+
+«keyword:foreach» («variable:$item» «keyword:in» «variable:$items») {
+    «keyword:if» («variable:$WhatIfOnly») {
+        «function:Write-Verbose» «string:"Would remove »«string>interpolation:$(»«string>interpolation>variable:$item»«string>interpolation:.FullName)»«string:"»
+        «keyword:continue»
+    }
+    «keyword:try» {
+        «function:Remove-Item» «attribute:-LiteralPath» «variable:$item».FullName «attribute:-Force» «attribute:-ErrorAction» Stop
+    }
+    «keyword:catch» «type:[System.UnauthorizedAccessException]» {
+        «function:Write-Warning» «string:"Access denied: »«string>interpolation:$(»«string>interpolation>variable:$_»«string>interpolation:.Exception.Message)»«string:"»
+    }
+}
+
+«variable:$hash» «operator:=» @{ Name «operator:=» «string:'build'»; Count «operator:=» «variable:$items».Count; Enabled «operator:=» «literal:$true»; Home «operator:=» «variable:$env:HOME» }
+«keyword:if» («variable:$hash».Count «operator:-ge» «number:0x10» «operator:-or» «literal:$null» «operator:-eq» «variable:$summary») { «keyword:exit» «number:1» }
+«type:[System.IO.Path]»::«function:Combine»(«variable:$Path»«operator:,» «string:'log.txt'») «operator:|» «function:Out-File» «attribute:-FilePath» «string:"»«string>variable:$Path»«string:\clean.log"»

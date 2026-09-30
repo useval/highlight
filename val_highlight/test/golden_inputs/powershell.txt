@@ -1,0 +1,56 @@
+#Requires -Version 7.0
+<#
+.SYNOPSIS
+    Cleans up old build artifacts.
+#>
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path,
+
+    [int]$Days = 30,
+    [switch]$WhatIfOnly
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Get-OldItem {
+    param([string]$Root, [datetime]$Before)
+    Get-ChildItem -Path $Root -Recurse -File |
+        Where-Object { $_.LastWriteTime -lt $Before -and $_.Length -gt 1KB }
+}
+
+$cutoff = (Get-Date).AddDays(-$Days)
+$items = @(Get-OldItem -Root $Path -Before $cutoff)
+$total = ($items | Measure-Object -Property Length -Sum).Sum
+
+Write-Host "Found $($items.Count) files ($([math]::Round($total / 1MB, 2)) MB) under $Path"
+Write-Host 'Single quotes: no $expansion, it''s literal'
+Write-Host "Escapes: tab`there, newline`n, dollar `$Path"
+
+$summary = @"
+Path:   $Path
+Before: $($cutoff.ToString('yyyy-MM-dd'))
+"@
+
+$literal = @'
+Nothing $expanded here.
+'@
+
+foreach ($item in $items) {
+    if ($WhatIfOnly) {
+        Write-Verbose "Would remove $($item.FullName)"
+        continue
+    }
+    try {
+        Remove-Item -LiteralPath $item.FullName -Force -ErrorAction Stop
+    }
+    catch [System.UnauthorizedAccessException] {
+        Write-Warning "Access denied: $($_.Exception.Message)"
+    }
+}
+
+$hash = @{ Name = 'build'; Count = $items.Count; Enabled = $true; Home = $env:HOME }
+if ($hash.Count -ge 0x10 -or $null -eq $summary) { exit 1 }
+[System.IO.Path]::Combine($Path, 'log.txt') | Out-File -FilePath "$Path\clean.log"

@@ -1,0 +1,44 @@
+«comment:# Build settings»
+«variable:CC»      «operator:?=» cc
+«variable:CFLAGS»  «operator::=» -O2 -Wall -Wextra
+«variable:LDLIBS»  «operator:+=» -lm
+«variable:SRC»     «operator::=» «variable:$(»«variable>function:wildcard»«variable: src/*.c)»
+«variable:OBJ»     «operator::=» «variable:$(»«variable>function:patsubst»«variable: src/%.c,build/%.o,»«variable>variable:$(SRC)»«variable:)»
+«variable:VERSION» «operator::=» «variable:$(»«variable>function:shell»«variable: git describe --tags 2>/dev/null || echo dev)»
+
+«keyword:export» «variable:PREFIX» «operator:?=» /usr/local
+
+«function:.PHONY»«operator::» all clean install test
+
+«function:all»«operator::» build/app
+
+«function:build/app»«operator::» «variable:$(OBJ)» «operator:|» build
+	«operator:@»echo «string:"linking »«string>variable:$@»«string: from »«string>variable:$^»«string:"»
+	«variable:$(CC)» «variable:$(CFLAGS)» -o «variable:$@» «variable:$^» «variable:$(LDLIBS)»
+
+«function:build/%.o»«operator::» src/%.c include/%.h
+	«variable:$(CC)» «variable:$(CFLAGS)» -Iinclude -c «variable:$<» -o «variable:$@»
+
+«function:build»«operator::»
+	mkdir -p «variable:$@»
+
+«keyword:ifeq» («variable:$(OS)»,Windows_NT)
+«variable:    EXE» «operator::=» .exe
+«keyword:else»
+«variable:    EXE» «operator::=»
+«keyword:endif»
+
+«keyword:define» banner
+	«operator:@»echo «string:"== »«string>variable:$(1)»«string: =="»
+«keyword:endef»
+
+«function:install»«operator::» build/app
+	«variable:$(»«variable>function:call»«variable: banner,installing)»
+	install -m 755 build/app «variable:$(DESTDIR)$(PREFIX)»/bin/app«variable:$(EXE)»
+
+«function:test»«operator::» all
+	./build/app --self-test && «string.escape:\
+»	  echo «string:"ok: »«string>string.escape:$$»«string:{HOME}"»
+
+«function:clean»«operator::»
+	«operator:-»rm -rf build «comment:# remove everything»

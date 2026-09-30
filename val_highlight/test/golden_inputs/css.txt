@@ -1,0 +1,20 @@
+:root {
+  --brand: #b0226e;
+  --gap: 12px;
+}
+
+html, body { margin: 0; font: 16px/1.5 system-ui, sans-serif; }
+
+.grid > .item:nth-child(2n + 1),
+#sidebar a[href^="https://"]:hover {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--gap);
+  color: var(--brand) !important;
+  background: url("img/bg.png") no-repeat center / cover;
+  transition: transform 0.2s ease-in-out, opacity 150ms;
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}

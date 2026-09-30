@@ -1,0 +1,52 @@
+«meta:#!/usr/bin/env Rscript»
+«comment:# Summarise a sales dataset.»
+«function:library»(dplyr)
+«function:library»(ggplot2)
+
+«comment.doc:#' Load sales data from a CSV file.»
+«comment.doc:#' @param path File to read.»
+load_sales «operator:<-» «keyword:function»(path, sep «operator:=» «string:","») {
+  «function:stopifnot»(«function:file.exists»(path))
+  data «operator:<-» «function:read.csv»(path, sep «operator:=» sep, stringsAsFactors «operator:=» «literal:FALSE»)
+  data«operator:$»date «operator:<-» «function:as.Date»(data«operator:$»date, format «operator:=» «string:"%Y-%m-%d"»)
+  data[«operator:!»«function:is.na»(data«operator:$»amount), ]
+}
+
+sales «operator:<-» «function:load_sales»(«string:"sales.csv"»)
+regions «operator:<-» «function:c»(«string:"north"», «string:'south'», «string:"east"», «string:"west"»)
+threshold «operator:<-» «number:1e3»
+big «operator:<-» «number:0x1F» «operator:+» «number:10L» «operator:+» «number:2i»
+
+summary_tbl «operator:<-» sales «operator:%>%»
+  «function:filter»(region «operator:%in%» regions, amount «operator:>» threshold) «operator:%>%»
+  «function:group_by»(region) «operator:%>%»
+  «function:summarise»(total «operator:=» «function:sum»(amount), n «operator:=» «function:n»(), .groups «operator:=» «string:"drop"») «operator:|>»
+  «function:arrange»(«function:desc»(total))
+
+`odd name` «operator:<-» «literal:TRUE»
+pattern «operator:<-» «string:r"(\d+\.\d+)"»
+path «operator:<-» «string:r"[C:\data\file.txt]"»
+
+«keyword:for» (i «keyword:in» «function:seq_len»(«function:nrow»(summary_tbl))) {
+  row «operator:<-» summary_tbl[i, ]
+  «keyword:if» («function:is.null»(row) «operator:||» row«operator:$»n «operator:==» «number:0») {
+    «keyword:next»
+  } «keyword:else» «keyword:if» (row«operator:$»total «operator:>» «number:5000») {
+    «function:message»(«function:sprintf»(«string:"%s: %.1f (large)"», row«operator:$»region, row«operator:$»total))
+  } «keyword:else» {
+    «function:cat»(«function:paste0»(row«operator:$»region, «string:": "», row«operator:$»total, «string:"»«string>string.escape:\n»«string:"»))
+  }
+}
+
+result «operator:<-» «function:tryCatch»(
+  «function:stop»(«string:"boom"»),
+  error «operator:=» «keyword:function»(e) «literal:NA_real_»,
+  finally «operator:=» «function:cat»(«string:"done»«string>string.escape:\n»«string:"»)
+)
+
+plot «operator:<-» «function:ggplot»(summary_tbl, «function:aes»(x «operator:=» region, y «operator:=» total)) «operator:+»
+  «function:geom_col»(fill «operator:=» «string:"steelblue"») «operator:+»
+  «function:labs»(title «operator:=» «string:"Sales by region"»)
+
+squares «operator:<-» «function:sapply»(«number:1»«operator::»«number:10», «keyword:\»(x) x«operator:^»«number:2»)
+«function:print»(«function:list»(result «operator:=» result, missing «operator:=» «literal:NA», nothing «operator:=» «literal:NULL», inf «operator:=» «operator:-»«literal:Inf»))

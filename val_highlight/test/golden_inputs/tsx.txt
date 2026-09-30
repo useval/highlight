@@ -1,0 +1,44 @@
+import type { ReactNode } from 'react';
+import { useMemo, useState } from 'react';
+
+interface ListProps<T> {
+  items: readonly T[];
+  render: (item: T, index: number) => ReactNode;
+  empty?: ReactNode;
+}
+
+type Status = 'idle' | 'loading' | 'done';
+
+export function List<T,>({ items, render, empty = null }: ListProps<T>): JSX.Element {
+  const [status, setStatus] = useState<Status>('idle');
+  const sorted = useMemo(() => [...items].sort(), [items]);
+
+  if (items.length < 1) return <>{empty}</>;
+
+  return (
+    <ul role="list" aria-busy={status === 'loading'}>
+      {sorted.map((item, i) => (
+        <li key={i} className={i % 2 === 0 ? 'even' : 'odd'}>
+          {render(item, i)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const identity = <T,>(value: T): T => value;
+
+export const Page: React.FC<{ title: string }> = ({ title }) => {
+  const count: number = 3;
+  const big = count > 2 && count < 10;
+  return (
+    <main>
+      <h1 title={`Page: ${title}`}>{title}</h1>
+      {big ? <Alert.Banner level="info" /> : null}
+      <List<number> items={[1, 2, 3]} render={(n) => <b>{n}</b>} />
+      <svg:circle cx="5" cy="5" r="4" />
+    </main>
+  );
+};
+
+enum Level { Low = 1, High = 2 }

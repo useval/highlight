@@ -1,0 +1,58 @@
+«meta:#include <iostream>»
+«meta:#include <memory>»
+«meta:#include <string_view>»
+«meta:#include <vector>»
+
+«keyword:namespace» geo {
+
+«comment.doc:/// A 2D point.»
+«keyword:template» «operator:<»«keyword:typename» «type:T»«operator:>»
+    «keyword:requires» «type:std»«operator:::»is_arithmetic_v«operator:<»«type:T»«operator:>»
+«keyword:struct» «type:Point» {
+    «type:T» x{}, y{};
+    «keyword:constexpr» «keyword:auto» «keyword:operator»«operator:<=>»(«keyword:const» «type:Point»«operator:&») «keyword:const» «operator:=» «keyword:default»;
+};
+
+«keyword:class» «type:Shape» {
+«keyword:public»«operator::»
+    «keyword:virtual» «operator:~»«type:Shape»() «operator:=» «keyword:default»;
+    «meta:[[nodiscard]]» «keyword:virtual» «type.builtin:double» «function:area»() «keyword:const» «keyword:noexcept» «operator:=» «number:0»;
+};
+
+«keyword:class» «type:Circle» «keyword:final» «operator::» «keyword:public» «type:Shape» {
+«keyword:public»«operator::»
+    «keyword:explicit» «type:Circle»(«type.builtin:double» r) «operator::» radius_{r} {}
+    «meta:[[nodiscard]]» «type.builtin:double» «function:area»() «keyword:const» «keyword:noexcept» «keyword:override» {
+        «keyword:return» «number:3.141'592» «operator:*» radius_ «operator:*» radius_;
+    }
+
+«keyword:private»«operator::»
+    «type.builtin:double» radius_ «operator:=» «number:1.0»;
+};
+
+}  «comment:// namespace geo»
+
+«comment:/* Raw strings keep their contents. */»
+«keyword:static» «keyword:constexpr» «keyword:auto» kQuery «operator:=» «string:R"sql(
+SELECT "name" FROM users WHERE id = ?; -- )" is not the end
+)sql"»;
+
+«keyword:consteval» «type.builtin:int» «function:square»(«type.builtin:int» n) { «keyword:return» n «operator:*» n; }
+
+«type.builtin:int» «function:main»(«type.builtin:int» argc, «type.builtin:char»«operator:**» argv) {
+    «keyword:using» «keyword:namespace» «type:std»«operator:::»string_view_literals;
+    «type:std»«operator:::»vector«operator:<»«type:std»«operator:::»unique_ptr«operator:<»«type:geo»«operator:::»«type:Shape»«operator:>>» shapes;
+    shapes.«function:push_back»(«type:std»«operator:::»«function:make_unique»«operator:<»«type:geo»«operator:::»«type:Circle»«operator:>»(«number:2.0»));
+    «keyword:auto» total «operator:=» «number:0.0»;
+    «keyword:for» («keyword:const» «keyword:auto»«operator:&» shape «operator::» shapes) {
+        total «operator:+=» shape«operator:->»«function:area»();
+    }
+    «keyword:const» «type.builtin:char»«operator:*» msg «operator:=» «string:u8"héllo»«string>string.escape:\n»«string:"»;
+    «type.builtin:char» c «operator:=» «string:'\x41'»;
+    «type.builtin:unsigned» «type.builtin:long» «type.builtin:long» big «operator:=» «number:0xFFFF'FFFFull»;
+    «keyword:if» (argc «operator:>» «number:1» «operator:&&» total «operator:>» «number:1e3») {
+        «type:std»«operator:::»cout «operator:<<» «string:"total: "» «operator:<<» total «operator:<<» «string:'\t'» «operator:<<» msg «operator:<<» big «operator:<<» «type:std»«operator:::»endl;
+    }
+    «keyword:static_assert»(«function:square»(«number:4») «operator:==» «number:16»);
+    «keyword:return» «literal:nullptr» «operator:==» argv «operator:?» «number:1» «operator::» «number:0»;
+}

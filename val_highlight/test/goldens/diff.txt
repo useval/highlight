@@ -1,0 +1,13 @@
+«meta:diff --git a/lib/src/scanner.dart b/lib/src/scanner.dart»
+«meta:index 3b18e51..a9c02f7 100644»
+«meta:--- a/lib/src/scanner.dart»
+«meta:+++ b/lib/src/scanner.dart»
+«heading:@@ -12,7 +12,8 @@» final class Scanner {
+   final String code;
+«deletion:-  final int limit = 100;»
+«addition:+  final int limit = 200;»
+«addition:+  final bool fast = true;»
+ 
+   int scan() {
+     return 0;
+«comment:\ No newline at end of file»

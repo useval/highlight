@@ -1,0 +1,63 @@
+«meta:#!/usr/bin/env julia»
+«comment:#= Simple statistics module.
+   #= nested comment =#
+=#»
+«keyword:module» «type:Stats»
+
+«keyword:using» «type:LinearAlgebra», «type:Statistics»
+«keyword:import» «type:Base»«operator::» show
+
+«keyword:export» «type:Summary», summarize, «meta:@timed_log»
+
+«string:"""
+    Summary{T<:Real}
+
+Holds summary statistics for a sample of `T`.
+"""»
+«keyword:struct» «type:Summary»{«type:T»«operator:<:»«type:Real»}
+    n«operator:::»«type:Int»
+    mean«operator:::»«type:Float64»
+    std«operator:::»«type:T»
+«keyword:end»
+
+«keyword:mutable» «keyword:struct» «type:Counter»
+    value«operator:::»«type:Int»
+«keyword:end»
+
+«keyword:function» «function:summarize»(xs«operator:::»«type:AbstractVector»{«type:T»}) «keyword:where» {«type:T»«operator:<:»«type:Real»}
+    «function:isempty»(xs) «operator:&&» «function:throw»(«type:ArgumentError»(«string:"empty sample"»))
+    μ «operator:=» «function:mean»(xs)
+    σ «operator:=» «function:length»(xs) «operator:>» «number:1» «operator:?» «function:std»(xs) «operator::» «function:zero»(«type:T»)
+    «keyword:return» «type:Summary»{«type:T»}(«function:length»(xs), μ, σ)
+«keyword:end»
+
+«function:increment!»(c«operator:::»«type:Counter», by«operator:=»«number:1») «operator:=» (c.value «operator:+=» by; c)
+
+«function:show»(io«operator:::»«type:IO», s«operator:::»«type:Summary») «operator:=» «function:print»(io, «string:"Summary(n=»«string>interpolation:$(s.n)»«string:, mean=»«string>interpolation:$(»«string>interpolation>function:round»«string>interpolation:(s.mean; digits»«string>interpolation>operator:=»«string>interpolation>number:2»«string>interpolation:))»«string:)"»)
+
+«keyword:macro» «function:timed_log»(expr)
+    «keyword:quote»
+        «keyword:local» t0 «operator:=» «function:time»()
+        «keyword:local» result «operator:=» «operator:$»(«function:esc»(expr))
+        «function:println»(«string:"took »«string>interpolation:$(»«string>interpolation>function:time»«string>interpolation:() »«string>interpolation>operator:-»«string>interpolation: t0)»«string: s"»)
+        result
+    «keyword:end»
+«keyword:end»
+
+«keyword:end» «comment:# module»
+
+xs «operator:=» [«number:1.5», «number:2.0», «number:3.25», «number:1e-3», «number:0x1F»]
+s «operator:=» «type:Stats».«function:summarize»(xs)
+«type:A» «operator:=» [«number:1» «number:2»; «number:3» «number:4»]'
+c «operator:=» «string:'x'»
+newline «operator:=» «string:'\n'»
+pattern «operator:=» «regexp:r"^\d+$"»
+raw_path «operator:=» «string:raw"C:\temp\file"»
+name «operator:=» «string:"world"»
+«function:println»(«string:"Hello, »«string>interpolation:$name»«string:! First: »«string>interpolation:$(xs[»«string>interpolation>number:1»«string>interpolation:])»«string:, sym: "», «literal.symbol::done», «string:" range: "», «number:1»«operator::»«number:3»)
+«keyword:for» (i, x) «keyword:in» «function:enumerate»(xs)
+    i «operator:>» «number:3» «operator:&&» «keyword:break»
+    «meta:@show» i x
+«keyword:end»
+z «operator:=» «number:3» «operator:+» «number:4im»
+result «operator:=» xs «keyword:isa» «type.builtin:Vector»{«type.builtin:Float64»} «operator:?» «literal:nothing» «operator::» «literal:missing»

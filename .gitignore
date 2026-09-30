@@ -1,0 +1,40 @@
+# Dart / pub
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+build/
+doc/api/
+coverage/
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+**/Flutter/ephemeral/
+**/Pods/
+**/.symlinks/
+**/android/.gradle/
+**/android/local.properties
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+*.g.dart.bak
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+
+# FVM (keep .fvmrc, ignore the local SDK cache)
+.fvm/

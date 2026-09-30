@@ -1,0 +1,65 @@
+«comment:%% @doc A counter server.»
+«meta:-module»(counter).
+«meta:-behaviour»(gen_server).
+
+«meta:-export»([start_link«operator:/»«number:0», increment«operator:/»«number:1», value«operator:/»«number:0»]).
+«meta:-export»([init«operator:/»«number:1», handle_call«operator:/»«number:3», handle_cast«operator:/»«number:2»]).
+
+«meta:-define»(«variable:SERVER», «meta:?MODULE»).
+«meta:-define»(«variable:MAX», «number:16#FFFF»).
+
+«meta:-record»(state, {count «operator:=» «number:0» «operator:::» «function:non_neg_integer»(), name «operator:=» «literal:'default name'»}).
+
+«meta:-spec» «function:start_link»() «operator:->» {«literal:ok», «function:pid»()} «operator:|» {«literal:error», «function:term»()}.
+«function:start_link»() «operator:->»
+    gen_server«operator::»«function:start_link»({local, «meta:?SERVER»}, «meta:?MODULE», [], []).
+
+«function:increment»(«variable:By») «keyword:when» «function:is_integer»(«variable:By»), «variable:By» «operator:>» «number:0» «operator:->»
+    gen_server«operator::»«function:cast»(«meta:?SERVER», {increment, «variable:By»}).
+
+«function:value»() «operator:->»
+    gen_server«operator::»«function:call»(«meta:?SERVER», value).
+
+«function:init»([]) «operator:->»
+    {«literal:ok», «type:#state»{}}.
+
+«function:handle_call»(value, «variable:_From», «variable:State» «operator:=» «type:#state»{count «operator:=» «variable:Count»}) «operator:->»
+    {reply, «variable:Count», «variable:State»};
+«function:handle_call»(«variable:_Other», «variable:_From», «variable:State») «operator:->»
+    {reply, {«literal:error», unknown}, «variable:State»}.
+
+«function:handle_cast»({increment, «variable:By»}, «type:#state»{count «operator:=» «variable:C»} «operator:=» «variable:S») «operator:->»
+    «variable:New» «operator:=» «function:min»(«variable:C» «operator:+» «variable:By», «meta:?MAX»),
+    io«operator::»«function:format»(«string:"count is now »«string>string.escape:~p»«string: (»«string>string.escape:~s»«string:)»«string>string.escape:~n»«string:"», [«variable:New», «variable:S»«type:#state».name]),
+    {noreply, «variable:S»«type:#state»{count «operator:=» «variable:New»}}.
+
+«comment:%% Binaries, chars and numbers.»
+«function:checksum»(«operator:<<»«variable:Head»«operator::»«number:8», «variable:Rest»«operator:/»binary«operator:>>») «operator:->»
+    «variable:Head» «keyword:bxor» «function:checksum»(«variable:Rest»);
+«function:checksum»(«operator:<<>>») «operator:->»
+    «string:$\n» «operator:+» «string:$a» «operator:+» «number:2#1010» «operator:+» «number:1_000» «operator:+» «number:3.5e2».
+
+«function:classify»(«variable:N») «operator:->»
+    «keyword:case» «variable:N» «keyword:of»
+        «number:0» «operator:->» zero;
+        «variable:X» «keyword:when» «variable:X» «operator:<» «number:0» «operator:->» negative;
+        «variable:_» «operator:->» «literal:'positive number'»
+    «keyword:end».
+
+«function:safe»(«variable:F») «operator:->»
+    «keyword:try» «variable:F»() «keyword:of»
+        «variable:Result» «operator:->» {«literal:ok», «variable:Result»}
+    «keyword:catch»
+        throw«operator::»«variable:Reason» «operator:->» {«literal:error», «variable:Reason»};
+        «literal:error»«operator::»badarg «operator:->» {«literal:error», badarg}
+    «keyword:after»
+        «literal:ok»
+    «keyword:end».
+
+«function:loop»() «operator:->»
+    «keyword:receive»
+        {«variable:From», ping} «operator:->» «variable:From» «operator:!» pong, «function:loop»();
+        stop «operator:->» «literal:ok»
+    «keyword:after» «number:5000» «operator:->»
+        timeout
+    «keyword:end».

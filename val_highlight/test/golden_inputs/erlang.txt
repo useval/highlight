@@ -1,0 +1,65 @@
+%% @doc A counter server.
+-module(counter).
+-behaviour(gen_server).
+
+-export([start_link/0, increment/1, value/0]).
+-export([init/1, handle_call/3, handle_cast/2]).
+
+-define(SERVER, ?MODULE).
+-define(MAX, 16#FFFF).
+
+-record(state, {count = 0 :: non_neg_integer(), name = 'default name'}).
+
+-spec start_link() -> {ok, pid()} | {error, term()}.
+start_link() ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+increment(By) when is_integer(By), By > 0 ->
+    gen_server:cast(?SERVER, {increment, By}).
+
+value() ->
+    gen_server:call(?SERVER, value).
+
+init([]) ->
+    {ok, #state{}}.
+
+handle_call(value, _From, State = #state{count = Count}) ->
+    {reply, Count, State};
+handle_call(_Other, _From, State) ->
+    {reply, {error, unknown}, State}.
+
+handle_cast({increment, By}, #state{count = C} = S) ->
+    New = min(C + By, ?MAX),
+    io:format("count is now ~p (~s)~n", [New, S#state.name]),
+    {noreply, S#state{count = New}}.
+
+%% Binaries, chars and numbers.
+checksum(<<Head:8, Rest/binary>>) ->
+    Head bxor checksum(Rest);
+checksum(<<>>) ->
+    $\n + $a + 2#1010 + 1_000 + 3.5e2.
+
+classify(N) ->
+    case N of
+        0 -> zero;
+        X when X < 0 -> negative;
+        _ -> 'positive number'
+    end.
+
+safe(F) ->
+    try F() of
+        Result -> {ok, Result}
+    catch
+        throw:Reason -> {error, Reason};
+        error:badarg -> {error, badarg}
+    after
+        ok
+    end.
+
+loop() ->
+    receive
+        {From, ping} -> From ! pong, loop();
+        stop -> ok
+    after 5000 ->
+        timeout
+    end.

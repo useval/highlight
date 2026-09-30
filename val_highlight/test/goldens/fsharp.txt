@@ -1,0 +1,48 @@
+«meta:#nowarn "40"»
+«keyword:namespace» «type:Shop»
+
+«keyword:open» «type:System»
+«keyword:open» «type:System»«operator:.»Collections«operator:.»Generic
+
+«comment.doc:/// An order line.»
+«meta:[<CLIMutable>]»
+«keyword:type» «type:Line» «operator:=» { «type:Sku»«operator::» «type.builtin:string»; «type:Qty»«operator::» «type.builtin:int»; «type:Price»«operator::» «type.builtin:decimal» }
+
+«keyword:type» «type:Status» «operator:=»
+    «operator:|» «type:Pending»
+    «operator:|» «type:Shipped» «keyword:of» «type:DateTime»
+    «operator:|» «type:Cancelled» «keyword:of» reason«operator::» «type.builtin:string»
+
+«keyword:module» «type:Orders» «operator:=»
+    «comment:(* Totals an order. (* nested *) *)»
+    «keyword:let» total (lines«operator::» «type:Line» «type.builtin:list») «operator::» «type.builtin:decimal» «operator:=»
+        lines «operator:|>» «type:List»«operator:.»«function:sumBy» («keyword:fun» l «operator:->» «type.builtin:decimal» l«operator:.»Qty «operator:*» l«operator:.»Price)
+
+    «keyword:let» describe status «operator:=»
+        «keyword:match» status «keyword:with»
+        «operator:|» «type:Pending» «operator:->» «string:"pending"»
+        «operator:|» «type:Shipped» at «operator:->» «string:$"shipped on »«string>interpolation:{at»«string>interpolation>operator::»«string>interpolation:yyyy»«string>interpolation>operator:-»«string>interpolation>type:MM»«string>interpolation>operator:-»«string>interpolation:dd}»«string: (»«string>string.escape:{{»«string:literal»«string>string.escape:}}»«string:)"»
+        «operator:|» «type:Cancelled» reason «operator:->» sprintf «string:"cancelled: %s"» reason
+
+    «keyword:let» «keyword:inline» twice (f«operator::» «type:'T» «operator:->» «type:'T») x «operator:=» f (f x)
+
+    «keyword:let» fetchAsync (id«operator::» «type.builtin:int») «operator:=»
+        async {
+            «keyword:let!» body «operator:=» «type.builtin:Async»«operator:.»Sleep «number:10» «operator:|>» «type.builtin:Async»«operator:.»«function:map» («keyword:fun» () «operator:->» «string:"ok"»)
+            «keyword:use!» handle «operator:=» «type.builtin:Async»«operator:.»«function:OnCancel»(«keyword:fun» () «operator:->» ())
+            «keyword:return!» async { «keyword:return» body«operator:.»Length «operator:+» id }
+        }
+
+«meta:[<EntryPoint>]»
+«keyword:let» main argv «operator:=»
+    «keyword:let» path «operator:=» «string:@"C:\data\orders.csv"»
+    «keyword:let» quote «operator:=» «string:@"He said »«string>string.escape:""»«string:hi»«string>string.escape:""»«string:"»
+    «keyword:let» json «operator:=» «string:"""{"key": "value"}"""»
+    «keyword:let» chars «operator:=» [ «string:'a'»; «string:'\n'»; «string:'\''»; «string:'b'B» ]
+    «keyword:let» «keyword:mutable» count «operator:=» «number:0x1Fu» «operator:+» «number:10u»
+    «keyword:let» big «operator:=» «number:1_000_000L»
+    «keyword:let» ratio «operator:=» «number:2.5e-3»
+    «keyword:let» lines «operator:=» [ { «type:Sku» «operator:=» «string:"A1"»; «type:Qty» «operator:=» «number:2»; «type:Price» «operator:=» «number:9.99m» } ]
+    count «operator:<-» count «operator:+» «number:1u»
+    printfn «string:"%s %s %s %A %d %f %M"» path quote json chars big ratio («type:Orders»«operator:.»total lines)
+    «keyword:if» argv«operator:.»Length «operator:>» «number:0» «operator:&&» «keyword:not» («type:String»«operator:.»IsNullOrEmpty argv«operator:.»[«number:0»]) «keyword:then» «number:0» «keyword:else» «number:1»

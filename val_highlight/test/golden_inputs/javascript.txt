@@ -1,0 +1,32 @@
+import { EventEmitter } from 'node:events';
+
+export class Queue extends EventEmitter {
+  #items = [];
+  constructor({ concurrency = 4, retries = 2 } = {}) {
+    super();
+    this.concurrency = concurrency;
+    this.retries = retries;
+  }
+
+  push(task) {
+    this.#items.push({ task, attempts: 0 });
+    this.emit('queued', this.#items.length);
+    return this;
+  }
+
+  async run() {
+    const workers = Array.from({ length: this.concurrency }, async () => {
+      while (this.#items.length > 0) {
+        const job = this.#items.shift();
+        try {
+          const result = await job.task();
+          this.emit('done', result);
+        } catch (err) {
+          if (++job.attempts <= this.retries) this.#items.push(job);
+          else console.error(`failed after ${job.attempts} tries`, /timeout/i.test(err.message));
+        }
+      }
+    });
+    await Promise.all(workers);
+  }
+}

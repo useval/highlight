@@ -1,0 +1,29 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+/// Loads and caches user profiles.
+class ProfileRepository {
+  ProfileRepository(this._client, {this.ttl = const Duration(minutes: 5)});
+
+  final HttpClient _client;
+  final Duration ttl;
+  final Map<String, (Profile, DateTime)> _cache = {};
+
+  Future<Profile?> load(String id, {bool force = false}) async {
+    final cached = _cache[id];
+    if (!force && cached != null && DateTime.now().difference(cached.$2) < ttl) {
+      return cached.$1;
+    }
+    try {
+      final json = await _client.getJson('/profiles/$id?fields=${_fields.join(',')}');
+      final profile = Profile.fromJson(json as Map<String, Object?>);
+      _cache[id] = (profile, DateTime.now());
+      return profile;
+    } on TimeoutException catch (e) {
+      debugPrint('timeout loading $id: $e'); // retry later
+      return null;
+    }
+  }
+
+  static const _fields = ['name', 'email', 'avatar', 0x1F];
+}

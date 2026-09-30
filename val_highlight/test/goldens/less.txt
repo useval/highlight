@@ -1,0 +1,37 @@
+«keyword:@import» (reference) «string:"mixins.less"»;
+
+«comment:// Variables»
+«variable:@brand»: «number:#b0226e»;
+«variable:@gap»: «number:12px»;
+«variable:@selector»: «operator:~»«string:".card"»;
+«variable:@prop»: color;
+
+«function:.rounded»(«variable:@radius»: «number:4px») {
+  «property:border-radius»: «variable:@radius»;
+}
+
+«function:.theme»(«variable:@mode») «keyword:when» («variable:@mode» «operator:=» dark) {
+  «property:background»: «number:#16181d»;
+}
+
+«comment:/* Components */»
+«variable:@{selector}» {
+  «function:.rounded»(«number:8px»);
+  «property:padding»: «variable:@gap» «operator:*» «number:2»;
+  «property:@{prop}»: «function:darken»(«variable:@brand», «number:10%»);
+  «property:width»: «operator:~»«string:"calc(100% - »«string>variable:@{gap}»«string:)"»;
+
+  «operator:&»«keyword::hover» { «property:opacity»: «number:0.9»; }
+  «operator:&»«tag:-title» {
+    «property:font-size»: («variable:@gap» «operator:+» «number:4»);
+    «function:.theme»(dark);
+  }
+
+  «keyword:@media» («property:max-width»: «number:600px») {
+    «property:padding»: «variable:@gap»;
+  }
+}
+
+«type:.button»«keyword::extend»(.card all) {
+  «property:color»: «variable:@@name»;
+}

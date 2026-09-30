@@ -1,0 +1,34 @@
+«meta:#include <stdio.h>»
+«meta:#include <stdlib.h>»
+«meta:#define MAX(a, b) ((a) > (b) ? (a) : (b)) \
+    /* continued */»
+
+«comment.doc:/** A growable buffer. */»
+«keyword:typedef» «keyword:struct» {
+    «type.builtin:size_t» len;
+    «type.builtin:size_t» cap;
+    «type.builtin:uint8_t» «operator:*»data;
+} buffer_t;
+
+«keyword:static» «type.builtin:int» «function:buffer_push»(buffer_t «operator:*»buf, «type.builtin:uint8_t» byte) {
+    «keyword:if» (buf«operator:->»len «operator:==» buf«operator:->»cap) {
+        «type.builtin:size_t» cap «operator:=» buf«operator:->»cap «operator:?» buf«operator:->»cap «operator:*» «number:2» «operator::» «number:16»;
+        «type.builtin:uint8_t» «operator:*»data «operator:=» «function:realloc»(buf«operator:->»data, cap);
+        «keyword:if» (data «operator:==» «literal:NULL») «keyword:return» «operator:-»«number:1»; «comment:// out of memory»
+        buf«operator:->»data «operator:=» data;
+        buf«operator:->»cap «operator:=» cap;
+    }
+    buf«operator:->»data[buf«operator:->»len«operator:++»] «operator:=» byte;
+    «keyword:return» «number:0»;
+}
+
+«type.builtin:int» «function:main»(«type.builtin:int» argc, «type.builtin:char» «operator:**»argv) {
+    buffer_t buf «operator:=» {«number:0»};
+    «keyword:const» «type.builtin:char» «operator:*»msg «operator:=» «string:"hello»«string>string.escape:\t»«string:world»«string>string.escape:\n»«string:"»;
+    «keyword:for» («type.builtin:int» i «operator:=» «number:0»; msg[i] «operator:!=» «string:'\0'»; i«operator:++») {
+        «function:buffer_push»(«operator:&»buf, («type.builtin:uint8_t»)msg[i]);
+    }
+    «function:printf»(«string:"%zu bytes, max %d, pi %.2f»«string>string.escape:\n»«string:"», buf.len, «function:MAX»(«number:3», «number:7»), «number:3.14159f»);
+    «function:free»(buf.data);
+    «keyword:return» «number:0x0»;
+}

@@ -1,0 +1,45 @@
+(** A binary search tree. *)
+module Tree = struct
+  type 'a t =
+    | Leaf
+    | Node of 'a t * 'a * 'a t
+  [@@deriving show]
+
+  let empty = Leaf
+
+  (* Insert keeps the tree ordered. (* nested *) *)
+  let rec insert cmp x = function
+    | Leaf -> Node (Leaf, x, Leaf)
+    | Node (l, v, r) as node ->
+      let c = cmp x v in
+      if c < 0 then Node (insert cmp x l, v, r)
+      else if c > 0 then Node (l, v, insert cmp x r)
+      else node
+
+  let rec to_list = function
+    | Leaf -> []
+    | Node (l, v, r) -> to_list l @ (v :: to_list r)
+end
+
+exception Invalid_input of string
+
+let parse_int (s : string) : int option =
+  match int_of_string_opt (String.trim s) with
+  | Some n when n >= 0 -> Some n
+  | Some _ -> raise (Invalid_input s)
+  | None -> None
+
+let banner = {|raw "text" with \n no escapes|}
+let tagged = {sql|SELECT * FROM t|sql}
+
+let () =
+  let t = List.fold_left (fun acc x -> Tree.insert compare x acc) Tree.empty [5; 3; 8; 1] in
+  let chars = ['a'; '\n'; '\''; '\065'] in
+  let mask = 0xFF land 0b1010 lor 0o17 in
+  let big = 1_000_000L and pi = 3.14159 in
+  Printf.printf "%d items, mask=%d, big=%Ld, pi=%.2f\n"
+    (List.length (Tree.to_list t)) mask big pi;
+  ignore chars;
+  print_endline banner;
+  print_endline tagged;
+  assert (not false)

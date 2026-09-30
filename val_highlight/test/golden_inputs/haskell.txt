@@ -1,0 +1,55 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+-- | A small inventory module.
+module Inventory
+  ( Item (..)
+  , restock
+  , total
+  ) where
+
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
+
+{- Block comment {- with a nested one -} still comment -}
+
+data Item = Item
+  { itemName  :: String
+  , itemCount :: !Int
+  , itemPrice :: Double
+  } deriving (Show, Eq)
+
+newtype Sku = Sku Int deriving stock (Eq, Ord)
+
+type Stock = Map.Map Sku Item
+
+-- | Adds n units, creating the item if missing.
+restock :: Sku -> Int -> Stock -> Stock
+restock sku n = Map.alter bump sku
+  where
+    bump Nothing = Just (Item "unnamed" n 0.0)
+    bump (Just it) = Just it { itemCount = itemCount it + n }
+
+total :: Stock -> Double
+total stock = sum [ fromIntegral (itemCount i) * itemPrice i | i <- Map.elems stock ]
+
+classify :: Int -> String
+classify n
+  | n < 0 = "negative"
+  | n == 0 = "zero"
+  | otherwise = "positive"
+
+arrows :: Int -> Int
+arrows x' = x' --> 1 -- a real comment
+  where a --> b = a + b
+
+chars :: [Char]
+chars = ['a', '\n', '\'', '\x41']
+
+main :: IO ()
+main = do
+  let s = restock (Sku 1) 5 Map.empty
+      hex = 0xFF :: Int
+      big = 1_000_000 :: Integer
+  print (total s, hex, big, 2.5e-3 :: Double)
+  mapM_ (putStrLn . classify) [-1, 0, 1]
+  putStrLn $ fromMaybe "none" (Just "some \"quoted\" text")

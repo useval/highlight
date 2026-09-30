@@ -1,0 +1,38 @@
+import '../val_highlight.dart';
+
+/// A high-contrast light theme: every colour has at least 7:1 contrast.
+const highContrastLightTheme = ValTheme(
+  name: 'high-contrast-light',
+  root: Style(color: 0xFF000000, background: 0xFFFFFFFF),
+  styles: {
+    Scopes.comment: Style(color: 0xFF4A4A4A, italic: true),
+    Scopes.commentDoc: Style(color: 0xFF2F4A2F, italic: true),
+    Scopes.string: Style(color: 0xFF0A5A1A),
+    Scopes.stringEscape: Style(color: 0xFF00565C),
+    Scopes.interpolation: Style(color: 0xFF000000),
+    Scopes.number: Style(color: 0xFF7A3300),
+    Scopes.keyword: Style(color: 0xFF8A0048),
+    Scopes.literal: Style(color: 0xFF003E8A),
+    Scopes.type: Style(color: 0xFF4A1E8A),
+    Scopes.typeBuiltin: Style(color: 0xFF003E8A),
+    Scopes.function: Style(color: 0xFF5A3300),
+    Scopes.variable: Style(color: 0xFF4A1E8A),
+    Scopes.variableLanguage: Style(color: 0xFF8A0048, italic: true),
+    Scopes.meta: Style(color: 0xFF4A2A7A),
+    Scopes.property: Style(color: 0xFF003E8A),
+    Scopes.punctuation: Style(color: 0xFF2A2A2A),
+    Scopes.operator: Style(color: 0xFF2A2A2A),
+    Scopes.tag: Style(color: 0xFF8A0048),
+    Scopes.attribute: Style(color: 0xFF4A1E8A),
+    Scopes.regexp: Style(color: 0xFF00565C),
+    Scopes.heading: Style(color: 0xFF003E8A, bold: true),
+    Scopes.emphasis: Style(italic: true),
+    Scopes.strong: Style(bold: true),
+    Scopes.link: Style(color: 0xFF003E8A, underline: true),
+    Scopes.code: Style(color: 0xFF0A5A1A),
+    Scopes.quote: Style(color: 0xFF4A4A4A, italic: true),
+    Scopes.addition: Style(color: 0xFF0A5A1A, background: 0xFFE2F6E6),
+    Scopes.deletion: Style(color: 0xFF8A0A0A, background: 0xFFFBE4E4),
+    Scopes.invalid: Style(color: 0xFF8A0A0A, underline: true),
+  },
+);

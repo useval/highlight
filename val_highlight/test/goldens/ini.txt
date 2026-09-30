@@ -1,0 +1,28 @@
+«comment:; Application settings»
+«comment:# also a comment»
+
+«heading:[server]»
+«property:host» «operator:=» 127.0.0.1
+«property:port» «operator:=» «number:8080»
+«property:debug» «operator:=» «literal:false»
+«property:timeout» «operator:=» «number:2.5»
+«property:name» «operator:=» «string:"val server"»
+«property:root» «operator:=» /var/www/html
+
+«heading:[database]»
+«property:url»«operator:=»postgres://localhost:5432/app
+«property:pool_size»«operator:=»«number:16»
+«property:enabled» «operator:=» «literal:yes»
+«property:path» «operator:=» «variable:${HOME}»/data
+«property:log» «operator:=» «variable:%(root)s»/db.log
+
+«heading:[section with spaces]»
+«property:key.with.dots»«operator::» value with spaces
+«property:empty» «operator:=»
+
+«comment:# Java properties style»
+«property:app.title»«operator:=»Hello World
+«property:app.greeting»«operator:=»Welcome, «string.escape:\
+»    dear user!
+«property:unicode.escape»«operator:=»caf«string.escape:\u00e9»
+«comment:! bang comment»

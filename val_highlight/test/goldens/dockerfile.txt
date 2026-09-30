@@ -1,0 +1,32 @@
+«meta:# syntax=docker/dockerfile:1.7»
+«comment:# Build stage»
+«keyword:ARG» DART_VERSION«operator:=»3.5
+«keyword:FROM» dart:«variable:${DART_VERSION}» «keyword:AS» build
+
+«keyword:WORKDIR» /app
+«keyword:COPY» pubspec.* ./
+«keyword:RUN» dart pub get «operator:&&» «operator:\»
+«comment:    # keep the cache small»
+    rm -rf /root/.pub-cache/_temp
+
+«keyword:COPY» «attribute:--chown»«operator:=»app:app . .
+«keyword:RUN» «attribute:--mount»«operator:=»type«operator:=»cache,target«operator:=»/root/.pub-cache «operator:\»
+    dart compile exe bin/server.dart -o bin/server
+
+«keyword:RUN» «operator:<<EOF»
+«string:echo "building $APP_NAME"»
+«string:set -eu»
+«operator:EOF»
+
+«comment:# Runtime stage»
+«keyword:FROM» scratch
+«keyword:ENV» PORT«operator:=»«number:8080» «operator:\»
+    MODE«operator:=»«string:"production"»
+«keyword:LABEL» org.opencontainers.image.title«operator:=»«string:"server"» version«operator:=»«string:'1.2'»
+«keyword:COPY» «attribute:--from»«operator:=»build /runtime/ /
+«keyword:COPY» «attribute:--from»«operator:=»build /app/bin/server /app/bin/
+«keyword:EXPOSE» «number:8080/tcp»
+«keyword:USER» «number:1000»
+«keyword:HEALTHCHECK» «attribute:--interval»«operator:=»30s «keyword:CMD» [«string:"/app/bin/server"», «string:"--health"»]
+«keyword:ENTRYPOINT» [«string:"/app/bin/server"»]
+«keyword:CMD» [«string:"--port"», «string:"»«string>variable:$PORT»«string:"»]

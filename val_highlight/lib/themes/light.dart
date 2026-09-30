@@ -1,0 +1,38 @@
+import '../val_highlight.dart';
+
+/// The default light theme.
+const lightTheme = ValTheme(
+  name: 'light',
+  root: Style(color: 0xFF2B2F36, background: 0xFFFAFAFB),
+  styles: {
+    Scopes.comment: Style(color: 0xFF687080, italic: true),
+    Scopes.commentDoc: Style(color: 0xFF55705F, italic: true),
+    Scopes.string: Style(color: 0xFF1E7A3A),
+    Scopes.stringEscape: Style(color: 0xFF0E7C86),
+    Scopes.interpolation: Style(color: 0xFF2B2F36),
+    Scopes.number: Style(color: 0xFF9A5B00),
+    Scopes.keyword: Style(color: 0xFFB0226E),
+    Scopes.literal: Style(color: 0xFF0B61B8),
+    Scopes.type: Style(color: 0xFF6A3FB5),
+    Scopes.typeBuiltin: Style(color: 0xFF0B61B8),
+    Scopes.function: Style(color: 0xFF8A4B08),
+    Scopes.variable: Style(color: 0xFF8A3FB5),
+    Scopes.variableLanguage: Style(color: 0xFFB0226E, italic: true),
+    Scopes.meta: Style(color: 0xFF7A5CC0),
+    Scopes.property: Style(color: 0xFF0B61B8),
+    Scopes.punctuation: Style(color: 0xFF5B616B),
+    Scopes.operator: Style(color: 0xFF5B616B),
+    Scopes.tag: Style(color: 0xFFB0226E),
+    Scopes.attribute: Style(color: 0xFF6A3FB5),
+    Scopes.regexp: Style(color: 0xFF0E7C86),
+    Scopes.heading: Style(color: 0xFF0B61B8, bold: true),
+    Scopes.emphasis: Style(italic: true),
+    Scopes.strong: Style(bold: true),
+    Scopes.link: Style(color: 0xFF0B61B8, underline: true),
+    Scopes.code: Style(color: 0xFF1E7A3A),
+    Scopes.quote: Style(color: 0xFF687080, italic: true),
+    Scopes.addition: Style(color: 0xFF1E7A3A, background: 0xFFE8F7EC),
+    Scopes.deletion: Style(color: 0xFFB42318, background: 0xFFFDECEA),
+    Scopes.invalid: Style(color: 0xFFB42318, underline: true),
+  },
+);

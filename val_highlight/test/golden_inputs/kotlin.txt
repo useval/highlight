@@ -1,0 +1,64 @@
+package com.example.cart
+
+import kotlinx.coroutines.flow.*
+import java.time.Instant
+
+/**
+ * A shopping cart. Totals are in cents.
+ * @property owner who the cart belongs to
+ * /* nested comment in docs */
+ */
+@JvmInline
+value class Cents(val amount: Long)
+
+sealed interface Event {
+    data class Added(val sku: String, val qty: Int = 1) : Event
+    data object Cleared : Event
+}
+
+class Cart(private val owner: String) {
+    private val items = mutableMapOf<String, Int>()
+    var updatedAt: Instant? = null
+        private set
+
+    companion object {
+        const val MAX_ITEMS = 1_000
+        private const val MASK = 0xFF_FFL
+    }
+
+    suspend fun apply(event: Event): Boolean = when (event) {
+        is Event.Added -> {
+            require(event.qty > 0) { "qty must be positive, got ${event.qty}" }
+            items.merge(event.sku, event.qty, Int::plus)
+            updatedAt = Instant.now()
+            true
+        }
+        Event.Cleared -> items.clear().let { false }
+    }
+
+    fun summary(): String {
+        val lines = items.entries.joinToString("\n") { (sku, qty) -> "$sku x$qty" }
+        return """
+            |Cart for $owner (${items.size} items)
+            |$lines \n stays raw
+        """.trimMargin()
+    }
+
+    inline fun <reified T> find(predicate: (T) -> Boolean): T? = null
+
+    fun loop() {
+        outer@ for (i in 0 until 10) {
+            if (i % 2 == 0) continue@outer
+            val c = 'x'; val tab = '\t'; val pi = 3.14f
+            println(`is`(i) && c != tab && pi > 1e-3)
+        }
+    }
+
+    private fun `is`(n: Int) = n in 1..9 && n !in setOf(4, 5)
+}
+
+fun main() = runBlocking {
+    val cart = Cart("ada")
+    listOf(Event.Added("apple", 2), Event.Cleared).asFlow().collect { cart.apply(it) }
+    println(cart.summary() ?: "empty")
+}

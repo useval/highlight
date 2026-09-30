@@ -1,0 +1,50 @@
+«comment:; Prints a message and exits (Linux x86-64).»
+«meta:%define SYS_WRITE 1»
+«meta:%define SYS_EXIT  60»
+
+«keyword:bits» «number:64»
+«keyword:default» «type.builtin:rel»
+
+«keyword:section» .data
+    msg     «keyword:db»  «string:"Hello, world!"», «number:10», «number:0»
+    len     «keyword:equ» $ «operator:-» msg
+    table   «keyword:dw»  «number:0x10», «number:20h», «number:0b1010», «number:1010b», «number:777q», «number:12»
+    pi      «keyword:dq»  «number:3.14159»
+    quote   «keyword:db»  «string:'single'», «string:`tick»«string>string.escape:\n»«string:`»
+
+«keyword:section» .bss
+    buffer  «keyword:resb» «number:64»
+
+«keyword:section» .text
+    «keyword:global» _start
+
+«function:_start»:
+    «function:mov»     «variable:rax», SYS_WRITE
+    «function:mov»     «variable:rdi», «number:1»
+    «function:lea»     «variable:rsi», [msg]
+    «function:mov»     «variable:rdx», len
+    «function:syscall»
+
+    «function:xor»     «variable:ecx», «variable:ecx»            «comment:; counter = 0»
+«function:.loop»:
+    «function:cmp»     «variable:rcx», «number:10»
+    «function:jge»     .done
+    «function:inc»     «variable:rcx»
+    «function:movzx»   «variable:eax», «type.builtin:byte» [«variable:rsi» «operator:+» «variable:rcx»]
+    «function:test»    «variable:al», «variable:al»
+    «function:jz»      .done
+    «function:cmovne»  «variable:r8», «variable:rcx»
+    «function:jmp»     .loop
+
+«function:.done»:
+    «function:push»    «variable:r12»
+    «function:call»    helper
+    «function:pop»     «variable:r12»
+    «function:vxorps»  «variable:ymm0», «variable:ymm0», «variable:ymm0»
+    «function:MOV»     «variable:RAX», SYS_EXIT       «comment:; upper case works too»
+    «function:xor»     «variable:edi», «variable:edi»
+    «function:syscall»
+
+«function:helper»:
+    «function:mov»     «type.builtin:qword» [buffer], «variable:r12»
+    «function:ret»

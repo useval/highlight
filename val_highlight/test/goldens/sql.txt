@@ -1,0 +1,17 @@
+«comment:-- Monthly revenue per region»
+«keyword:WITH» monthly «keyword:AS» (
+  «keyword:SELECT» r.name «keyword:AS» region,
+         «function:date_trunc»(«string:'month'», o.created_at) «keyword:AS» month,
+         «function:SUM»(o.total) «keyword:AS» revenue,
+         «function:COUNT»(«keyword:DISTINCT» o.customer_id) «keyword:AS» customers
+  «keyword:FROM» orders o
+  «keyword:JOIN» regions r «keyword:ON» r.id «operator:=» o.region_id
+  «keyword:WHERE» o.status «operator:=» «string:'paid'» «keyword:AND» o.created_at «operator:>=» «string:'2026-01-01'»
+  «keyword:GROUP» «keyword:BY» «number:1», «number:2»
+)
+«keyword:SELECT» region, month, revenue,
+       revenue «operator:/» «function:NULLIF»(customers, «number:0») «keyword:AS» per_customer,
+       «function:LAG»(revenue) «keyword:OVER» («keyword:PARTITION» «keyword:BY» region «keyword:ORDER» «keyword:BY» month) «keyword:AS» previous
+«keyword:FROM» monthly
+«keyword:ORDER» «keyword:BY» region, month «keyword:DESC»
+«keyword:LIMIT» «number:100»;

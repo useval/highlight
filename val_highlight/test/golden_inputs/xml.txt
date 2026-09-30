@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Android manifest-style example -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <application android:label="Example &amp; Co" android:icon="@mipmap/ic_launcher">
+    <activity android:name=".MainActivity" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+      </intent-filter>
+    </activity>
+    <meta-data android:name="flutterEmbedding" android:value="2" />
+  </application>
+  <data><![CDATA[ raw <text> & more ]]></data>
+</manifest>

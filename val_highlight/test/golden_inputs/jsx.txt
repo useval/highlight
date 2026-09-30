@@ -1,0 +1,48 @@
+import React, { useState, useEffect } from 'react';
+import { Card } from './components/card';
+
+// A searchable list of users.
+export default function UserList({ users, onSelect, title = 'Users' }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (query.length > 2 && users.length < 100) {
+      console.log(`searching ${query}`);
+    }
+  }, [query, users]);
+
+  const visible = users.filter((u) => u.name.includes(query));
+
+  return (
+    <Card className="user-list" data-count={visible.length}>
+      <h2>{title} &amp; friends</h2>
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        disabled={!users.length}
+      />
+      {/* Nothing to show yet */}
+      {visible.length === 0 ? (
+        <p className="empty">Don't panic, no matches.</p>
+      ) : (
+        <ul>
+          {visible.map((user) => (
+            <li key={user.id} onClick={() => onSelect(user)}>
+              <strong>{user.name}</strong> is {user.age > 18 ? 'adult' : 'minor'}
+            </li>
+          ))}
+        </ul>
+      )}
+      {open && <Modal.Dialog {...user} onClose={() => setOpen(false)} />}
+      <>
+        <span>a</span>
+        <span>b</span>
+      </>
+    </Card>
+  );
+}
+
+const Badge = ({ count }) => <span className="badge">{count > 99 ? '99+' : count}</span>;
+const same = 1 < 2 && 3 > 2;

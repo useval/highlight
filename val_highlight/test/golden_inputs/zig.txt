@@ -1,0 +1,47 @@
+//! Parses key=value lines.
+const std = @import("std");
+const Allocator = std.mem.Allocator;
+
+/// A parsed entry.
+pub const Entry = struct {
+    key: []const u8,
+    value: []const u8,
+    line: u32 = 0,
+};
+
+pub const ParseError = error{ MissingEquals, EmptyKey } || Allocator.Error;
+
+pub fn parse(allocator: Allocator, text: []const u8) ParseError![]Entry {
+    var list = std.ArrayList(Entry).init(allocator);
+    errdefer list.deinit();
+    var it = std.mem.splitScalar(u8, text, '\n');
+    var line: u32 = 1;
+    while (it.next()) |raw| : (line += 1) {
+        const trimmed = std.mem.trim(u8, raw, " \t");
+        if (trimmed.len == 0 or trimmed[0] == '#') continue;
+        const eq = std.mem.indexOfScalar(u8, trimmed, '=') orelse return error.MissingEquals;
+        if (eq == 0) return error.EmptyKey;
+        try list.append(.{ .key = trimmed[0..eq], .value = trimmed[eq + 1 ..], .line = line });
+    }
+    return list.toOwnedSlice();
+}
+
+const help =
+    \\usage: kv [file]
+    \\  prints every "key = value" pair
+;
+
+test "parse two lines" {
+    const entries = try parse(std.testing.allocator, "a=1\nb=0x2A\n");
+    defer std.testing.allocator.free(entries);
+    try std.testing.expectEqual(@as(usize, 2), entries.len);
+    const mask: u7 = 0b101_0101;
+    const ratio: f64 = 1.5e3;
+    _ = mask;
+    _ = ratio;
+    var @"weird name": i32 = undefined;
+    @"weird name" = comptime blk: {
+        break :blk 7;
+    };
+    _ = help;
+}

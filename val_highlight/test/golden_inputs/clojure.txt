@@ -1,0 +1,46 @@
+(ns shop.orders
+  "Order processing."
+  (:require [clojure.string :as str]
+            [clojure.set :refer [union]])
+  (:import (java.time Instant)))
+
+;; A simple order record.
+(defrecord Order [id items status])
+
+(def ^:private tax-rate 0.08M)
+(def max-items 100)
+
+(defn subtotal
+  "Sums quantity times price."
+  [{:keys [items]}]
+  (reduce + (map (fn [{:keys [qty price]}] (* qty price)) items)))
+
+(defn total [order]
+  (let [sub (subtotal order)]
+    (-> sub (* (+ 1 tax-rate)) (.setScale 2 java.math.RoundingMode/HALF_UP))))
+
+(defmulti describe :status)
+(defmethod describe :pending [_] "waiting")
+(defmethod describe ::shipped [o] (str "shipped " (:id o)))
+
+(defn valid-id? [s]
+  (boolean (re-matches #"[A-Z]{2}-\d{4}" s)))
+
+(defn tags [order]
+  (union #{:new} (set (map keyword (str/split (get order :tags "") #",")))))
+
+(comment
+  (total (->Order "AB-1234" [{:qty 2 :price 9.99M}] :pending))
+  (valid-id? "AB-1234"))
+
+(defn -main [& args]
+  (let [ratio 22/7
+        hex 0xFF
+        big 12345678901234567890N
+        letters [\a \b \newline \u00e9]
+        f #(* % 2)
+        v @(delay (Instant/now))]
+    (when-let [order (first args)]
+      (println "order" order (count letters) (f hex) ratio big v))
+    (doseq [n (range 3)]
+      (println n nil true false 'sym `(quoted ~n ~@args)))))

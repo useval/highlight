@@ -1,0 +1,56 @@
+defmodule Shop.Cart do
+  @moduledoc """
+  A shopping cart with #{length([1, 2])} interpolated docs.
+  """
+  use GenServer
+  alias Shop.{Item, Pricing}
+  require Logger
+
+  @type t :: %__MODULE__{items: [Item.t()], currency: atom()}
+  @default_currency :usd
+  defstruct items: [], currency: @default_currency
+
+  @doc "Adds `qty` of an item."
+  @spec add(t(), Item.t(), pos_integer()) :: t()
+  def add(%__MODULE__{items: items} = cart, %Item{} = item, qty \\ 1)
+      when is_integer(qty) and qty > 0 do
+    %{cart | items: List.duplicate(item, qty) ++ items}
+  end
+
+  def total(%__MODULE__{items: items, currency: currency}) do
+    items
+    |> Enum.map(&Pricing.price/1)
+    |> Enum.sum()
+    |> Pricing.round(currency)
+  end
+
+  defp valid?(cart), do: cart.items != [] and not is_nil(cart.currency)
+
+  def handle_call({:checkout, opts}, _from, state) do
+    case Pricing.charge(state, Keyword.get(opts, :card)) do
+      {:ok, receipt} ->
+        Logger.info("charged #{receipt.amount} #{inspect(receipt.id)}")
+        {:reply, {:ok, receipt}, %{state | items: []}}
+
+      {:error, reason} when reason in [:declined, :expired] ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def parse(line) do
+    with [sku, qty] <- String.split(line, ",", trim: true),
+         {n, ""} <- Integer.parse(qty) do
+      {:ok, sku, n}
+    else
+      _ -> {:error, :"bad line"}
+    end
+  end
+end
+
+words = ~w(apple banana cherry)a
+pattern = ~r/^\d{3}-\d{4}$/i
+raw = ~S(no #{interpolation} here)
+chars = ~c"abc"
+hex = 0xFF + 1_000 + 0b1010
+fun = fn x -> x * 2 end
+IO.puts("#{hex} #{fun.(21)} #{?a} #{__MODULE__}")

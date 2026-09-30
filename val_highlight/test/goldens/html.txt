@@ -1,0 +1,26 @@
+«meta:<!DOCTYPE html>»
+«punctuation:<»«tag:html» «attribute:lang»«punctuation:=»«string:"en"»«punctuation:>»
+«punctuation:<»«tag:head»«punctuation:>»
+  «punctuation:<»«tag:meta» «attribute:charset»«punctuation:=»«string:"utf-8"»«punctuation:>»
+  «punctuation:<»«tag:title»«punctuation:>»Dashboard «string.escape:&mdash;» Overview«punctuation:</»«tag:title»«punctuation:>»
+  «punctuation:<»«tag:style»«punctuation:>»
+    «type:.card» { «property:padding»: «number:1rem»; «property:border-radius»: «number:8px»; «property:box-shadow»: «number:0» «number:1px» «number:3px» «function:rgba»(«number:0»,«number:0»,«number:0»,«number:.2»); }
+    «type:.card»«keyword::hover» { «property:transform»: «function:translateY»(«number:-2px»); }
+  «punctuation:</»«tag:style»«punctuation:>»
+«punctuation:</»«tag:head»«punctuation:>»
+«punctuation:<»«tag:body» «attribute:class»«punctuation:=»«string:"dark"»«punctuation:>»
+  «comment:<!-- Main navigation -->»
+  «punctuation:<»«tag:nav» «attribute:id»«punctuation:=»«string:"top"»«punctuation:><»«tag:a» «attribute:href»«punctuation:=»«string:"/"» «attribute:class»«punctuation:=»«string:"brand"»«punctuation:>»Home«punctuation:</»«tag:a»«punctuation:><»«tag:a» «attribute:href»«punctuation:=»«string:"/about"»«punctuation:>»About«punctuation:</»«tag:a»«punctuation:></»«tag:nav»«punctuation:>»
+  «punctuation:<»«tag:main»«punctuation:>»
+    «punctuation:<»«tag:section» «attribute:class»«punctuation:=»«string:"card"» «attribute:data-id»«punctuation:=»«string:"42"»«punctuation:>»
+      «punctuation:<»«tag:h2»«punctuation:>»Stats«punctuation:</»«tag:h2»«punctuation:>»
+      «punctuation:<»«tag:p»«punctuation:>»Visitors: «punctuation:<»«tag:strong» «attribute:id»«punctuation:=»«string:"count"»«punctuation:>»0«punctuation:</»«tag:strong»«punctuation:></»«tag:p»«punctuation:>»
+    «punctuation:</»«tag:section»«punctuation:>»
+  «punctuation:</»«tag:main»«punctuation:>»
+  «punctuation:<»«tag:script» «attribute:type»«punctuation:=»«string:"module"»«punctuation:>»
+    «keyword:const» el «operator:=» «type.builtin:document».«function:getElementById»(«string:'count'»);
+    «keyword:let» n «operator:=» «number:0»;
+    «function:setInterval»(() «operator:=>» { el.textContent «operator:=» «type.builtin:String»(«operator:++»n); }, «number:1000»);
+  «punctuation:</»«tag:script»«punctuation:>»
+«punctuation:</»«tag:body»«punctuation:>»
+«punctuation:</»«tag:html»«punctuation:>»

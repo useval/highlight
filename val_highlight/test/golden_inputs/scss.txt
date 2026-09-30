@@ -1,0 +1,43 @@
+@use 'sass:math';
+@import "base/reset";
+
+// Design tokens
+$brand: #b0226e !default;
+$gap: 12px;
+$breakpoints: (small: 576px, large: 992px);
+
+@mixin respond($size) {
+  @media (min-width: map-get($breakpoints, $size)) {
+    @content;
+  }
+}
+
+%card-base {
+  border-radius: math.div($gap, 2);
+}
+
+/* Components */
+.card {
+  @extend %card-base;
+  padding: $gap * 2;
+  color: darken($brand, 10%);
+
+  &:hover { transform: translateY(-2px); }
+  &__title {
+    font: #{$gap + 4}/1.2 system-ui, sans-serif;
+    margin-#{$side}: 0;
+  }
+
+  @include respond(large) {
+    padding: $gap * 3;
+  }
+
+  @each $name, $value in $breakpoints {
+    .col-#{$name} { width: $value; }
+  }
+}
+
+@function rem($px) {
+  @if $px == 0 { @return 0; }
+  @return math.div($px, 16px) * 1rem;
+}

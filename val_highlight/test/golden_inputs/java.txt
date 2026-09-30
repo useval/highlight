@@ -1,0 +1,64 @@
+package com.example.orders;
+
+import java.util.*;
+import java.util.function.Function;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * Processes orders.
+ * @author Ada
+ * @since 21
+ */
+public sealed interface Shape permits Circle, Square {}
+
+record Circle(double radius) implements Shape {}
+
+non-sealed class Square implements Shape {
+    final int side;
+    Square(int side) { this.side = side; }
+}
+
+@FunctionalInterface
+interface Pricing extends Function<Order, Long> {}
+
+public final class OrderService {
+    private static final long LIMIT = 10_000L;
+    private static final int MASK = 0x7F_FF;
+    private final Map<String, List<Order>> byCustomer = new HashMap<>();
+
+    @Override
+    public String toString() {
+        return "OrderService{customers=" + byCustomer.size() + "}";
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Order> Optional<T> latest(String customer) {
+        var orders = byCustomer.getOrDefault(requireNonNull(customer), List.of());
+        if (orders.isEmpty()) return Optional.empty();
+        return Optional.of((T) orders.get(orders.size() - 1));
+    }
+
+    static double area(Shape shape) {
+        return switch (shape) {
+            case Circle c when c.radius() > 0 -> Math.PI * c.radius() * c.radius();
+            case Circle c -> 0.0;
+            case Square s -> {
+                double side = s.side;
+                yield side * side;
+            }
+        };
+    }
+
+    public static void main(String[] args) throws Exception {
+        String report = """
+            Orders: %d
+            Limit:  \t%d "quoted"
+            """.formatted(args.length, LIMIT);
+        char sep = '\n', quote = '\'';
+        float ratio = 1.5e-3f;
+        synchronized (OrderService.class) {
+            System.out.println(report + sep + quote + ratio + (MASK >>> 2));
+        }
+        assert args != null : "args";
+    }
+}

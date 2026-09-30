@@ -1,0 +1,56 @@
+«meta:#!/usr/bin/env lua»
+«comment:-- Inventory module.»
+«comment:--[[
+  Multi-line comment with [brackets] and "quotes".
+]]»
+«comment:--[==[ a level-2 comment that contains ]] safely ]==]»
+
+«keyword:local» json «operator:=» «function:require»(«string:"dkjson"»)
+«keyword:local» M «operator:=» {}
+M.__index «operator:=» M
+
+«keyword:local» MAX «meta:<const>» «operator:=» «number:64»
+«keyword:local» escape «operator:=» «string:"tab»«string>string.escape:\t»«string:newline»«string>string.escape:\n\"»«string:quoted»«string>string.escape:\"»«string: »«string>string.escape:\u{48}»«string:"»
+«keyword:local» literal «operator:=» «string:[[
+raw text with \n no escapes and 'quotes'
+]]»
+«keyword:local» nested «operator:=» «string:[=[ contains ]] and [[ ]=]»
+
+«keyword:function» M.«function:new»(name, capacity)
+  «keyword:local» «variable.language:self» «operator:=» «function:setmetatable»({}, M)
+  «variable.language:self».name «operator:=» name «keyword:or» «string:"default"»
+  «variable.language:self».capacity «operator:=» capacity «keyword:or» MAX
+  «variable.language:self».items «operator:=» {}
+  «keyword:return» «variable.language:self»
+«keyword:end»
+
+«keyword:function» M:«function:add»(item, count)
+  count «operator:=» count «keyword:or» «number:1»
+  «keyword:if» «operator:#»«variable.language:self».items «operator:+» count «operator:>» «variable.language:self».capacity «keyword:then»
+    «function:error»((«string:"inventory %s is full"»):«function:format»(«variable.language:self».name), «number:2»)
+  «keyword:elseif» count «operator:<=» «number:0» «keyword:then»
+    «keyword:return» «literal:false»
+  «keyword:end»
+  «keyword:for» i «operator:=» «number:1», count «keyword:do»
+    «variable.language:self».items[«operator:#»«variable.language:self».items «operator:+» «number:1»] «operator:=» item
+  «keyword:end»
+  «keyword:return» «literal:true»
+«keyword:end»
+
+«keyword:function» M:«function:report»()
+  «keyword:local» totals «operator:=» {}
+  «keyword:for» _, item «keyword:in» «function:ipairs»(«variable.language:self».items) «keyword:do»
+    totals[item] «operator:=» (totals[item] «keyword:or» «number:0») «operator:+» «number:1»
+  «keyword:end»
+  «keyword:for» name, n «keyword:in» «function:pairs»(totals) «keyword:do»
+    «function:print»(«type.builtin:string».«function:format»(«string:"%-10s %3d"», name, n))
+  «keyword:end»
+  «keyword:return» json.«function:encode» { name «operator:=» «variable.language:self».name, size «operator:=» «operator:#»«variable.language:self».items }
+«keyword:end»
+
+«keyword:local» inv «operator:=» M.«function:new»(«string:"pack"», «number:0x10»)
+inv:«function:add»(«string:"potion"», «number:3»)
+«function:print»(inv:«function:report»(), «number:1e3», «number:0.5», «number:3» «operator://» «number:2», «number:7» «operator:~=» «number:8», «string:"a"» «operator:..» «string:"b"»)
+«keyword:goto» done
+«meta:::done::»
+«keyword:return» M

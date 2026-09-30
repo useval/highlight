@@ -1,0 +1,48 @@
+#nowarn "40"
+namespace Shop
+
+open System
+open System.Collections.Generic
+
+/// An order line.
+[<CLIMutable>]
+type Line = { Sku: string; Qty: int; Price: decimal }
+
+type Status =
+    | Pending
+    | Shipped of DateTime
+    | Cancelled of reason: string
+
+module Orders =
+    (* Totals an order. (* nested *) *)
+    let total (lines: Line list) : decimal =
+        lines |> List.sumBy (fun l -> decimal l.Qty * l.Price)
+
+    let describe status =
+        match status with
+        | Pending -> "pending"
+        | Shipped at -> $"shipped on {at:yyyy-MM-dd} ({{literal}})"
+        | Cancelled reason -> sprintf "cancelled: %s" reason
+
+    let inline twice (f: 'T -> 'T) x = f (f x)
+
+    let fetchAsync (id: int) =
+        async {
+            let! body = Async.Sleep 10 |> Async.map (fun () -> "ok")
+            use! handle = Async.OnCancel(fun () -> ())
+            return! async { return body.Length + id }
+        }
+
+[<EntryPoint>]
+let main argv =
+    let path = @"C:\data\orders.csv"
+    let quote = @"He said ""hi"""
+    let json = """{"key": "value"}"""
+    let chars = [ 'a'; '\n'; '\''; 'b'B ]
+    let mutable count = 0x1Fu + 10u
+    let big = 1_000_000L
+    let ratio = 2.5e-3
+    let lines = [ { Sku = "A1"; Qty = 2; Price = 9.99m } ]
+    count <- count + 1u
+    printfn "%s %s %s %A %d %f %M" path quote json chars big ratio (Orders.total lines)
+    if argv.Length > 0 && not (String.IsNullOrEmpty argv.[0]) then 0 else 1

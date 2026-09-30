@@ -1,0 +1,36 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+
+% Macros
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{Fast Highlighting}
+\author{Ada Lovelace}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+Highlighting costs 50\% less with a \textbf{scanner} that never copies
+text. See Section~\ref{sec:intro} and \cite{knuth84}.
+
+Inline math such as $a^2 + b^2 = c^2$ and $\norm{x} \leq 1$ is common,
+while display math uses
+\[
+  E = mc^2 \quad \text{(energy)}
+\]
+or double dollars:
+$$\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$$
+
+\begin{itemize}
+  \item First item % trailing comment
+  \item Costs \$5 \& up
+\end{itemize}
+
+\begin{align}
+  f(x) &= \int_0^\infty e^{-x}\,dx \\
+       &= 1
+\end{align}
+
+\end{document}

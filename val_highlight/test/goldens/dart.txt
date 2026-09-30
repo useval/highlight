@@ -1,0 +1,29 @@
+«keyword:import» «string:'dart:async'»;
+«keyword:import» «string:'package:flutter/material.dart'»;
+
+«comment.doc:/// Loads and caches user profiles.»
+«keyword:class» «type:ProfileRepository» {
+  «type:ProfileRepository»(«variable.language:this»._client, {«variable.language:this».ttl «operator:=» «keyword:const» «type.builtin:Duration»(minutes: «number:5»)});
+
+  «keyword:final» «type:HttpClient» _client;
+  «keyword:final» «type.builtin:Duration» ttl;
+  «keyword:final» «type.builtin:Map»«operator:<»«type.builtin:String», («type:Profile», «type:DateTime»)«operator:>» _cache «operator:=» {};
+
+  «type.builtin:Future»«operator:<»«type:Profile»«operator:?>» «function:load»(«type.builtin:String» id, {«type.builtin:bool» force «operator:=» «literal:false»}) «keyword:async» {
+    «keyword:final» cached «operator:=» _cache[id];
+    «keyword:if» («operator:!»force «operator:&&» cached «operator:!=» «literal:null» «operator:&&» «type:DateTime».«function:now»().«function:difference»(cached.$2) «operator:<» ttl) {
+      «keyword:return» cached.$1;
+    }
+    «keyword:try» {
+      «keyword:final» json «operator:=» «keyword:await» _client.«function:getJson»(«string:'/profiles/»«string>interpolation:$id»«string:?fields=»«string>interpolation:${_fields.»«string>interpolation>function:join»«string>interpolation:(»«string>interpolation>string:','»«string>interpolation:)}»«string:'»);
+      «keyword:final» profile «operator:=» «type:Profile».«function:fromJson»(json «keyword:as» «type.builtin:Map»«operator:<»«type.builtin:String», «type.builtin:Object»«operator:?>»);
+      _cache[id] «operator:=» (profile, «type:DateTime».«function:now»());
+      «keyword:return» profile;
+    } «keyword:on» «type:TimeoutException» «keyword:catch» (e) {
+      «function:debugPrint»(«string:'timeout loading »«string>interpolation:$id»«string:: »«string>interpolation:$e»«string:'»); «comment:// retry later»
+      «keyword:return» «literal:null»;
+    }
+  }
+
+  «keyword:static» «keyword:const» _fields «operator:=» [«string:'name'», «string:'email'», «string:'avatar'», «number:0x1F»];
+}

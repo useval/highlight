@@ -1,0 +1,69 @@
+«meta:#!/usr/bin/env ruby»
+«comment:# frozen_string_literal: true»
+
+«function:require» «string:'json'»
+«function:require_relative» «string:'lib/client'»
+
+«comment:=begin
+Block comment: nothing here is code.
+def ignored; end
+=end»
+
+«keyword:module» «type:Billing»
+  «keyword:class» «type:Invoice» «operator:<» «type:Base»«operator:::»«type:Record»
+    «function:attr_reader» «literal.symbol::id», «literal.symbol::items»
+    «type:TAX_RATE» «operator:=» «number:0.2r»
+    «variable:@@count» «operator:=» «number:0»
+
+    «keyword:def» «function:initialize»(id, «literal.symbol:items:» [], «literal.symbol:currency:» «literal.symbol::usd»)
+      «variable:@id» «operator:=» id
+      «variable:@items» «operator:=» items
+      «variable:@currency» «operator:=» currency
+      «variable:@@count» «operator:+=» «number:1»
+    «keyword:end»
+
+    «keyword:def» «function:total?»
+      items.any? «operator:&&» total «operator:>» «number:0»
+    «keyword:end»
+
+    «keyword:def» «function:total»
+      items.sum { «operator:|»item«operator:|» item[«literal.symbol::price»] «operator:*» («number:1» «operator:+» «type:TAX_RATE») }
+    «keyword:end»
+
+    «keyword:def» «variable.language:self».«function:parse»(text)
+      data «operator:=» «type:JSON».«function:parse»(text, «literal.symbol:symbolize_names:» «literal:true»)
+      «function:new»(data[«literal.symbol::id»], «literal.symbol:items:» data.«function:fetch»(«literal.symbol::items», []))
+    «keyword:rescue» «type:JSON»«operator:::»«type:ParserError» «operator:=>» e
+      warn «string:"bad invoice: »«string>interpolation:#{e.message}»«string: (»«string>interpolation:#{text.length}»«string: bytes)"»
+      «literal:nil»
+    «keyword:end»
+
+    «keyword:def» «function:to_s» «operator:=» «string:"Invoice #»«string>interpolation:#{id}»«string:: »«string>interpolation:#{»«string>interpolation>function:format»«string>interpolation:(»«string>interpolation>string:'%.2f'»«string>interpolation:, total)}»«string: »«string>interpolation:#{»«string>interpolation>variable:@currency»«string>interpolation:.upcase}»«string:"»
+  «keyword:end»
+«keyword:end»
+
+words «operator:=» «string:%w[alpha beta gamma]»
+tags «operator:=» «string:%i(draft sent paid)»
+path «operator:=» «string:%q{C:\no\interpolation #{here}}»
+pattern «operator:=» «regexp:/»«regexp>string.escape:\A»«regexp:(»«regexp>string.escape:\d»«regexp:{3})-(»«regexp>string.escape:\d»«regexp:{4})»«regexp>string.escape:\z»«regexp:/i»
+matched «operator:=» «string:"555-1234"» «operator:=~» pattern
+ratio «operator:=» «number:10» «operator:/» «number:3» «operator:*» «number:1_000» «operator:+» «number:0xFF» «operator:+» «number:0b1010»
+«function:puts» «variable:$PROGRAM_NAME», «variable:$stdout».sync, «type:ENV».«function:fetch»(«string:'HOME'», «string:'~'»)
+
+sql «operator:=» «operator:<<~»«meta:SQL».strip
+«string:  SELECT * FROM invoices»
+«string:  WHERE id = »«interpolation:#{»«interpolation>type:Integer»«interpolation:(»«interpolation>type:ARGV»«interpolation:.first »«interpolation>operator:||»«interpolation: »«interpolation>number:1»«interpolation:)}»«string: -- it's interpolated»
+«meta:SQL»
+
+raw «operator:=» «operator:<<~»'«meta:TEXT»'
+«string:  Nothing #{interpolated} here.»
+«meta:TEXT»
+
+[«number:1», «number:2», «number:3»].each_with_index «keyword:do» «operator:|»value, index«operator:|»
+  «keyword:next» «keyword:if» value.odd?
+  «function:printf»(«string:"%d:%d»«string>string.escape:\n»«string:"», index, value) «keyword:unless» «keyword:defined?»(«type:SKIP»)
+«keyword:end»
+
+«comment:__END__
+data section: "unclosed and ignored
+»

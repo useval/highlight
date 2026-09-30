@@ -1,0 +1,27 @@
+name: val_highlight_flutter_example
+description: A gallery of every language and theme, a live editor, and a large file, built with val_highlight_flutter.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  val_highlight: ^0.1.0
+  val_highlight_flutter: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

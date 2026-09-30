@@ -1,0 +1,58 @@
+«meta:#!/usr/bin/perl»
+«keyword:use» strict;
+«keyword:use» warnings;
+
+«comment:# Summarise an access log.»
+«keyword:my» «variable:%hits»;
+«keyword:my» «variable:@errors» «operator:=» ();
+«keyword:my» «variable:$total» «operator:=» «number:0»;
+«keyword:my» «variable:$pattern» «operator:=» «regexp:qr/^(»«regexp>string.escape:\S»«regexp:+) »«regexp>string.escape:\S»«regexp:+ »«regexp>string.escape:\S»«regexp:+ »«regexp>string.escape:\[»«regexp:([^»«regexp>string.escape:\]»«regexp:]+)»«regexp>string.escape:\]»«regexp: "(»«regexp>string.escape:\w»«regexp:+) ([^"]+)"/»;
+
+«keyword:while» («keyword:my» «variable:$line» «operator:=» «operator:<»STDIN«operator:>») {
+    «function:chomp» «variable:$line»;
+    «keyword:next» «keyword:unless» «variable:$line» «operator:=~» «regexp:m{»«regexp>variable:$pattern»«regexp:}»;
+    «keyword:my» («variable:$ip», «variable:$when», «variable:$method», «variable:$path») «operator:=» («variable:$1», «variable:$2», «variable:$3», «variable:$4»);
+    «variable:$hits»{«variable:$ip»}«operator:++»;
+    «variable:$total» «operator:+=» «number:1»;
+    «function:push» «variable:@errors», «variable:$path» «keyword:if» «variable:$line» «operator:=~» «regexp:/\s5\d\d\s/»;
+    («keyword:my» «variable:$clean» «operator:=» «variable:$path») «operator:=~» «regexp:s/\?.*$//»;
+    «variable:$clean» «operator:=~» «regexp:tr/A-Z/a-z/»;
+}
+
+«keyword:my» «variable:@top» «operator:=» («function:sort» { «variable:$hits»{«variable:$b»} «operator:<=>» «variable:$hits»{«variable:$a»} } «function:keys» «variable:%hits»)[«number:0» «operator:..» «number:2»];
+«keyword:my» «variable:@words» «operator:=» «string:qw(alpha beta gamma)»;
+«keyword:my» «variable:$single» «operator:=» «string:q(no $interpolation here)»;
+«keyword:my» «variable:$double» «operator:=» «string:qq{total: »«string>variable:$total»«string:, first: »«string>variable:$top[0]»«string:, count: »«string>variable:${\ scalar @top}»«string:}»;
+
+«function:printf» «string:"%-15s %d»«string>string.escape:\n»«string:"», «variable:$_», «variable:$hits»{«variable:$_»} «keyword:for» «variable:@top»;
+«function:print» «string:"last index: »«string>variable:$#top»«string:, words: »«string>variable:@words»«string>string.escape:\n»«string:"»;
+
+«keyword:my» «variable:%config» «operator:=» (
+    «property:name»    «operator:=>» «string:'report'»,
+    «property:limit»   «operator:=>» «number:10»,
+    «property:verbose» «operator:=>» «number:0»,
+);
+
+«keyword:sub» «function:report» {
+    «keyword:my» («variable:$self», «variable:%args») «operator:=» «variable:@_»;
+    «keyword:my» «variable:$out» «operator:=» «variable:$args»{fh} «operator://» «operator:\*»STDOUT;
+    «function:print» {«variable:$out»} «operator:<<»"«meta:END»";
+«string:Report for »«variable:$config{name}»
+«string:Errors: »«variable:${\ scalar @errors}»
+«meta:END»
+    «function:print» {«variable:$out»} «operator:<<»'«meta:RAW»';
+«string:Literal $text, no interpolation.»
+«meta:RAW»
+    «keyword:return» «function:wantarray» «operator:?» «variable:@errors» «operator::» «function:scalar» «variable:@errors»;
+}
+
+«keyword:my» «variable:$obj» «operator:=» «type:Report::Writer»«operator:->»«function:new»(«property:limit» «operator:=>» «variable:$config»{limit});
+«variable:$obj»«operator:->»«function:write»(«function:report»(«literal:undef», «property:fh» «operator:=>» «operator:\*»STDERR));
+«function:die» «string:"no data»«string>string.escape:\n»«string:"» «keyword:unless» «variable:$total» «operator:>» «number:0x0»;
+
+«comment:__END__
+
+=head1 NAME
+
+report.pl - summarise logs
+»

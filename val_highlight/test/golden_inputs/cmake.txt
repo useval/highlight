@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 3.20)
+project(example VERSION 1.4.0 LANGUAGES C CXX)
+
+#[[ Options
+    for the build ]]
+option(EXAMPLE_TESTS "Build the tests" ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+find_package(Threads REQUIRED)
+find_package(ZLIB 1.2 COMPONENTS static)
+
+add_library(core STATIC
+    src/core.cpp
+    src/io.cpp)
+target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(core PRIVATE Threads::Threads $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>)
+
+add_executable(example src/main.cpp)
+target_link_libraries(example PRIVATE core)
+
+if(WIN32 AND NOT MSVC)
+    message(WARNING "MinGW build: $ENV{PATH}")
+elseif(APPLE)
+    set_target_properties(example PROPERTIES MACOSX_BUNDLE TRUE)
+else()
+    target_compile_options(example PRIVATE -Wall -O2) # warnings
+endif()
+
+function(add_example_test name)
+    add_test(NAME ${name} COMMAND example --test "${name}")
+endfunction()
+
+foreach(t IN ITEMS parse print)
+    add_example_test(${t})
+endforeach()
+
+set(SCRIPT [=[
+  echo "raw ]] text"
+]=])

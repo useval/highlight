@@ -1,0 +1,32 @@
+«keyword:import» { «type:EventEmitter» } «keyword:from» «string:'node:events'»;
+
+«keyword:export» «keyword:class» «type:Queue» «keyword:extends» «type:EventEmitter» {
+  #items «operator:=» [];
+  «function:constructor»({ concurrency «operator:=» «number:4», retries «operator:=» «number:2» } «operator:=» {}) {
+    «variable.language:super»();
+    «variable.language:this».concurrency «operator:=» concurrency;
+    «variable.language:this».retries «operator:=» retries;
+  }
+
+  «function:push»(task) {
+    «variable.language:this».#items.«function:push»({ task, attempts: «number:0» });
+    «variable.language:this».«function:emit»(«string:'queued'», «variable.language:this».#items.length);
+    «keyword:return» «variable.language:this»;
+  }
+
+  «keyword:async» «function:run»() {
+    «keyword:const» workers «operator:=» «type.builtin:Array».«function:from»({ length: «variable.language:this».concurrency }, «keyword:async» () «operator:=>» {
+      «keyword:while» («variable.language:this».#items.length «operator:>» «number:0») {
+        «keyword:const» job «operator:=» «variable.language:this».#items.«function:shift»();
+        «keyword:try» {
+          «keyword:const» result «operator:=» «keyword:await» job.«function:task»();
+          «variable.language:this».«function:emit»(«string:'done'», result);
+        } «keyword:catch» (err) {
+          «keyword:if» («operator:++»job.attempts «operator:<=» «variable.language:this».retries) «variable.language:this».#items.«function:push»(job);
+          «keyword:else» «type.builtin:console».«function:error»(«string:`failed after »«string>interpolation:${job.attempts}»«string: tries`», «regexp:/timeout/i».«function:test»(err.message));
+        }
+      }
+    });
+    «keyword:await» «type.builtin:Promise».«function:all»(workers);
+  }
+}

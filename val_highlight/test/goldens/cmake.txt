@@ -1,0 +1,40 @@
+«function:cmake_minimum_required»(«attribute:VERSION» «number:3.20»)
+«function:project»(example «attribute:VERSION» «number:1.4.0» «attribute:LANGUAGES» C «attribute:CXX»)
+
+«comment:#[[ Options
+    for the build ]]»
+«function:option»(«attribute:EXAMPLE_TESTS» «string:"Build the tests"» «literal:ON»)
+«function:set»(«attribute:CMAKE_CXX_STANDARD» «number:20»)
+«function:set»(«attribute:CMAKE_CXX_STANDARD_REQUIRED» «literal:TRUE»)
+
+«function:find_package»(Threads «attribute:REQUIRED»)
+«function:find_package»(«attribute:ZLIB» «number:1.2» «attribute:COMPONENTS» static)
+
+«function:add_library»(core «attribute:STATIC»
+    src/core.cpp
+    src/io.cpp)
+«function:target_include_directories»(core «attribute:PUBLIC» «variable:${CMAKE_CURRENT_SOURCE_DIR}»/include)
+«function:target_link_libraries»(core «attribute:PRIVATE» Threads::Threads «meta:$<»«meta>meta:$<BOOL:»«meta>meta>variable:${ZLIB_FOUND}»«meta>meta:>»«meta::ZLIB::ZLIB>»)
+
+«function:add_executable»(example src/main.cpp)
+«function:target_link_libraries»(example «attribute:PRIVATE» core)
+
+«keyword:if»(«attribute:WIN32» «attribute:AND» «attribute:NOT» «attribute:MSVC»)
+    «function:message»(«attribute:WARNING» «string:"MinGW build: »«string>variable:$ENV{PATH}»«string:"»)
+«keyword:elseif»(«attribute:APPLE»)
+    «function:set_target_properties»(example «attribute:PROPERTIES» «attribute:MACOSX_BUNDLE» «literal:TRUE»)
+«keyword:else»()
+    «function:target_compile_options»(example «attribute:PRIVATE» -Wall -O2) «comment:# warnings»
+«keyword:endif»()
+
+«keyword:function»(add_example_test name)
+    «function:add_test»(«attribute:NAME» «variable:${name}» «attribute:COMMAND» example --test «string:"»«string>variable:${name}»«string:"»)
+«keyword:endfunction»()
+
+«keyword:foreach»(t «attribute:IN» «attribute:ITEMS» parse print)
+    «function:add_example_test»(«variable:${t}»)
+«keyword:endforeach»()
+
+«function:set»(«attribute:SCRIPT» «string:[=[
+  echo "raw ]] text"
+]=]»)

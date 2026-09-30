@@ -1,0 +1,54 @@
+package shop
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
+
+/** An order line.
+  * /* nested comment in docs */
+  */
+final case class Line(sku: String, qty: Int, price: BigDecimal):
+  def total: BigDecimal = price * qty
+
+enum Status:
+  case Open, Paid, Shipped
+
+trait Repository[F[_]]:
+  def find(id: Long): F[Option[Line]]
+
+given ExecutionContext = ExecutionContext.global
+
+object Orders extends App:
+  private val limit = 1_000L
+  private val mask = 0xFF
+  val lines = List(Line("apple", 2, BigDecimal("0.5")), Line("pear", 1, 1.25))
+
+  extension (line: Line)
+    def describe: String = s"${line.sku} x${line.qty} = ${line.total}"
+
+  @annotation.tailrec
+  def sum(xs: List[Line], acc: BigDecimal = 0): BigDecimal = xs match
+    case Nil          => acc
+    case head :: tail => sum(tail, acc + head.total)
+
+  def status(paid: Boolean): Status =
+    if paid then Status.Paid else Status.Open
+
+  val report =
+    s"""Orders: ${lines.size}
+       |Total: ${sum(lines)} $$ literal dollar
+       |""".stripMargin
+
+  val formatted = f"ratio ${2.5e-3}%.4f and ${limit}%d"
+  val path = raw"C:\temp\n stays"
+  val c = 'x'
+
+  for
+    line <- lines
+    if line.qty > 0
+  do println(line.describe)
+
+  Future(sum(lines)).onComplete {
+    case Success(total) => println(s"total $total")
+    case Failure(error) => Console.err.println(error.getMessage)
+  }
+end Orders

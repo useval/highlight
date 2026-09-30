@@ -1,0 +1,28 @@
+; Application settings
+# also a comment
+
+[server]
+host = 127.0.0.1
+port = 8080
+debug = false
+timeout = 2.5
+name = "val server"
+root = /var/www/html
+
+[database]
+url=postgres://localhost:5432/app
+pool_size=16
+enabled = yes
+path = ${HOME}/data
+log = %(root)s/db.log
+
+[section with spaces]
+key.with.dots: value with spaces
+empty =
+
+# Java properties style
+app.title=Hello World
+app.greeting=Welcome, \
+    dear user!
+unicode.escape=caf\u00e9
+! bang comment

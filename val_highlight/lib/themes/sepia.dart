@@ -1,0 +1,38 @@
+import '../val_highlight.dart';
+
+/// A warm, paper-like light theme.
+const sepiaTheme = ValTheme(
+  name: 'sepia',
+  root: Style(color: 0xFF3B3226, background: 0xFFF6EFE1),
+  styles: {
+    Scopes.comment: Style(color: 0xFF6E6353, italic: true),
+    Scopes.commentDoc: Style(color: 0xFF5E6841, italic: true),
+    Scopes.string: Style(color: 0xFF4F6B1A),
+    Scopes.stringEscape: Style(color: 0xFF1F6A66),
+    Scopes.interpolation: Style(color: 0xFF3B3226),
+    Scopes.number: Style(color: 0xFF9A4A12),
+    Scopes.keyword: Style(color: 0xFF9C2A3A),
+    Scopes.literal: Style(color: 0xFF2F5C8A),
+    Scopes.type: Style(color: 0xFF6B3E8C),
+    Scopes.typeBuiltin: Style(color: 0xFF2F5C8A),
+    Scopes.function: Style(color: 0xFF7A4A0A),
+    Scopes.variable: Style(color: 0xFF6B3E8C),
+    Scopes.variableLanguage: Style(color: 0xFF9C2A3A, italic: true),
+    Scopes.meta: Style(color: 0xFF6A4F8E),
+    Scopes.property: Style(color: 0xFF2F5C8A),
+    Scopes.punctuation: Style(color: 0xFF5C5245),
+    Scopes.operator: Style(color: 0xFF5C5245),
+    Scopes.tag: Style(color: 0xFF9C2A3A),
+    Scopes.attribute: Style(color: 0xFF6B3E8C),
+    Scopes.regexp: Style(color: 0xFF1F6A66),
+    Scopes.heading: Style(color: 0xFF2F5C8A, bold: true),
+    Scopes.emphasis: Style(italic: true),
+    Scopes.strong: Style(bold: true),
+    Scopes.link: Style(color: 0xFF2F5C8A, underline: true),
+    Scopes.code: Style(color: 0xFF4F6B1A),
+    Scopes.quote: Style(color: 0xFF6E6353, italic: true),
+    Scopes.addition: Style(color: 0xFF3E6414, background: 0xFFE6EDCF),
+    Scopes.deletion: Style(color: 0xFF9A2222, background: 0xFFF6DDD2),
+    Scopes.invalid: Style(color: 0xFF9A2222, underline: true),
+  },
+);

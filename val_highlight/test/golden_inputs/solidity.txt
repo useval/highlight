@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {IERC20} from "./interfaces/IERC20.sol";
+
+/// @title A simple vault.
+/// @notice Holds deposits until an unlock time.
+contract Vault is Ownable {
+    error TooEarly(uint256 unlockAt);
+    event Deposited(address indexed from, uint256 amount);
+
+    struct Deposit {
+        uint128 amount;
+        uint64 unlockAt;
+        bool withdrawn;
+    }
+
+    mapping(address => Deposit[]) private deposits;
+    uint256 public constant MIN_DEPOSIT = 0.01 ether;
+    uint256 public immutable lockTime;
+    bytes32 private constant TAG = hex"deadbeef";
+    string private greeting = unicode"Hello 👋";
+
+    /**
+     * @dev Sets the lock time.
+     * @param lockDays Number of days deposits stay locked.
+     */
+    constructor(uint256 lockDays) {
+        lockTime = lockDays * 1 days;
+    }
+
+    modifier minimum(uint256 amount) {
+        require(amount >= MIN_DEPOSIT, "deposit too small");
+        _;
+    }
+
+    function deposit() external payable minimum(msg.value) {
+        deposits[msg.sender].push(
+            Deposit({amount: uint128(msg.value), unlockAt: uint64(block.timestamp + lockTime), withdrawn: false})
+        );
+        emit Deposited(msg.sender, msg.value);
+    }
+
+    function withdraw(uint256 index) external {
+        Deposit storage d = deposits[msg.sender][index];
+        if (block.timestamp < d.unlockAt) revert TooEarly(d.unlockAt);
+        d.withdrawn = true;
+        (bool ok, ) = payable(msg.sender).call{value: d.amount}("");
+        assert(ok);
+    }
+
+    function hash(string calldata text) public pure returns (bytes32) {
+        unchecked {
+            return keccak256(abi.encodePacked(text, uint8(0x1f), 'single'));
+        }
+    }
+}

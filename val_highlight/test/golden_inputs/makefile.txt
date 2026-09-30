@@ -1,0 +1,44 @@
+# Build settings
+CC      ?= cc
+CFLAGS  := -O2 -Wall -Wextra
+LDLIBS  += -lm
+SRC     := $(wildcard src/*.c)
+OBJ     := $(patsubst src/%.c,build/%.o,$(SRC))
+VERSION := $(shell git describe --tags 2>/dev/null || echo dev)
+
+export PREFIX ?= /usr/local
+
+.PHONY: all clean install test
+
+all: build/app
+
+build/app: $(OBJ) | build
+	@echo "linking $@ from $^"
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+build/%.o: src/%.c include/%.h
+	$(CC) $(CFLAGS) -Iinclude -c $< -o $@
+
+build:
+	mkdir -p $@
+
+ifeq ($(OS),Windows_NT)
+    EXE := .exe
+else
+    EXE :=
+endif
+
+define banner
+	@echo "== $(1) =="
+endef
+
+install: build/app
+	$(call banner,installing)
+	install -m 755 build/app $(DESTDIR)$(PREFIX)/bin/app$(EXE)
+
+test: all
+	./build/app --self-test && \
+	  echo "ok: $${HOME}"
+
+clean:
+	-rm -rf build # remove everything

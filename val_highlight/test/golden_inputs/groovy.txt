@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.application'
+    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
+}
+
+def versionCode = 42
+def releaseName = "1.${versionCode}.0"
+
+android {
+    namespace = 'com.example.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.app"
+        minSdk 24
+        targetSdk 35
+        versionName releaseName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$coreVersion"
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    testImplementation 'junit:junit:4.13.2'
+}
+
+/** Prints a report of the build. */
+@groovy.transform.CompileStatic
+class Report {
+    String title = '''Multi
+line, no ${interpolation}'''
+    List<Integer> sizes = [1, 2, 0x10, 3.5G as int]
+
+    String render(Map<String, ?> info) {
+        def lines = info.collect { k, v -> "$k=${v ?: 'none'}\t" }
+        return """Report: $title
+${lines.join('\n')}"""
+    }
+}
+
+tasks.register('report') {
+    doLast {
+        println new Report().render(version: releaseName, code: versionCode)
+        assert versionCode > 0 : "bad code"
+    }
+}

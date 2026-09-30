@@ -1,0 +1,63 @@
+«comment.doc://! A tiny key-value store.»
+«meta:#![allow(dead_code)]»
+
+«keyword:use» std«operator:::»collections«operator:::»«type.builtin:HashMap»;
+«keyword:use» std«operator:::»fmt«operator:::»{«variable.language:self», «type:Display»};
+
+«comment.doc:/// A stored value with a lifetime-bound view.»
+«meta:#[derive(Debug, Clone, PartialEq)]»
+«keyword:pub» «keyword:enum» «type:Value» {
+    «type:Int»(«type.builtin:i64»),
+    «type:Text»(«type.builtin:String»),
+    «type:Bytes»(«type.builtin:Vec»«operator:<»«type.builtin:u8»«operator:>»),
+}
+
+«keyword:pub» «keyword:struct» «type:Store»«operator:<»«variable:'a»«operator:>» {
+    items«operator::» «type.builtin:HashMap»«operator:<&»«variable:'a» «type.builtin:str», «type:Value»«operator:>»,
+    limit«operator::» «type.builtin:usize»,
+}
+
+«keyword:impl»«operator:<»«variable:'a»«operator:>» «type:Store»«operator:<»«variable:'a»«operator:>» {
+    «keyword:pub» «keyword:fn» «function:new»(limit«operator::» «type.builtin:usize») «operator:->» «variable.language:Self» {
+        «variable.language:Self» { items«operator::» «type.builtin:HashMap»«operator:::»«function:with_capacity»(«number:16»), limit }
+    }
+
+    «keyword:pub» «keyword:fn» «function:put»(«operator:&»«keyword:mut» «variable.language:self», key«operator::» «operator:&»«variable:'a» «type.builtin:str», value«operator::» «type:Value») «operator:->» «type.builtin:Result»«operator:<»(), «type.builtin:String»«operator:>» {
+        «keyword:if» «variable.language:self».items.«function:len»() «operator:>=» «variable.language:self».limit {
+            «keyword:return» «literal:Err»(«function:format!»(«string:"store full ({} items)"», «variable.language:self».limit));
+        }
+        «variable.language:self».items.«function:insert»(key, value);
+        «literal:Ok»(())
+    }
+
+    «keyword:fn» «function:first_char»(«operator:&»«variable.language:self», key«operator::» «operator:&»«type.builtin:str») «operator:->» «type.builtin:Option»«operator:<»«type.builtin:char»«operator:>» {
+        «keyword:match» «variable.language:self».items.«function:get»(key)«operator:?» {
+            «type:Value»«operator:::»«type:Text»(s) «operator:=>» s.«function:chars»().«function:next»(),
+            _ «operator:=>» «literal:None»,
+        }
+    }
+}
+
+«keyword:impl» «type:Display» «keyword:for» «type:Value» {
+    «keyword:fn» «function:fmt»(«operator:&»«variable.language:self», f«operator::» «operator:&»«keyword:mut» fmt«operator:::»«type:Formatter»«operator:<»«variable:'_»«operator:>») «operator:->» fmt«operator:::»«type.builtin:Result» {
+        «keyword:match» «variable.language:self» {
+            «type:Value»«operator:::»«type:Int»(n) «operator:=>» «function:write!»(f, «string:"{n}"»),
+            «type:Value»«operator:::»«type:Text»(s) «operator:=>» «function:write!»(f, «string:"{s:?}"»),
+            «type:Value»«operator:::»«type:Bytes»(b) «operator:=>» «function:write!»(f, «string:"{} bytes"», b.«function:len»()),
+        }
+    }
+}
+
+«comment:/* Outer /* nested */ comment. */»
+«keyword:fn» «function:main»() {
+    «keyword:let» raw «operator:=» «string:r#"C:\path "quoted""#»;
+    «keyword:let» bytes «operator:=» «string:b"»«string>string.escape:\x00\xff»«string:"»;
+    «keyword:let» (a, b, c) «operator:=» («string:'x'», «string:'\n'», «string:b'\''»);
+    «keyword:let» big «operator:=» «number:1_000_000u64» «operator:+» «number:0xFF_u64» «operator:+» «number:0b1010» «operator:+» «number:0o17»;
+    «keyword:let» pi «operator:=» «number:3.141_59_f64»;
+    «keyword:let» «keyword:mut» store «operator:=» «type:Store»«operator:::»«function:new»(«number:10»);
+    store.«function:put»(«string:"answer"», «type:Value»«operator:::»«type:Int»(«number:42»)).«function:unwrap»();
+    «keyword:let» v«operator::» «type.builtin:Vec»«operator:<»_«operator:>» «operator:=» («number:0»..big).«function:filter»(«operator:|»n«operator:|» n «operator:%» «number:2» «operator:==» «number:0»).«function:take»(«number:3»).collect«operator:::<»«type.builtin:Vec»«operator:<»«type.builtin:u64»«operator:>>»();
+    «function:println!»(«string:"{raw} {bytes:?} {a}{b}{c} {pi} {v:?}"»);
+    «variable:'outer»«operator::» «keyword:loop» { «keyword:break» «variable:'outer»; }
+}

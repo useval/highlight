@@ -1,0 +1,34 @@
+@echo off
+setlocal enabledelayedexpansion
+rem Build script for the example app
+:: another comment style
+
+set "ROOT=%~dp0"
+set BUILD_DIR=%ROOT%build
+set /a COUNT=0
+
+if not exist "%BUILD_DIR%" (
+    mkdir "%BUILD_DIR%"
+) else (
+    echo Build folder exists
+)
+
+for %%f in (src\*.c) do (
+    set /a COUNT+=1
+    echo Compiling %%~nf ^(!COUNT!^)
+    cl /nologo /O2 /c "%%f" /Fo"%BUILD_DIR%\\" >nul 2>&1
+    if errorlevel 1 goto :fail
+)
+
+call :report %COUNT%
+echo Done: %DATE:~0,10% & rem trailing comment
+exit /b 0
+
+:report
+echo Built %1 files into %BUILD_DIR%
+goto :eof
+
+:fail
+echo Build failed with code %ERRORLEVEL% 1>&2
+pause
+exit /b 1

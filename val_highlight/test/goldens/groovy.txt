@@ -1,0 +1,54 @@
+«function:plugins» {
+    «function:id» «string:'com.android.application'»
+    «function:id» «string:"org.jetbrains.kotlin.android"» «function:version» «string:"2.1.0"» apply «literal:false»
+}
+
+«keyword:def» versionCode «operator:=» «number:42»
+«keyword:def» releaseName «operator:=» «string:"1.»«string>interpolation:${versionCode}»«string:.0"»
+
+«function:android» {
+    namespace «operator:=» «string:'com.example.app'»
+    compileSdk «number:35»
+
+    «function:defaultConfig» {
+        «function:applicationId» «string:"com.example.app"»
+        minSdk «number:24»
+        targetSdk «number:35»
+        versionName releaseName
+        «function:testInstrumentationRunner» «string:"androidx.test.runner.AndroidJUnitRunner"»
+    }
+
+    «function:buildTypes» {
+        «function:release» {
+            minifyEnabled «literal:true»
+            proguardFiles «function:getDefaultProguardFile»(«string:'proguard-android-optimize.txt'»), «string:'proguard-rules.pro'»
+        }
+    }
+}
+
+«function:dependencies» {
+    «function:implementation» «string:"androidx.core:core-ktx:»«string>interpolation:$coreVersion»«string:"»
+    implementation «function:platform»(«string:'com.google.firebase:firebase-bom:33.7.0'»)
+    «function:testImplementation» «string:'junit:junit:4.13.2'»
+}
+
+«comment.doc:/** Prints a report of the build. */»
+«meta:@groovy.transform.CompileStatic»
+«keyword:class» «type:Report» {
+    «type.builtin:String» title «operator:=» «string:'''Multi
+line, no ${interpolation}'''»
+    «type.builtin:List»«operator:<»«type.builtin:Integer»«operator:>» sizes «operator:=» [«number:1», «number:2», «number:0x10», «number:3.5G» «keyword:as» «type.builtin:int»]
+
+    «type.builtin:String» «function:render»(«type.builtin:Map»«operator:<»«type.builtin:String», «operator:?>» info) {
+        «keyword:def» lines «operator:=» info.collect { k, v «operator:->» «string:"»«string>interpolation:$k»«string:=»«string>interpolation:${v »«string>interpolation>operator:?:»«string>interpolation: »«string>interpolation>string:'none'»«string>interpolation:}»«string>string.escape:\t»«string:"» }
+        «keyword:return» «string:"""Report: »«string>interpolation:$title»«string:
+»«string>interpolation:${lines.»«string>interpolation>function:join»«string>interpolation:(»«string>interpolation>string:'»«string>interpolation>string>string.escape:\n»«string>interpolation>string:'»«string>interpolation:)}»«string:"""»
+    }
+}
+
+tasks.«function:register»(«string:'report'») {
+    «function:doLast» {
+        «function:println» «keyword:new» «type:Report»().«function:render»(version«operator::» releaseName, code«operator::» versionCode)
+        «keyword:assert» versionCode «operator:>» «number:0» «operator::» «string:"bad code"»
+    }
+}

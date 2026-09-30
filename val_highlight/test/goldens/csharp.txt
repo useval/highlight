@@ -1,0 +1,57 @@
+«keyword:using» «type:System»;
+«keyword:using» «type:System».Collections.Generic;
+«keyword:using» «type:System».Threading.Tasks;
+
+«meta:#nullable enable»
+«keyword:namespace» «type:Shop».Orders;
+
+«comment.doc:/// <summary>An order line.</summary>»
+«keyword:public» «keyword:record» «function:Line»(«type.builtin:string» «type:Sku», «type.builtin:int» «type:Qty», «type.builtin:decimal» «type:Price»)
+{
+    «keyword:public» «type.builtin:decimal» «type:Total» «operator:=>» «type:Qty» «operator:*» «type:Price»;
+}
+
+[«meta:Serializable»]
+«keyword:public» «keyword:sealed» «keyword:partial» «keyword:class» «type:OrderService» «operator::» «type:IDisposable»
+{
+    «keyword:private» «keyword:const» «type.builtin:int» «type:Max» «operator:=» «number:1_000»;
+    «keyword:private» «keyword:readonly» «type:Dictionary»«operator:<»«type.builtin:string», «type:List»«operator:<»«type:Line»«operator:>>» _orders «operator:=» «keyword:new»();
+    «keyword:public» «type.builtin:string» «type:Name» { «keyword:get»; «keyword:init»; } «operator:=» «string:"orders"»;
+    «keyword:public» «type.builtin:int» «type:Count» { «keyword:get»; «keyword:private» «keyword:set»; }
+
+«meta:    #region Queries»
+    «keyword:public» «keyword:async» «type:Task»«operator:<»«type.builtin:decimal»«operator:>» «function:TotalAsync»(«type.builtin:string» customer, «type:CancellationToken» token «operator:=» «keyword:default»)
+    {
+        «keyword:if» («operator:!»_orders.«function:TryGetValue»(customer, «keyword:out» «keyword:var» lines)) «keyword:return» «number:0m»;
+        «keyword:await» «type:Task».«function:Delay»(«number:10», token);
+        «keyword:return» lines.«function:Where»(l «operator:=>» l.Qty «operator:>» «number:0»).«function:Sum»(l «operator:=>» l.Total);
+    }
+«meta:    #endregion»
+
+    «keyword:public» «type.builtin:string» «function:Describe»(«type:Line» line) «operator:=>»
+        «string:$"»«string>interpolation:{line.Sku,»«string>interpolation>operator:-»«string>interpolation>number:8»«string>interpolation:}»«string: x»«string>interpolation:{line.Qty}»«string: = »«string>interpolation:{line.Total»«string>interpolation>operator::»«string>interpolation>type:C2»«string>interpolation:}»«string: »«string>string.escape:{{»«string:braces»«string>string.escape:}}»«string:"»;
+
+    «keyword:public» «keyword:static» «type.builtin:string» «type:Path» «operator:=>» «string:@"C:\data\orders »«string>string.escape:""»«string:quoted»«string>string.escape:""»«string:.csv"»;
+
+    «keyword:public» «keyword:static» «type.builtin:string» «function:Json»(«type.builtin:int» id) «operator:=>» «string:$$"""
+        { "id": »«string>interpolation:{{id}}»«string:, "raw": "\n stays" }
+        """»;
+
+    «keyword:public» «type.builtin:object» «function:Classify»(«type.builtin:object» value) «operator:=>» value «keyword:switch»
+    {
+        «type.builtin:int» n «keyword:when» n «operator:>» «type:Max» «operator:=>» «string:"big"»,
+        «type.builtin:int» n «keyword:and» «operator:>=» «number:0» «operator:=>» n,
+        «type.builtin:string» { «type:Length»«operator::» «number:0» } «operator:=>» «keyword:nameof»(«type.builtin:String».Empty),
+        «literal:null» «operator:=>» «keyword:throw» «keyword:new» «function:ArgumentNullException»(«keyword:nameof»(value)),
+        _ «operator:=>» «keyword:default»(«type.builtin:int»),
+    };
+
+    «keyword:public» «type.builtin:void» «function:Dispose»()
+    {
+        «type.builtin:char» tab «operator:=» «string:'\t'»;
+        «keyword:var» mask «operator:=» «number:0xFF_00u»;
+        «keyword:var» ratio «operator:=» «number:2.5e-3f»;
+        «type:Console».«function:WriteLine»(«string:$@"Disposed »«string>interpolation:{»«string>interpolation>type:Name»«string>interpolation:}»«string: at C:\logs »«string>interpolation:{tab}{mask}{ratio}»«string:"»);
+        «type:GC».«function:SuppressFinalize»(«variable.language:this»);
+    }
+}

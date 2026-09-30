@@ -1,0 +1,56 @@
+«meta:#import <Foundation/Foundation.h>»
+«meta:#import "ProfileStore.h"»
+«meta:#define kTimeout 30.0»
+
+«type:NS_ASSUME_NONNULL_BEGIN»
+
+«comment.doc:/** Stores user profiles. */»
+«keyword:@interface» «type:ProfileStore» «operator::» «type:NSObject» «operator:<»«type:NSCopying»«operator:>»
+«keyword:@property» («keyword:nonatomic», copy, «keyword:readonly») «type:NSArray»«operator:<»«type:NSString» «operator:*>» «operator:*»names;
+«keyword:@property» («keyword:nonatomic», «keyword:weak», «keyword:nullable») «type.builtin:id»«operator:<»«type:ProfileDelegate»«operator:>» delegate;
+«operator:-» («type.builtin:instancetype»)«function:initWithCapacity»«operator::»(«type.builtin:NSUInteger»)capacity «type:NS_DESIGNATED_INITIALIZER»;
+«operator:+» («type.builtin:instancetype»)sharedStore;
+«keyword:@end»
+
+«keyword:@implementation» «type:ProfileStore» {
+    «type:NSMutableArray»«operator:<»«type:NSString» «operator:*>» «operator:*»_names;
+    «type.builtin:BOOL» _loaded;
+}
+
+«operator:+» («type.builtin:instancetype»)sharedStore {
+    «keyword:static» «type:ProfileStore» «operator:*»shared «operator:=» «literal:nil»;
+    «keyword:static» dispatch_once_t once;
+    «function:dispatch_once»(«operator:&»once, «operator:^»{
+        shared «operator:=» [[«variable.language:self» alloc] «function:initWithCapacity»«operator::»«number:16»];
+    });
+    «keyword:return» shared;
+}
+
+«operator:-» («type.builtin:instancetype»)«function:initWithCapacity»«operator::»(«type.builtin:NSUInteger»)capacity {
+    «keyword:if» ((«variable.language:self» «operator:=» [«variable.language:super» init])) {
+        _names «operator:=» [«type:NSMutableArray» «function:arrayWithCapacity»«operator::»capacity];
+        _loaded «operator:=» «literal:NO»;
+    }
+    «keyword:return» «variable.language:self»;
+}
+
+«operator:-» («type.builtin:void»)«function:addName»«operator::»(«type:NSString» «operator:*»)name {
+    «keyword:if» (name.length «operator:==» «number:0») «keyword:return»; «comment:// ignore empty names»
+    [_names «function:addObject»«operator::»name];
+    «type:NSLog»(«string:@"Added %@ (%lu total)»«string>string.escape:\n»«string:"», name, («type.builtin:unsigned» «type.builtin:long»)_names.count);
+    «type:NSDictionary» «operator:*»info «operator:=» «keyword:@»{«string:@"name"»«operator::» name, «string:@"count"»«operator::» «keyword:@»(_names.count), «string:@"ok"»«operator::» «keyword:@YES»};
+    «type:NSArray» «operator:*»pair «operator:=» «keyword:@»[«keyword:@»«number:1», «keyword:@»«number:2.5»];
+    [«variable.language:self».delegate «function:store»«operator::»«variable.language:self» «function:didUpdate»«operator::»info «function:with»«operator::»pair];
+}
+
+«operator:-» («type.builtin:id»)«function:copyWithZone»«operator::»(«keyword:nullable» «type:NSZone» «operator:*»)zone {
+    «type:ProfileStore» «operator:*»copy «operator:=» [[«type:ProfileStore» «function:allocWithZone»«operator::»zone] «function:initWithCapacity»«operator::»«number:0x10»];
+    «keyword:@synchronized» («variable.language:self») {
+        copy«operator:->»_names «operator:=» [_names mutableCopy];
+    }
+    «keyword:return» copy;
+}
+
+«keyword:@end»
+
+«type:NS_ASSUME_NONNULL_END»

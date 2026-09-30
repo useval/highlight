@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_DIR="${LOG_DIR:-/var/log/app}"
+KEEP=7
+
+# Rotate logs older than $KEEP days.
+rotate() {
+  local dir="$1"
+  find "$dir" -name '*.log' -mtime +"$KEEP" -print0 | while IFS= read -r -d '' f; do
+    gzip -9 "$f" && echo "compressed $(basename "$f")"
+  done
+}
+
+if [[ -d "$LOG_DIR" ]]; then
+  rotate "$LOG_DIR" >> /tmp/rotate.log 2>&1
+else
+  echo "missing $LOG_DIR" >&2
+  exit 1
+fi

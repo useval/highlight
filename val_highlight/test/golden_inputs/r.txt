@@ -1,0 +1,52 @@
+#!/usr/bin/env Rscript
+# Summarise a sales dataset.
+library(dplyr)
+library(ggplot2)
+
+#' Load sales data from a CSV file.
+#' @param path File to read.
+load_sales <- function(path, sep = ",") {
+  stopifnot(file.exists(path))
+  data <- read.csv(path, sep = sep, stringsAsFactors = FALSE)
+  data$date <- as.Date(data$date, format = "%Y-%m-%d")
+  data[!is.na(data$amount), ]
+}
+
+sales <- load_sales("sales.csv")
+regions <- c("north", 'south', "east", "west")
+threshold <- 1e3
+big <- 0x1F + 10L + 2i
+
+summary_tbl <- sales %>%
+  filter(region %in% regions, amount > threshold) %>%
+  group_by(region) %>%
+  summarise(total = sum(amount), n = n(), .groups = "drop") |>
+  arrange(desc(total))
+
+`odd name` <- TRUE
+pattern <- r"(\d+\.\d+)"
+path <- r"[C:\data\file.txt]"
+
+for (i in seq_len(nrow(summary_tbl))) {
+  row <- summary_tbl[i, ]
+  if (is.null(row) || row$n == 0) {
+    next
+  } else if (row$total > 5000) {
+    message(sprintf("%s: %.1f (large)", row$region, row$total))
+  } else {
+    cat(paste0(row$region, ": ", row$total, "\n"))
+  }
+}
+
+result <- tryCatch(
+  stop("boom"),
+  error = function(e) NA_real_,
+  finally = cat("done\n")
+)
+
+plot <- ggplot(summary_tbl, aes(x = region, y = total)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Sales by region")
+
+squares <- sapply(1:10, \(x) x^2)
+print(list(result = result, missing = NA, nothing = NULL, inf = -Inf))

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package example.users.v1;
+
+import "google/protobuf/timestamp.proto";
+option go_package = "example.com/users/v1;usersv1";
+option java_multiple_files = true;
+
+// A registered user.
+message User {
+  string id = 1;
+  string display_name = 2 [json_name = "displayName"];
+  repeated string emails = 3;
+  map<string, int64> counters = 4;
+  google.protobuf.Timestamp created_at = 5;
+  Status status = 6;
+  optional bytes avatar = 7;
+
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_ACTIVE = 1;
+    STATUS_BANNED = 2 [deprecated = true];
+  }
+
+  oneof contact {
+    string phone = 8;
+    string pager = 9;
+  }
+
+  reserved 10 to 15, 20;
+  reserved "legacy_id";
+}
+
+/* The user service. */
+service UserService {
+  rpc GetUser(GetUserRequest) returns (User);
+  rpc WatchUsers(stream WatchRequest) returns (stream User) {}
+}
+
+message GetUserRequest { string id = 1; double weight = 2; }

@@ -1,0 +1,46 @@
+(«keyword:ns» shop.orders
+  «string:"Order processing."»
+  («literal::require» [clojure.string «literal::as» str]
+            [clojure.set «literal::refer» [union]])
+  («literal::import» («function:java.time» «type:Instant»)))
+
+«comment:;; A simple order record.»
+(«keyword:defrecord» «type:Order» [id items status])
+
+(«keyword:def» «operator:^»«literal::private» tax-rate «number:0.08M»)
+(«keyword:def» max-items «number:100»)
+
+(«keyword:defn» subtotal
+  «string:"Sums quantity times price."»
+  [{«literal::keys» [items]}]
+  («function:reduce» + («function:map» («keyword:fn» [{«literal::keys» [qty price]}] («function:*» qty price)) items)))
+
+(«keyword:defn» total [order]
+  («keyword:let» [sub («function:subtotal» order)]
+    («keyword:->» sub («function:*» («function:+» «number:1» tax-rate)) («function:.setScale» «number:2» java.math.RoundingMode/HALF_UP))))
+
+(«keyword:defmulti» describe «literal::status»)
+(«keyword:defmethod» describe «literal::pending» [_] «string:"waiting"»)
+(«keyword:defmethod» describe «literal:::shipped» [o] («function:str» «string:"shipped "» («literal::id» o)))
+
+(«keyword:defn» valid-id? [s]
+  («function:boolean» («function:re-matches» «regexp:#"[A-Z]{2}-»«regexp>string.escape:\d»«regexp:{4}"» s)))
+
+(«keyword:defn» tags [order]
+  («function:union» «operator:#{»«literal::new»} («function:set» («function:map» keyword («function:str/split» («function:get» order «literal::tags» «string:""») «regexp:#","»)))))
+
+(«keyword:comment»
+  («function:total» («function:->Order» «string:"AB-1234"» [{«literal::qty» «number:2» «literal::price» «number:9.99M»}] «literal::pending»))
+  («function:valid-id?» «string:"AB-1234"»))
+
+(«keyword:defn» -main [& args]
+  («keyword:let» [ratio «number:22/7»
+        hex «number:0xFF»
+        big «number:12345678901234567890N»
+        letters [«string:\a» «string:\b» «string:\newline» «string:\u00e9»]
+        f «operator:#(»«function:*» % «number:2»)
+        v «operator:@»(«keyword:delay» («function:Instant/now»))]
+    («keyword:when-let» [order («function:first» args)]
+      («function:println» «string:"order"» order («function:count» letters) («function:f» hex) ratio big v))
+    («keyword:doseq» [n («function:range» «number:3»)]
+      («function:println» n «literal:nil» «literal:true» «literal:false» «operator:'»sym «operator:`»(«function:quoted» «operator:~»n «operator:~@»args)))))

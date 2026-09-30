@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Use the same Flutter version as local development (.fvmrc).
+      - name: Read pinned Flutter version
+        id: fvm
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Core tests (VM)
+        working-directory: val_highlight
+        run: dart test
+
+      - name: Core tests (JavaScript)
+        working-directory: val_highlight
+        run: dart test -p node
+
+      - name: Flutter tests
+        working-directory: val_highlight_flutter
+        run: flutter test
+
+      - name: Example tests
+        working-directory: val_highlight_flutter/example
+        run: flutter test
+
+      - name: Build example for web
+        working-directory: val_highlight_flutter/example
+        run: flutter build web

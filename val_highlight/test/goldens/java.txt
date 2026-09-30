@@ -1,0 +1,64 @@
+«keyword:package» com.example.orders;
+
+«keyword:import» java.util.«operator:*»;
+«keyword:import» java.util.function.Function;
+«keyword:import» «keyword:static» java.util.Objects.requireNonNull;
+
+«comment.doc:/**
+ * Processes orders.
+ * »«comment.doc>keyword:@author»«comment.doc: Ada
+ * »«comment.doc>keyword:@since»«comment.doc: 21
+ */»
+«keyword:public» «keyword:sealed» «keyword:interface» «type:Shape» «keyword:permits» «type:Circle», «type:Square» {}
+
+«keyword:record» «type:Circle»(«type.builtin:double» radius) «keyword:implements» «type:Shape» {}
+
+«keyword:non-sealed» «keyword:class» «type:Square» «keyword:implements» «type:Shape» {
+    «keyword:final» «type.builtin:int» side;
+    «type:Square»(«type.builtin:int» side) { «variable.language:this».side «operator:=» side; }
+}
+
+«meta:@FunctionalInterface»
+«keyword:interface» «type:Pricing» «keyword:extends» «type:Function»«operator:<»«type:Order», «type.builtin:Long»«operator:>» {}
+
+«keyword:public» «keyword:final» «keyword:class» «type:OrderService» {
+    «keyword:private» «keyword:static» «keyword:final» «type.builtin:long» «type:LIMIT» «operator:=» «number:10_000L»;
+    «keyword:private» «keyword:static» «keyword:final» «type.builtin:int» «type:MASK» «operator:=» «number:0x7F_FF»;
+    «keyword:private» «keyword:final» «type:Map»«operator:<»«type.builtin:String», «type:List»«operator:<»«type:Order»«operator:>>» byCustomer «operator:=» «keyword:new» «type:HashMap»«operator:<>»();
+
+    «meta:@Override»
+    «keyword:public» «type.builtin:String» «function:toString»() {
+        «keyword:return» «string:"OrderService{customers="» «operator:+» byCustomer.«function:size»() «operator:+» «string:"}"»;
+    }
+
+    «meta:@SuppressWarnings»(«string:"unchecked"»)
+    «keyword:public» «operator:<»«type:T» «keyword:extends» «type:Order»«operator:>» «type:Optional»«operator:<»«type:T»«operator:>» «function:latest»(«type.builtin:String» customer) {
+        «keyword:var» orders «operator:=» byCustomer.«function:getOrDefault»(«function:requireNonNull»(customer), «type:List».«function:of»());
+        «keyword:if» (orders.«function:isEmpty»()) «keyword:return» «type:Optional».«function:empty»();
+        «keyword:return» «type:Optional».«function:of»((«type:T») orders.«function:get»(orders.«function:size»() «operator:-» «number:1»));
+    }
+
+    «keyword:static» «type.builtin:double» «function:area»(«type:Shape» shape) {
+        «keyword:return» «keyword:switch» (shape) {
+            «keyword:case» «type:Circle» c «keyword:when» c.«function:radius»() «operator:>» «number:0» «operator:->» «type:Math».PI «operator:*» c.«function:radius»() «operator:*» c.«function:radius»();
+            «keyword:case» «type:Circle» c «operator:->» «number:0.0»;
+            «keyword:case» «type:Square» s «operator:->» {
+                «type.builtin:double» side «operator:=» s.side;
+                «keyword:yield» side «operator:*» side;
+            }
+        };
+    }
+
+    «keyword:public» «keyword:static» «type.builtin:void» «function:main»(«type.builtin:String»[] args) «keyword:throws» «type:Exception» {
+        «type.builtin:String» report «operator:=» «string:"""
+            Orders: %d
+            Limit:  »«string>string.escape:\t»«string:%d "quoted"
+            """».«function:formatted»(args.length, «type:LIMIT»);
+        «type.builtin:char» sep «operator:=» «string:'\n'», quote «operator:=» «string:'\''»;
+        «type.builtin:float» ratio «operator:=» «number:1.5e-3f»;
+        «keyword:synchronized» («type:OrderService».class) {
+            «type:System».out.«function:println»(report «operator:+» sep «operator:+» quote «operator:+» ratio «operator:+» («type:MASK» «operator:>>>» «number:2»));
+        }
+        «keyword:assert» args «operator:!=» «literal:null» «operator::» «string:"args"»;
+    }
+}

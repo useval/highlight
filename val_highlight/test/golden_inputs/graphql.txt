@@ -1,0 +1,38 @@
+# Fetch a user with their recent posts.
+query UserWithPosts($id: ID!, $first: Int = 10, $published: Boolean) {
+  user(id: $id) {
+    id
+    name
+    ...AvatarFields
+    posts(first: $first, filter: { published: $published }) @include(if: true) {
+      edges {
+        node { title createdAt score }
+      }
+    }
+  }
+}
+
+fragment AvatarFields on User {
+  avatar(size: 128)
+}
+
+mutation Rename($id: ID!, $name: String!) {
+  renameUser(input: { id: $id, name: $name }) { ok errors }
+}
+
+"""
+A registered user.
+"""
+type User implements Node & Timestamped {
+  id: ID!
+  "The display name."
+  name: String
+  score: Float @deprecated(reason: "Use rating")
+  posts(first: Int = 20): [Post!]!
+}
+
+enum Role { ADMIN EDITOR VIEWER }
+
+input RenameInput { id: ID!, name: String! }
+
+directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION

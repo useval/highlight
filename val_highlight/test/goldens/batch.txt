@@ -1,0 +1,34 @@
+«operator:@»«function:echo» «literal:off»
+«keyword:setlocal» «keyword:enabledelayedexpansion»
+«comment:rem Build script for the example app»
+«comment::: another comment style»
+
+«function:set» «string:"ROOT=»«string>variable:%~dp0»«string:"»
+«function:set» BUILD_DIR«operator:=»«variable:%ROOT%»build
+«function:set» «attribute:/a» COUNT«operator:=»«number:0»
+
+«keyword:if» «keyword:not» «keyword:exist» «string:"»«string>variable:%BUILD_DIR%»«string:"» (
+    «function:mkdir» «string:"»«string>variable:%BUILD_DIR%»«string:"»
+) «keyword:else» (
+    «function:echo» Build folder exists
+)
+
+«keyword:for» «variable:%%f» «keyword:in» (src\*.c) «keyword:do» (
+    «function:set» «attribute:/a» COUNT+«operator:=»«number:1»
+    «function:echo» Compiling «variable:%%~nf» «string.escape:^(»«variable:!COUNT!»«string.escape:^)»
+    cl «attribute:/nologo» «attribute:/O2» «attribute:/c» «string:"»«string>variable:%%f»«string:"» «attribute:/Fo»«string:"»«string>variable:%BUILD_DIR%»«string:\\"» «operator:>»«literal:nul» «number:2»«operator:>&»«number:1»
+    «keyword:if» «keyword:errorlevel» «number:1» «keyword:goto» «function::fail»
+)
+
+«keyword:call» «function::report» «variable:%COUNT%»
+«function:echo» Done: «variable:%DATE:~0,10%» «operator:&»«comment: rem trailing comment»
+«keyword:exit» «attribute:/b» «number:0»
+
+«function::report»
+«function:echo» Built «variable:%1» files into «variable:%BUILD_DIR%»
+«keyword:goto» :«keyword:eof»
+
+«function::fail»
+«function:echo» Build failed with code «variable:%ERRORLEVEL%» «number:1»«operator:>&»«number:2»
+«function:pause»
+«keyword:exit» «attribute:/b» «number:1»

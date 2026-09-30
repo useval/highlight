@@ -1,0 +1,50 @@
+; Prints a message and exits (Linux x86-64).
+%define SYS_WRITE 1
+%define SYS_EXIT  60
+
+bits 64
+default rel
+
+section .data
+    msg     db  "Hello, world!", 10, 0
+    len     equ $ - msg
+    table   dw  0x10, 20h, 0b1010, 1010b, 777q, 12
+    pi      dq  3.14159
+    quote   db  'single', `tick\n`
+
+section .bss
+    buffer  resb 64
+
+section .text
+    global _start
+
+_start:
+    mov     rax, SYS_WRITE
+    mov     rdi, 1
+    lea     rsi, [msg]
+    mov     rdx, len
+    syscall
+
+    xor     ecx, ecx            ; counter = 0
+.loop:
+    cmp     rcx, 10
+    jge     .done
+    inc     rcx
+    movzx   eax, byte [rsi + rcx]
+    test    al, al
+    jz      .done
+    cmovne  r8, rcx
+    jmp     .loop
+
+.done:
+    push    r12
+    call    helper
+    pop     r12
+    vxorps  ymm0, ymm0, ymm0
+    MOV     RAX, SYS_EXIT       ; upper case works too
+    xor     edi, edi
+    syscall
+
+helper:
+    mov     qword [buffer], r12
+    ret

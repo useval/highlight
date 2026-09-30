@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+# Summarise an access log.
+my %hits;
+my @errors = ();
+my $total = 0;
+my $pattern = qr/^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) ([^"]+)"/;
+
+while (my $line = <STDIN>) {
+    chomp $line;
+    next unless $line =~ m{$pattern};
+    my ($ip, $when, $method, $path) = ($1, $2, $3, $4);
+    $hits{$ip}++;
+    $total += 1;
+    push @errors, $path if $line =~ /\s5\d\d\s/;
+    (my $clean = $path) =~ s/\?.*$//;
+    $clean =~ tr/A-Z/a-z/;
+}
+
+my @top = (sort { $hits{$b} <=> $hits{$a} } keys %hits)[0 .. 2];
+my @words = qw(alpha beta gamma);
+my $single = q(no $interpolation here);
+my $double = qq{total: $total, first: $top[0], count: ${\ scalar @top}};
+
+printf "%-15s %d\n", $_, $hits{$_} for @top;
+print "last index: $#top, words: @words\n";
+
+my %config = (
+    name    => 'report',
+    limit   => 10,
+    verbose => 0,
+);
+
+sub report {
+    my ($self, %args) = @_;
+    my $out = $args{fh} // \*STDOUT;
+    print {$out} <<"END";
+Report for $config{name}
+Errors: ${\ scalar @errors}
+END
+    print {$out} <<'RAW';
+Literal $text, no interpolation.
+RAW
+    return wantarray ? @errors : scalar @errors;
+}
+
+my $obj = Report::Writer->new(limit => $config{limit});
+$obj->write(report(undef, fh => \*STDERR));
+die "no data\n" unless $total > 0x0;
+
+__END__
+
+=head1 NAME
+
+report.pl - summarise logs

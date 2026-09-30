@@ -1,0 +1,19 @@
+«heading:# Release notes»
+
+«heading:## 1.2.0»
+
+This release makes highlighting «strong:**much faster**» and adds «emphasis:*incremental*» updates.
+See «link:[the changelog](https://example.com/changelog)» for details.
+
+«punctuation:-» Faster scanner with «code:`first-character dispatch`»
+«punctuation:-» New «code:`IncrementalHighlighter`»
+«punctuation:-» Fixed a bug in YAML keys
+
+«quote:> Upgrading is safe; the API is unchanged.»
+
+«code:```dart»
+«keyword:final» result «operator:=» «keyword:const» «type:Highlighter»().«function:highlight»(code, language: dartLanguage);
+«code:```»
+
+«punctuation:1.» Update the dependency
+«punctuation:2.» Run «code:`dart pub get`»

@@ -1,0 +1,29 @@
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+
+
+@dataclass
+class Config:
+    name: str
+    retries: int = 3
+    tags: list[str] = field(default_factory=list)
+
+    @classmethod
+    def load(cls, path: Path) -> "Config":
+        """Read a config file, falling back to defaults."""
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return cls(name=path.stem)
+        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
+
+    def summary(self) -> str:
+        return f"{self.name}: {self.retries} retries, tags={', '.join(self.tags) or None!r}"
+
+
+if __name__ == "__main__":
+    for p in Path(".").glob("*.json"):
+        print(Config.load(p).summary())  # one per file

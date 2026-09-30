@@ -1,0 +1,32 @@
+«keyword:import» «keyword:type» { «type:Request», «type:Response» } «keyword:from» «string:'express'»;
+
+«keyword:export» «keyword:enum» «type:Status» { «type:Active» «operator:=» «string:'active'», «type:Disabled» «operator:=» «string:'disabled'» }
+
+«keyword:interface» «type:User»«operator:<»«type:T» «keyword:extends» «type.builtin:object» «operator:=» {}«operator:>» {
+  «keyword:readonly» id: «type.builtin:number»;
+  name: «type.builtin:string»;
+  email«operator:?»: «type.builtin:string»;
+  meta: «type:T»;
+}
+
+«keyword:type» «type:Handler» «operator:=» (req: «type:Request», res: «type:Response») «operator:=>» «type.builtin:Promise»«operator:<»«keyword:void»«operator:>»;
+
+«keyword:export» «keyword:abstract» «keyword:class» «type:Repository»«operator:<»«type:T» «keyword:extends» «type:User»«operator:>» {
+  «keyword:private» cache «operator:=» «keyword:new» «type.builtin:Map»«operator:<»«type.builtin:number», «type:T»«operator:>»();
+  «keyword:protected» «function:constructor»(«keyword:private» «keyword:readonly» table: «type.builtin:string») {}
+
+  «keyword:abstract» «function:load»(id: «type.builtin:number»): «type.builtin:Promise»«operator:<»«type:T» «operator:|» «literal:undefined»«operator:>»;
+
+  «keyword:async» «function:find»(id: «type.builtin:number»): «type.builtin:Promise»«operator:<»«type:T» «operator:|» «literal:undefined»«operator:>» {
+    «keyword:const» hit «operator:=» «variable.language:this».cache.«function:get»(id);
+    «keyword:if» (hit «operator:!==» «literal:undefined») «keyword:return» hit;
+    «keyword:const» user «operator:=» «keyword:await» «variable.language:this».«function:load»(id);
+    user «operator:&&» «variable.language:this».cache.«function:set»(id, user);
+    «keyword:return» user «keyword:as» «type:T»;
+  }
+}
+
+«keyword:export» «keyword:const» handler: «type:Handler» «operator:=» «keyword:async» (req, res) «operator:=>» {
+  «keyword:const» limit «operator:=» «type.builtin:Number»(req.query.limit «operator:??» «number:10») «keyword:satisfies» «type.builtin:number»;
+  res.«function:json»({ ok: «literal:true», limit, at: «string:`»«string>interpolation:${»«string>interpolation>type.builtin:Date»«string>interpolation:.»«string>interpolation>function:now»«string>interpolation:()}»«string:`» });
+};

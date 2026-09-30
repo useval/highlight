@@ -1,0 +1,20 @@
+«keyword::root» {
+  «property:--brand»: «number:#b0226e»;
+  «property:--gap»: «number:12px»;
+}
+
+«tag:html», «tag:body» { «property:margin»: «number:0»; «property:font»: «number:16px»/«number:1.5» system-ui, sans-serif; }
+
+«type:.grid» > «type:.item»«keyword::nth-child(2n + 1)»,
+«meta:#sidebar» «tag:a»«attribute:[href^=»«attribute>string:"https://"»«attribute:]»«keyword::hover» {
+  «property:display»: grid;
+  «property:grid-template-columns»: «function:repeat»(auto-fill, «function:minmax»(«number:200px», «number:1fr»));
+  «property:gap»: «function:var»(«variable:--gap»);
+  «property:color»: «function:var»(«variable:--brand») «keyword:!important»;
+  «property:background»: «string>function:url»«string:("img/bg.png")» no-repeat center / cover;
+  «property:transition»: transform «number:0.2s» ease-in-out, opacity «number:150ms»;
+}
+
+«keyword:@media» («property:max-width»: «number:600px») {
+  «type:.grid» { «property:grid-template-columns»: «number:1fr»; }
+}

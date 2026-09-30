@@ -1,0 +1,26 @@
+«comment:# Deployment configuration»
+«property:apiVersion»: apps/v1
+«property:kind»: Deployment
+«property:metadata»:
+  «property:name»: web
+  «property:labels»: «punctuation:{»«property:app»: web«punctuation:,» «property:tier»: frontend«punctuation:}»
+«property:spec»:
+  «property:replicas»: «number:3»
+  «property:selector»:
+    «property:matchLabels»:
+      «property:app»: web
+  «property:template»:
+    «property:spec»:
+      «property:containers»:
+        «punctuation:- »«property:name»: web
+          «property:image»: «string:"registry.example.com/web:1.4.2"»
+          «property:ports»:
+            «punctuation:- »«property:containerPort»: «number:8080»
+          «property:env»:
+            «punctuation:- »«property:name»: DEBUG
+              «property:value»: «literal:false»
+            «punctuation:- »«property:name»: RATIO
+              «property:value»: «number:0.75»
+          «property:args»: «variable:&args» «punctuation:[»--port«punctuation:,» «string:"8080"»«punctuation:]»
+          «property:resources»:
+            «property:limits»: «punctuation:{»«property:cpu»: 500m«punctuation:,» «property:memory»: 256Mi«punctuation:}»

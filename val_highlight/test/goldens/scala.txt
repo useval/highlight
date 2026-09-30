@@ -1,0 +1,54 @@
+«keyword:package» shop
+
+«keyword:import» scala.concurrent.{«type:ExecutionContext», «type:Future»}
+«keyword:import» scala.util.{«type:Failure», «type:Success»}
+
+«comment.doc:/** An order line.
+  * »«comment.doc>comment.doc:/* nested comment in docs */»«comment.doc:
+  */»
+«keyword:final» «keyword:case» «keyword:class» «type:Line»(sku«operator::» «type.builtin:String», qty«operator::» «type.builtin:Int», price«operator::» «type:BigDecimal»)«operator::»
+  «keyword:def» total«operator::» «type:BigDecimal» «operator:=» price «operator:*» qty
+
+«keyword:enum» «type:Status»«operator::»
+  «keyword:case» «type:Open», «type:Paid», «type:Shipped»
+
+«keyword:trait» «type:Repository»[«type:F»[_]]«operator::»
+  «keyword:def» «function:find»(id«operator::» «type.builtin:Long»)«operator::» «type:F»[«type.builtin:Option»[«type:Line»]]
+
+«keyword:given» «type:ExecutionContext» «operator:=» «type:ExecutionContext».global
+
+«keyword:object» «type:Orders» «keyword:extends» «type:App»«operator::»
+  «keyword:private» «keyword:val» limit «operator:=» «number:1_000L»
+  «keyword:private» «keyword:val» mask «operator:=» «number:0xFF»
+  «keyword:val» lines «operator:=» «type.builtin:List»(«type:Line»(«string:"apple"», «number:2», «type:BigDecimal»(«string:"0.5"»)), «type:Line»(«string:"pear"», «number:1», «number:1.25»))
+
+  «keyword:extension» (line«operator::» «type:Line»)
+    «keyword:def» describe«operator::» «type.builtin:String» «operator:=» «string:s"»«string>interpolation:${line.sku}»«string: x»«string>interpolation:${line.qty}»«string: = »«string>interpolation:${line.total}»«string:"»
+
+  «meta:@annotation.tailrec»
+  «keyword:def» «function:sum»(xs«operator::» «type.builtin:List»[«type:Line»], acc«operator::» «type:BigDecimal» «operator:=» «number:0»)«operator::» «type:BigDecimal» «operator:=» xs «keyword:match»
+    «keyword:case» «type:Nil»          «operator:=>» acc
+    «keyword:case» head «operator:::» tail «operator:=>» «function:sum»(tail, acc «operator:+» head.total)
+
+  «keyword:def» «function:status»(paid«operator::» «type.builtin:Boolean»)«operator::» «type:Status» «operator:=»
+    «keyword:if» paid «keyword:then» «type:Status».Paid «keyword:else» «type:Status».Open
+
+  «keyword:val» report «operator:=»
+    «string:s"""Orders: »«string>interpolation:${lines.size}»«string:
+       |Total: »«string>interpolation:${»«string>interpolation>function:sum»«string>interpolation:(lines)}»«string: »«string>string.escape:$$»«string: literal dollar
+       |"""».stripMargin
+
+  «keyword:val» formatted «operator:=» «string:f"ratio »«string>interpolation:${»«string>interpolation>number:2.5e-3»«string>interpolation:}»«string:%.4f and »«string>interpolation:${limit}»«string:%d"»
+  «keyword:val» path «operator:=» «string:raw"C:\temp\n stays"»
+  «keyword:val» c «operator:=» «string:'x'»
+
+  «keyword:for»
+    line «operator:<-» lines
+    «keyword:if» line.qty «operator:>» «number:0»
+  «keyword:do» «function:println»(line.describe)
+
+  «type:Future»(«function:sum»(lines)).onComplete {
+    «keyword:case» «type:Success»(total) «operator:=>» «function:println»(«string:s"total »«string>interpolation:$total»«string:"»)
+    «keyword:case» «type:Failure»(error) «operator:=>» «type:Console».err.«function:println»(error.getMessage)
+  }
+«keyword:end» «type:Orders»

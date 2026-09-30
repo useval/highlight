@@ -1,0 +1,57 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+#nullable enable
+namespace Shop.Orders;
+
+/// <summary>An order line.</summary>
+public record Line(string Sku, int Qty, decimal Price)
+{
+    public decimal Total => Qty * Price;
+}
+
+[Serializable]
+public sealed partial class OrderService : IDisposable
+{
+    private const int Max = 1_000;
+    private readonly Dictionary<string, List<Line>> _orders = new();
+    public string Name { get; init; } = "orders";
+    public int Count { get; private set; }
+
+    #region Queries
+    public async Task<decimal> TotalAsync(string customer, CancellationToken token = default)
+    {
+        if (!_orders.TryGetValue(customer, out var lines)) return 0m;
+        await Task.Delay(10, token);
+        return lines.Where(l => l.Qty > 0).Sum(l => l.Total);
+    }
+    #endregion
+
+    public string Describe(Line line) =>
+        $"{line.Sku,-8} x{line.Qty} = {line.Total:C2} {{braces}}";
+
+    public static string Path => @"C:\data\orders ""quoted"".csv";
+
+    public static string Json(int id) => $$"""
+        { "id": {{id}}, "raw": "\n stays" }
+        """;
+
+    public object Classify(object value) => value switch
+    {
+        int n when n > Max => "big",
+        int n and >= 0 => n,
+        string { Length: 0 } => nameof(String.Empty),
+        null => throw new ArgumentNullException(nameof(value)),
+        _ => default(int),
+    };
+
+    public void Dispose()
+    {
+        char tab = '\t';
+        var mask = 0xFF_00u;
+        var ratio = 2.5e-3f;
+        Console.WriteLine($@"Disposed {Name} at C:\logs {tab}{mask}{ratio}");
+        GC.SuppressFinalize(this);
+    }
+}

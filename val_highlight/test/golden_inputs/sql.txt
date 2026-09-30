@@ -1,0 +1,17 @@
+-- Monthly revenue per region
+WITH monthly AS (
+  SELECT r.name AS region,
+         date_trunc('month', o.created_at) AS month,
+         SUM(o.total) AS revenue,
+         COUNT(DISTINCT o.customer_id) AS customers
+  FROM orders o
+  JOIN regions r ON r.id = o.region_id
+  WHERE o.status = 'paid' AND o.created_at >= '2026-01-01'
+  GROUP BY 1, 2
+)
+SELECT region, month, revenue,
+       revenue / NULLIF(customers, 0) AS per_customer,
+       LAG(revenue) OVER (PARTITION BY region ORDER BY month) AS previous
+FROM monthly
+ORDER BY region, month DESC
+LIMIT 100;

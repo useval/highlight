@@ -1,0 +1,47 @@
+«comment.doc://! Parses key=value lines.»
+«keyword:const» std «operator:=» «function:@import»(«string:"std"»);
+«keyword:const» «type:Allocator» «operator:=» std.mem.Allocator;
+
+«comment.doc:/// A parsed entry.»
+«keyword:pub» «keyword:const» «type:Entry» «operator:=» «keyword:struct» {
+    key«operator::» []«keyword:const» «type.builtin:u8»,
+    value«operator::» []«keyword:const» «type.builtin:u8»,
+    line«operator::» «type.builtin:u32» «operator:=» «number:0»,
+};
+
+«keyword:pub» «keyword:const» «type:ParseError» «operator:=» «keyword:error»{ «type:MissingEquals», «type:EmptyKey» } «operator:||» «type:Allocator».Error;
+
+«keyword:pub» «keyword:fn» «function:parse»(allocator«operator::» «type:Allocator», text«operator::» []«keyword:const» «type.builtin:u8») «type:ParseError»«operator:!»[]«type:Entry» {
+    «keyword:var» list «operator:=» std.«function:ArrayList»(«type:Entry»).«function:init»(allocator);
+    «keyword:errdefer» list.«function:deinit»();
+    «keyword:var» it «operator:=» std.mem.«function:splitScalar»(«type.builtin:u8», text, «string:'\n'»);
+    «keyword:var» line«operator::» «type.builtin:u32» «operator:=» «number:1»;
+    «keyword:while» (it.«function:next»()) «operator:|»raw«operator:|» «operator::» (line «operator:+=» «number:1») {
+        «keyword:const» trimmed «operator:=» std.mem.«function:trim»(«type.builtin:u8», raw, «string:" »«string>string.escape:\t»«string:"»);
+        «keyword:if» (trimmed.len «operator:==» «number:0» «keyword:or» trimmed[«number:0»] «operator:==» «string:'#'») «keyword:continue»;
+        «keyword:const» eq «operator:=» std.mem.«function:indexOfScalar»(«type.builtin:u8», trimmed, «string:'='») «keyword:orelse» «keyword:return» «keyword:error».MissingEquals;
+        «keyword:if» (eq «operator:==» «number:0») «keyword:return» «keyword:error».EmptyKey;
+        «keyword:try» list.«function:append»(.{ .key «operator:=» trimmed[«number:0»..eq], .value «operator:=» trimmed[eq «operator:+» «number:1» ..], .line «operator:=» line });
+    }
+    «keyword:return» list.«function:toOwnedSlice»();
+}
+
+«keyword:const» help «operator:=»
+    «string:\\usage: kv [file]»
+    «string:\\  prints every "key = value" pair»
+;
+
+«keyword:test» «string:"parse two lines"» {
+    «keyword:const» entries «operator:=» «keyword:try» «function:parse»(std.testing.allocator, «string:"a=1»«string>string.escape:\n»«string:b=0x2A»«string>string.escape:\n»«string:"»);
+    «keyword:defer» std.testing.allocator.«function:free»(entries);
+    «keyword:try» std.testing.«function:expectEqual»(«function:@as»(«type.builtin:usize», «number:2»), entries.len);
+    «keyword:const» mask«operator::» «type.builtin:u7» «operator:=» «number:0b101_0101»;
+    «keyword:const» ratio«operator::» «type.builtin:f64» «operator:=» «number:1.5e3»;
+    _ «operator:=» mask;
+    _ «operator:=» ratio;
+    «keyword:var» «variable:@"weird name"»«operator::» «type.builtin:i32» «operator:=» «literal:undefined»;
+    «variable:@"weird name"» «operator:=» «keyword:comptime» blk«operator::» {
+        «keyword:break» «operator::»blk «number:7»;
+    };
+    _ «operator:=» help;
+}

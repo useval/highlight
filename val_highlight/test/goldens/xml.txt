@@ -1,0 +1,15 @@
+«meta:<?xml version=»«meta>string:"1.0"»«meta: encoding=»«meta>string:"UTF-8"»«meta:?>»
+«meta:<!DOCTYPE plist PUBLIC »«meta>string:"-//Apple//DTD PLIST 1.0//EN"»«meta: »«meta>string:"http://www.apple.com/DTDs/PropertyList-1.0.dtd"»«meta:>»
+«comment:<!-- Android manifest-style example -->»
+«punctuation:<»«tag:manifest» «attribute:xmlns:android»«punctuation:=»«string:"http://schemas.android.com/apk/res/android"» «attribute:package»«punctuation:=»«string:"com.example.app"»«punctuation:>»
+  «punctuation:<»«tag:uses-permission» «attribute:android:name»«punctuation:=»«string:"android.permission.INTERNET"»«punctuation:/>»
+  «punctuation:<»«tag:application» «attribute:android:label»«punctuation:=»«string:"Example »«string>string.escape:&amp;»«string: Co"» «attribute:android:icon»«punctuation:=»«string:"@mipmap/ic_launcher"»«punctuation:>»
+    «punctuation:<»«tag:activity» «attribute:android:name»«punctuation:=»«string:".MainActivity"» «attribute:android:exported»«punctuation:=»«string:"true"»«punctuation:>»
+      «punctuation:<»«tag:intent-filter»«punctuation:>»
+        «punctuation:<»«tag:action» «attribute:android:name»«punctuation:=»«string:"android.intent.action.MAIN"» «punctuation:/>»
+      «punctuation:</»«tag:intent-filter»«punctuation:>»
+    «punctuation:</»«tag:activity»«punctuation:>»
+    «punctuation:<»«tag:meta-data» «attribute:android:name»«punctuation:=»«string:"flutterEmbedding"» «attribute:android:value»«punctuation:=»«string:"2"» «punctuation:/>»
+  «punctuation:</»«tag:application»«punctuation:>»
+  «punctuation:<»«tag:data»«punctuation:>»«string>meta:<![CDATA[»«string: raw <text> & more »«string>meta:]]>»«punctuation:</»«tag:data»«punctuation:>»
+«punctuation:</»«tag:manifest»«punctuation:>»

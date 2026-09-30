@@ -1,0 +1,15 @@
+«punctuation:{»
+  «property:"id"»«punctuation::» «string:"0f8fad5b-d9cb-469f-a165-70867728950e"»«punctuation:,»
+  «property:"name"»«punctuation::» «string:"val_highlight"»«punctuation:,»
+  «property:"version"»«punctuation::» «string:"1.2.3"»«punctuation:,»
+  «property:"private"»«punctuation::» «literal:false»«punctuation:,»
+  «property:"downloads"»«punctuation::» «number:128934»«punctuation:,»
+  «property:"rating"»«punctuation::» «number:4.87»«punctuation:,»
+  «property:"tags"»«punctuation::» «punctuation:[»«string:"syntax"»«punctuation:,» «string:"highlighting"»«punctuation:,» «string:"flutter"»«punctuation:,» «string:"dart"»«punctuation:],»
+  «property:"maintainers"»«punctuation::» «punctuation:[»
+    «punctuation:{»«property:"name"»«punctuation::» «string:"Ada"»«punctuation:,» «property:"email"»«punctuation::» «string:"ada@example.com"»«punctuation:,» «property:"active"»«punctuation::» «literal:true»«punctuation:},»
+    «punctuation:{»«property:"name"»«punctuation::» «string:"Linus"»«punctuation:,» «property:"email"»«punctuation::» «string:"linus@example.com"»«punctuation:,» «property:"active"»«punctuation::» «literal:null»«punctuation:}»
+  «punctuation:],»
+  «property:"escaped"»«punctuation::» «string:"line»«string>string.escape:\n»«string:break »«string>string.escape:\"»«string:quoted»«string>string.escape:\"»«string: é"»«punctuation:,»
+  «property:"nested"»«punctuation::» «punctuation:{»«property:"a"»«punctuation::» «punctuation:{»«property:"b"»«punctuation::» «punctuation:{»«property:"c"»«punctuation::» «punctuation:[»«number:1»«punctuation:,» «number:2»«punctuation:,» «number:3»«punctuation:,» «number:-4.5e10»«punctuation:]}}}»
+«punctuation:}»

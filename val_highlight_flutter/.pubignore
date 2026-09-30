@@ -1,0 +1,40 @@
+# A `.pubignore` REPLACES `.gitignore` for publishing — pub does not read
+# `.gitignore` when this file exists. Everything that must stay out of the
+# published archive has to be listed here, including build output.
+
+# Build output and tool caches.
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+
+# The package's own tests. They are the repository's guarantee, not
+# something a consumer compiles against.
+test/
+
+# The example ships for its source: `example/lib`, its pubspec and README
+# are what pub.dev shows. Its platform scaffolding, device tests, benchmark
+# driver and sample generator belong in the repository only.
+example/android/
+example/ios/
+example/linux/
+example/macos/
+example/web/
+example/windows/
+example/integration_test/
+example/test_driver/
+example/test/
+example/tool/
+example/build/
+example/.dart_tool/
+example/pubspec.lock
+example/analysis_options.yaml
+
+# Libraries should not publish a lockfile.
+pubspec.lock
+
+# Editor and OS debris that `.gitignore` would have caught.
+.DS_Store
+*.log
+**/doc/api/

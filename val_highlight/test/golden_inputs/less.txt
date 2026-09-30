@@ -1,0 +1,37 @@
+@import (reference) "mixins.less";
+
+// Variables
+@brand: #b0226e;
+@gap: 12px;
+@selector: ~".card";
+@prop: color;
+
+.rounded(@radius: 4px) {
+  border-radius: @radius;
+}
+
+.theme(@mode) when (@mode = dark) {
+  background: #16181d;
+}
+
+/* Components */
+@{selector} {
+  .rounded(8px);
+  padding: @gap * 2;
+  @{prop}: darken(@brand, 10%);
+  width: ~"calc(100% - @{gap})";
+
+  &:hover { opacity: 0.9; }
+  &-title {
+    font-size: (@gap + 4);
+    .theme(dark);
+  }
+
+  @media (max-width: 600px) {
+    padding: @gap;
+  }
+}
+
+.button:extend(.card all) {
+  color: @@name;
+}

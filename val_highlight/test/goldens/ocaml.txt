@@ -1,0 +1,45 @@
+«comment.doc:(** A binary search tree. *)»
+«keyword:module» «type:Tree» «operator:=» «keyword:struct»
+  «keyword:type» «type:'a» t «operator:=»
+    «operator:|» «type:Leaf»
+    «operator:|» «type:Node» «keyword:of» «type:'a» t «operator:*» «type:'a» «operator:*» «type:'a» t
+  «meta:[@@deriving» show«meta:]»
+
+  «keyword:let» empty «operator:=» «type:Leaf»
+
+  «comment:(* Insert keeps the tree ordered. (* nested *) *)»
+  «keyword:let» «keyword:rec» insert cmp x «operator:=» «keyword:function»
+    «operator:|» «type:Leaf» «operator:->» «type:Node» («type:Leaf», x, «type:Leaf»)
+    «operator:|» «type:Node» (l, v, r) «keyword:as» node «operator:->»
+      «keyword:let» c «operator:=» cmp x v «keyword:in»
+      «keyword:if» c «operator:<» «number:0» «keyword:then» «type:Node» (insert cmp x l, v, r)
+      «keyword:else» «keyword:if» c «operator:>» «number:0» «keyword:then» «type:Node» (l, v, insert cmp x r)
+      «keyword:else» node
+
+  «keyword:let» «keyword:rec» to_list «operator:=» «keyword:function»
+    «operator:|» «type:Leaf» «operator:->» []
+    «operator:|» «type:Node» (l, v, r) «operator:->» to_list l «operator:@» (v «operator:::» to_list r)
+«keyword:end»
+
+«keyword:exception» «type:Invalid_input» «keyword:of» «type.builtin:string»
+
+«keyword:let» parse_int (s «operator::» «type.builtin:string») «operator::» «type.builtin:int» «type.builtin:option» «operator:=»
+  «keyword:match» int_of_string_opt («type:String»«operator:.»trim s) «keyword:with»
+  «operator:|» «type:Some» n «keyword:when» n «operator:>=» «number:0» «operator:->» «type:Some» n
+  «operator:|» «type:Some» _ «operator:->» raise («type:Invalid_input» s)
+  «operator:|» «type:None» «operator:->» «type:None»
+
+«keyword:let» banner «operator:=» «string:{|raw "text" with \n no escapes|}»
+«keyword:let» tagged «operator:=» «string:{sql|SELECT * FROM t|sql}»
+
+«keyword:let» () «operator:=»
+  «keyword:let» t «operator:=» «type:List»«operator:.»fold_left («keyword:fun» acc x «operator:->» «type:Tree»«operator:.»insert compare x acc) «type:Tree»«operator:.»empty [«number:5»; «number:3»; «number:8»; «number:1»] «keyword:in»
+  «keyword:let» chars «operator:=» [«string:'a'»; «string:'\n'»; «string:'\''»; «string:'\065'»] «keyword:in»
+  «keyword:let» mask «operator:=» «number:0xFF» «keyword:land» «number:0b1010» «keyword:lor» «number:0o17» «keyword:in»
+  «keyword:let» big «operator:=» «number:1_000_000L» «keyword:and» pi «operator:=» «number:3.14159» «keyword:in»
+  «type:Printf»«operator:.»printf «string:"%d items, mask=%d, big=%Ld, pi=%.2f»«string>string.escape:\n»«string:"»
+    («type:List»«operator:.»length («type:Tree»«operator:.»to_list t)) mask big pi;
+  ignore chars;
+  print_endline banner;
+  print_endline tagged;
+  «keyword:assert» (not «literal:false»)

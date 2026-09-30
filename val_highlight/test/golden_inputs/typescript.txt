@@ -1,0 +1,32 @@
+import type { Request, Response } from 'express';
+
+export enum Status { Active = 'active', Disabled = 'disabled' }
+
+interface User<T extends object = {}> {
+  readonly id: number;
+  name: string;
+  email?: string;
+  meta: T;
+}
+
+type Handler = (req: Request, res: Response) => Promise<void>;
+
+export abstract class Repository<T extends User> {
+  private cache = new Map<number, T>();
+  protected constructor(private readonly table: string) {}
+
+  abstract load(id: number): Promise<T | undefined>;
+
+  async find(id: number): Promise<T | undefined> {
+    const hit = this.cache.get(id);
+    if (hit !== undefined) return hit;
+    const user = await this.load(id);
+    user && this.cache.set(id, user);
+    return user as T;
+  }
+}
+
+export const handler: Handler = async (req, res) => {
+  const limit = Number(req.query.limit ?? 10) satisfies number;
+  res.json({ ok: true, limit, at: `${Date.now()}` });
+};

@@ -1,0 +1,27 @@
+# A `.pubignore` REPLACES `.gitignore` for publishing — pub does not read
+# `.gitignore` when this file exists. Everything that must stay out of the
+# published archive has to be listed here, including build output.
+
+# Build output and tool caches.
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+
+# The package's own tests, golden snapshots and their inputs. They are the
+# repository's guarantee, not something a consumer compiles against.
+test/
+
+# Local performance harnesses and the real-code sweep. They take minutes and
+# exist to compare revisions of this package.
+benchmark/
+tool/
+
+# Libraries should not publish a lockfile.
+pubspec.lock
+
+# Editor and OS debris that `.gitignore` would have caught.
+.DS_Store
+*.log
+**/doc/api/

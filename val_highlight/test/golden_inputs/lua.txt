@@ -1,0 +1,56 @@
+#!/usr/bin/env lua
+-- Inventory module.
+--[[
+  Multi-line comment with [brackets] and "quotes".
+]]
+--[==[ a level-2 comment that contains ]] safely ]==]
+
+local json = require("dkjson")
+local M = {}
+M.__index = M
+
+local MAX <const> = 64
+local escape = "tab\tnewline\n\"quoted\" \u{48}"
+local literal = [[
+raw text with \n no escapes and 'quotes'
+]]
+local nested = [=[ contains ]] and [[ ]=]
+
+function M.new(name, capacity)
+  local self = setmetatable({}, M)
+  self.name = name or "default"
+  self.capacity = capacity or MAX
+  self.items = {}
+  return self
+end
+
+function M:add(item, count)
+  count = count or 1
+  if #self.items + count > self.capacity then
+    error(("inventory %s is full"):format(self.name), 2)
+  elseif count <= 0 then
+    return false
+  end
+  for i = 1, count do
+    self.items[#self.items + 1] = item
+  end
+  return true
+end
+
+function M:report()
+  local totals = {}
+  for _, item in ipairs(self.items) do
+    totals[item] = (totals[item] or 0) + 1
+  end
+  for name, n in pairs(totals) do
+    print(string.format("%-10s %3d", name, n))
+  end
+  return json.encode { name = self.name, size = #self.items }
+end
+
+local inv = M.new("pack", 0x10)
+inv:add("potion", 3)
+print(inv:report(), 1e3, 0.5, 3 // 2, 7 ~= 8, "a" .. "b")
+goto done
+::done::
+return M

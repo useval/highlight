@@ -1,0 +1,48 @@
+«keyword:import» «type:React», { useState, useEffect } «keyword:from» «string:'react'»;
+«keyword:import» { «type:Card» } «keyword:from» «string:'./components/card'»;
+
+«comment:// A searchable list of users.»
+«keyword:export» «keyword:default» «keyword:function» «type:UserList»({ users, onSelect, title «operator:=» «string:'Users'» }) {
+  «keyword:const» [query, setQuery] «operator:=» «function:useState»(«string:''»);
+  «keyword:const» [open, setOpen] «operator:=» «function:useState»(«literal:false»);
+
+  «function:useEffect»(() «operator:=>» {
+    «keyword:if» (query.length «operator:>» «number:2» «operator:&&» users.length «operator:<» «number:100») {
+      «type.builtin:console».«function:log»(«string:`searching »«string>interpolation:${query}»«string:`»);
+    }
+  }, [query, users]);
+
+  «keyword:const» visible «operator:=» users.«function:filter»((u) «operator:=>» u.name.«function:includes»(query));
+
+  «keyword:return» (
+    «punctuation:<»«type:Card» «attribute:className»«operator:=»«string:"user-list"» «attribute:data-count»«operator:=»«punctuation:{»visible.length«punctuation:}>»
+      «punctuation:<»«tag:h2»«punctuation:>{»title«punctuation:}» «string.escape:&amp;» friends«punctuation:</»«tag:h2»«punctuation:>»
+      «punctuation:<»«tag:input»
+        «attribute:type»«operator:=»«string:"search"»
+        «attribute:value»«operator:=»«punctuation:{»query«punctuation:}»
+        «attribute:onChange»«operator:=»«punctuation:{»(e) «operator:=>» «function:setQuery»(e.target.value)«punctuation:}»
+        «attribute:disabled»«operator:=»«punctuation:{»«operator:!»users.length«punctuation:}»
+      «punctuation:/>»
+      «punctuation:{»«comment:/* Nothing to show yet */»«punctuation:}»
+      «punctuation:{»visible.length «operator:===» «number:0» «operator:?» (
+        «punctuation:<»«tag:p» «attribute:className»«operator:=»«string:"empty"»«punctuation:>»Don't panic, no matches.«punctuation:</»«tag:p»«punctuation:>»
+      ) : (
+        «punctuation:<»«tag:ul»«punctuation:>»
+          «punctuation:{»visible.«function:map»((user) «operator:=>» (
+            «punctuation:<»«tag:li» «attribute:key»«operator:=»«punctuation:{»user.id«punctuation:}» «attribute:onClick»«operator:=»«punctuation:{»() «operator:=>» «function:onSelect»(user)«punctuation:}>»
+              «punctuation:<»«tag:strong»«punctuation:>{»user.name«punctuation:}</»«tag:strong»«punctuation:>» is «punctuation:{»user.age «operator:>» «number:18» «operator:?» «string:'adult'» : «string:'minor'»«punctuation:}»
+            «punctuation:</»«tag:li»«punctuation:>»
+          ))«punctuation:}»
+        «punctuation:</»«tag:ul»«punctuation:>»
+      )«punctuation:}»
+      «punctuation:{»open «operator:&&» «punctuation:<»«type:Modal.Dialog» «punctuation:{»«operator:...»user«punctuation:}» «attribute:onClose»«operator:=»«punctuation:{»() «operator:=>» «function:setOpen»(«literal:false»)«punctuation:}» «punctuation:/>}»
+      «punctuation:<>»
+        «punctuation:<»«tag:span»«punctuation:>»a«punctuation:</»«tag:span»«punctuation:>»
+        «punctuation:<»«tag:span»«punctuation:>»b«punctuation:</»«tag:span»«punctuation:>»
+      «punctuation:</>»
+    «punctuation:</»«type:Card»«punctuation:>»
+  );
+}
+
+«keyword:const» «type:Badge» «operator:=» ({ count }) «operator:=>» «punctuation:<»«tag:span» «attribute:className»«operator:=»«string:"badge"»«punctuation:>{»count «operator:>» «number:99» «operator:?» «string:'99+'» : count«punctuation:}</»«tag:span»«punctuation:>»;
+«keyword:const» same «operator:=» «number:1» «operator:<» «number:2» «operator:&&» «number:3» «operator:>» «number:2»;

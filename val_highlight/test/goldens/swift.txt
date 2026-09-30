@@ -1,0 +1,65 @@
+«keyword:import» «type:SwiftUI»
+«keyword:import» «type:Foundation»
+
+«comment.doc:/// A user profile loaded from the network.»
+«comment:/* An outer comment /* with a nested one */ still a comment */»
+«keyword:struct» «type:Profile»«operator::» «type:Codable», «type:Identifiable», «type:Sendable» {
+    «keyword:let» id«operator::» «type:UUID»
+    «keyword:var» name«operator::» «type.builtin:String»
+    «keyword:var» age«operator::» «type.builtin:Int»«operator:?»
+}
+
+«meta:@MainActor»
+«keyword:final» «keyword:class» «type:ProfileStore»«operator::» «type:ObservableObject» {
+    «meta:@Published» «keyword:private»(«keyword:set») «keyword:var» profiles«operator::» [«type:Profile»] «operator:=» []
+    «keyword:private» «keyword:let» session«operator::» «type:URLSession»
+
+    «keyword:init»(session«operator::» «type:URLSession» «operator:=» .shared) {
+        «variable.language:self».session «operator:=» session
+    }
+
+    «keyword:func» «function:load»(from url«operator::» «type:URL») «keyword:async» «keyword:throws» «operator:->» [«type:Profile»] {
+        «keyword:let» (data, response) «operator:=» «keyword:try» «keyword:await» session.«function:data»(from«operator::» url)
+        «keyword:guard» «keyword:let» http «operator:=» response «keyword:as»«operator:?» «type:HTTPURLResponse», http.statusCode «operator:==» «number:200» «keyword:else» {
+            «keyword:throw» «type:URLError»(.badServerResponse)
+        }
+        «keyword:let» decoded «operator:=» «keyword:try» «type:JSONDecoder»().«function:decode»([«type:Profile»].self, from«operator::» data)
+        profiles «operator:=» decoded.sorted { «variable:$0».name «operator:<» «variable:$1».name }
+        «keyword:return» decoded
+    }
+}
+
+«keyword:enum» «type:Level»«operator::» «type.builtin:Int», «type:CaseIterable» {
+    «keyword:case» low «operator:=» «number:0x01», high «operator:=» «number:0b10»
+    «keyword:var» label«operator::» «type.builtin:String» { «string:"Level »«string>interpolation:\(rawValue)»«string: of »«string>interpolation:\(»«string>interpolation>variable.language:Self»«string>interpolation:.allCases.count)»«string:"» }
+}
+
+«keyword:struct» «type:ProfileRow»«operator::» «type:View» {
+    «keyword:let» profile«operator::» «type:Profile»
+
+    «keyword:var» body«operator::» «keyword:some» «type:View» {
+        «type:HStack» {
+            «type:Text»(profile.name).«function:font»(.headline)
+            «type:Spacer»()
+            «keyword:if» «keyword:let» age «operator:=» profile.age {
+                «type:Text»(«string:"age »«string>interpolation:\(age »«string>interpolation>operator:+»«string>interpolation: (age »«string>interpolation>operator:>»«string>interpolation: »«string>interpolation>number:99»«string>interpolation: »«string>interpolation>operator:?»«string>interpolation: »«string>interpolation>number:0»«string>interpolation: »«string>interpolation>operator::»«string>interpolation: »«string>interpolation>number:1»«string>interpolation:))»«string>string.escape:\t»«string:✓"»)
+            }
+        }
+        .«function:padding»(«number:8.5»)
+    }
+}
+
+«keyword:let» raw «operator:=» «string:#"C:\path\n stays "raw" here"#»
+«keyword:let» multi «operator:=» «string:"""
+    Line one
+    Interpolated: »«string>interpolation:\(»«string>interpolation>type:Level»«string>interpolation:.high.label)»«string:
+    """»
+«keyword:let» `default` «operator:=» «number:1_000»
+
+«meta:#if» «type:DEBUG»
+«keyword:let» selector «operator:=» «meta:#selector»(«type:ProfileStore».reload)
+«meta:#endif»
+
+«meta:#Preview» {
+    «type:ProfileRow»(profile«operator::» «type:Profile»(id«operator::» «type:UUID»(), name«operator::» «string:"Ada"», age«operator::» «literal:nil»))
+}

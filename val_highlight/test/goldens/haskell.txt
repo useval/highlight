@@ -1,0 +1,55 @@
+«meta:{-# LANGUAGE OverloadedStrings #-}»
+«meta:{-# LANGUAGE ScopedTypeVariables #-}»
+«comment:-- | A small inventory module.»
+«keyword:module» «type:Inventory»
+  ( «type:Item» («operator:..»)
+  , restock
+  , total
+  ) «keyword:where»
+
+«keyword:import» «keyword:qualified» «type:Data»«operator:.»«type:Map»«operator:.»«type:Strict» «keyword:as» «type:Map»
+«keyword:import» «type:Data»«operator:.»«type.builtin:Maybe» (fromMaybe)
+
+«comment:{- Block comment {- with a nested one -} still comment -}»
+
+«keyword:data» «type:Item» «operator:=» «type:Item»
+  { «function:itemName»  «operator:::» «type.builtin:String»
+  , «function:itemCount» «operator:::» «operator:!»«type.builtin:Int»
+  , «function:itemPrice» «operator:::» «type.builtin:Double»
+  } «keyword:deriving» («type:Show», «type:Eq»)
+
+«keyword:newtype» «type:Sku» «operator:=» «type:Sku» «type.builtin:Int» «keyword:deriving» stock («type:Eq», «type:Ord»)
+
+«keyword:type» «type:Stock» «operator:=» «type:Map»«operator:.»«type:Map» «type:Sku» «type:Item»
+
+«comment:-- | Adds n units, creating the item if missing.»
+«function:restock» «operator:::» «type:Sku» «operator:->» «type.builtin:Int» «operator:->» «type:Stock» «operator:->» «type:Stock»
+restock sku n «operator:=» «type:Map»«operator:.»alter bump sku
+  «keyword:where»
+    bump «literal:Nothing» «operator:=» «literal:Just» («type:Item» «string:"unnamed"» n «number:0.0»)
+    bump («literal:Just» it) «operator:=» «literal:Just» it { itemCount «operator:=» itemCount it «operator:+» n }
+
+«function:total» «operator:::» «type:Stock» «operator:->» «type.builtin:Double»
+total stock «operator:=» sum [ fromIntegral (itemCount i) «operator:*» itemPrice i «operator:|» i «operator:<-» «type:Map»«operator:.»elems stock ]
+
+«function:classify» «operator:::» «type.builtin:Int» «operator:->» «type.builtin:String»
+classify n
+  «operator:|» n «operator:<» «number:0» «operator:=» «string:"negative"»
+  «operator:|» n «operator:==» «number:0» «operator:=» «string:"zero"»
+  «operator:|» «literal:otherwise» «operator:=» «string:"positive"»
+
+«function:arrows» «operator:::» «type.builtin:Int» «operator:->» «type.builtin:Int»
+arrows x' «operator:=» x' «operator:-->» «number:1» «comment:-- a real comment»
+  «keyword:where» a «operator:-->» b «operator:=» a «operator:+» b
+
+«function:chars» «operator:::» [«type.builtin:Char»]
+chars «operator:=» [«string:'a'», «string:'\n'», «string:'\''», «string:'\x41'»]
+
+«function:main» «operator:::» «type.builtin:IO» ()
+main «operator:=» «keyword:do»
+  «keyword:let» s «operator:=» restock («type:Sku» «number:1») «number:5» «type:Map»«operator:.»empty
+      hex «operator:=» «number:0xFF» «operator:::» «type.builtin:Int»
+      big «operator:=» «number:1_000_000» «operator:::» «type.builtin:Integer»
+  print (total s, hex, big, «number:2.5e-3» «operator:::» «type.builtin:Double»)
+  mapM_ (putStrLn «operator:.» classify) [«operator:-»«number:1», «number:0», «number:1»]
+  putStrLn «operator:$» fromMaybe «string:"none"» («literal:Just» «string:"some »«string>string.escape:\"»«string:quoted»«string>string.escape:\"»«string: text"»)

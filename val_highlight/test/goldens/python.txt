@@ -1,0 +1,29 @@
+«keyword:from» __future__ «keyword:import» annotations
+
+«keyword:import» json
+«keyword:from» dataclasses «keyword:import» dataclass, field
+«keyword:from» pathlib «keyword:import» «type:Path»
+
+
+«meta:@dataclass»
+«keyword:class» «type:Config»:
+    name: «type.builtin:str»
+    retries: «type.builtin:int» «operator:=» «number:3»
+    tags: «type.builtin:list»[«type.builtin:str»] «operator:=» «function:field»(default_factory«operator:=»«type.builtin:list»)
+
+    «meta:@classmethod»
+    «keyword:def» «function:load»(«variable.language:cls», path: «type:Path») «operator:->» «string:"Config"»:
+        «string:"""Read a config file, falling back to defaults."""»
+        «keyword:try»:
+            data «operator:=» json.«function:loads»(path.«function:read_text»(encoding«operator:=»«string:"utf-8"»))
+        «keyword:except» «type:FileNotFoundError»:
+            «keyword:return» «variable.language:cls»(name«operator:=»path.stem)
+        «keyword:return» «variable.language:cls»(«operator:**»{k: v «keyword:for» k, v «keyword:in» data.«function:items»() «keyword:if» k «keyword:in» «variable.language:cls».__annotations__})
+
+    «keyword:def» «function:summary»(«variable.language:self») «operator:->» «type.builtin:str»:
+        «keyword:return» «string:f"»«string>interpolation:{»«string>interpolation>variable.language:self»«string>interpolation:.name}»«string:: »«string>interpolation:{»«string>interpolation>variable.language:self»«string>interpolation:.retries}»«string: retries, tags=»«string>interpolation:{»«string>interpolation>string:', '»«string>interpolation:.»«string>interpolation>function:join»«string>interpolation:(»«string>interpolation>variable.language:self»«string>interpolation:.tags) »«string>interpolation>keyword:or»«string>interpolation: »«string>interpolation>literal:None»«string>interpolation>operator:!r»«string>interpolation:}»«string:"»
+
+
+«keyword:if» __name__ «operator:==» «string:"__main__"»:
+    «keyword:for» p «keyword:in» «type:Path»(«string:"."»).«function:glob»(«string:"*.json"»):
+        «function:print»(«type:Config».«function:load»(p).«function:summary»())  «comment:# one per file»

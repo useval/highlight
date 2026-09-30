@@ -1,0 +1,36 @@
+«keyword:\documentclass»«punctuation:[»11pt,a4paper«punctuation:]{»article«punctuation:}»
+«keyword:\usepackage»«punctuation:{»amsmath«punctuation:}»
+«keyword:\usepackage»«punctuation:[»utf8«punctuation:]{»inputenc«punctuation:}»
+
+«comment:% Macros»
+«keyword:\newcommand»«punctuation:{»«function:\norm»«punctuation:}[»1«punctuation:]{»«function:\left\lVert» «variable:#1» «function:\right\rVert»«punctuation:}»
+
+«keyword:\title»«punctuation:{»Fast Highlighting«punctuation:}»
+«keyword:\author»«punctuation:{»Ada Lovelace«punctuation:}»
+
+«keyword:\begin»{«type:document»}
+«keyword:\maketitle»
+
+«keyword:\section»«punctuation:{»Introduction«punctuation:}»«keyword:\label»«punctuation:{»sec:intro«punctuation:}»
+Highlighting costs 50«string.escape:\%» less with a «function:\textbf»«punctuation:{»scanner«punctuation:}» that never copies
+text. See Section«operator:~»«keyword:\ref»«punctuation:{»sec:intro«punctuation:}» and «keyword:\cite»«punctuation:{»knuth84«punctuation:}».
+
+Inline math such as «code:$a^2 + b^2 = c^2$» and «code:$»«code>function:\norm»«code:{x} »«code>function:\leq»«code: 1$» is common,
+while display math uses
+«code:\[
+  E = mc^2 »«code>function:\quad»«code: »«code>function:\text»«code:{(energy)}
+\]»
+or double dollars:
+«code:$$»«code>function:\sum»«code:_{i=1}^{n} i = »«code>function:\frac»«code:{n(n+1)}{2}$$»
+
+«keyword:\begin»{«type:itemize»}
+  «keyword:\item» First item «comment:% trailing comment»
+  «keyword:\item» Costs «string.escape:\$»5 «string.escape:\&» up
+«keyword:\end»{«type:itemize»}
+
+«keyword:\begin»{«type:align»}
+  f(x) «operator:&»= «function:\int»_0^«function:\infty» e^«punctuation:{»-x«punctuation:}»«string.escape:\,»dx «string.escape:\\»
+       «operator:&»= 1
+«keyword:\end»{«type:align»}
+
+«keyword:\end»{«type:document»}

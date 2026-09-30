@@ -1,0 +1,63 @@
+#!/usr/bin/env julia
+#= Simple statistics module.
+   #= nested comment =#
+=#
+module Stats
+
+using LinearAlgebra, Statistics
+import Base: show
+
+export Summary, summarize, @timed_log
+
+"""
+    Summary{T<:Real}
+
+Holds summary statistics for a sample of `T`.
+"""
+struct Summary{T<:Real}
+    n::Int
+    mean::Float64
+    std::T
+end
+
+mutable struct Counter
+    value::Int
+end
+
+function summarize(xs::AbstractVector{T}) where {T<:Real}
+    isempty(xs) && throw(ArgumentError("empty sample"))
+    μ = mean(xs)
+    σ = length(xs) > 1 ? std(xs) : zero(T)
+    return Summary{T}(length(xs), μ, σ)
+end
+
+increment!(c::Counter, by=1) = (c.value += by; c)
+
+show(io::IO, s::Summary) = print(io, "Summary(n=$(s.n), mean=$(round(s.mean; digits=2)))")
+
+macro timed_log(expr)
+    quote
+        local t0 = time()
+        local result = $(esc(expr))
+        println("took $(time() - t0) s")
+        result
+    end
+end
+
+end # module
+
+xs = [1.5, 2.0, 3.25, 1e-3, 0x1F]
+s = Stats.summarize(xs)
+A = [1 2; 3 4]'
+c = 'x'
+newline = '\n'
+pattern = r"^\d+$"
+raw_path = raw"C:\temp\file"
+name = "world"
+println("Hello, $name! First: $(xs[1]), sym: ", :done, " range: ", 1:3)
+for (i, x) in enumerate(xs)
+    i > 3 && break
+    @show i x
+end
+z = 3 + 4im
+result = xs isa Vector{Float64} ? nothing : missing

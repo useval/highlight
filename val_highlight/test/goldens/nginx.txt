@@ -1,0 +1,44 @@
+«comment:# Reverse proxy»
+«property:user» www-data«punctuation:;»
+«property:worker_processes» auto«punctuation:;»
+
+«keyword:events» «punctuation:{»
+    «property:worker_connections» «number:1024»«punctuation:;»
+«punctuation:}»
+
+«keyword:http» «punctuation:{»
+    «property:include»       mime.types«punctuation:;»
+    «property:sendfile»      «literal:on»«punctuation:;»
+    «property:keepalive_timeout» «number:65s»«punctuation:;»
+    «property:client_max_body_size» «number:10m»«punctuation:;»
+    «property:gzip» «literal:on»«punctuation:;»«property: gzip_types» text/css application/json«punctuation:;»
+
+    «keyword:upstream» app «punctuation:{»
+        «keyword:server» 127.0.0.1:8080 weight=«number:5»«punctuation:;»
+        «keyword:server» 127.0.0.1:8081 backup«punctuation:;»
+    «punctuation:}»
+
+    «keyword:server» «punctuation:{»
+        «property:listen» «number:443» ssl http2«punctuation:;»
+        «property:server_name» example.com www.example.com«punctuation:;»
+        «property:root» /var/www/html«punctuation:;»
+
+        «keyword:location» «operator:=» /health «punctuation:{»
+            «property:return» «number:200» «string:"ok»«string>string.escape:\n»«string:"»«punctuation:;»
+        «punctuation:}»
+
+        «keyword:location» «operator:~*» \.(png|jpg|css)$ «punctuation:{»
+            «property:expires» «number:30d»«punctuation:;»
+            «property:add_header» Cache-Control «string:"public, max-age=2592000"»«punctuation:;»
+        «punctuation:}»
+
+        «keyword:location» / «punctuation:{»
+            «property:proxy_pass» http://app«punctuation:;»
+            «property:proxy_set_header» Host «variable:$host»«punctuation:;»
+            «property:proxy_set_header» X-Real-IP «variable:${remote_addr}»«punctuation:;»
+            «keyword:if» («variable:$request_method» «operator:=» POST) «punctuation:{»
+                «property:return» «number:405»«punctuation:;»
+            «punctuation:}»
+        «punctuation:}»
+    «punctuation:}»
+«punctuation:}»

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/useval/highlight/main/assets/plusfinity-logo.png" width="112" alt="Plusfinity logo">
+</p>
+
 <h1 align="center">val_highlight</h1>
 
 <p align="center"><strong>Syntax highlighting in pure Dart.</strong></p>

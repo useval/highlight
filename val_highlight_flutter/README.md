@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/useval/highlight/main/assets/plusfinity-logo.png" width="112" alt="Plusfinity logo">
+</p>
+
 <h1 align="center">val_highlight_flutter</h1>
 
 <p align="center"><strong>Syntax-highlighted code for Flutter.</strong></p>
@@ -20,10 +24,6 @@
 </p>
 
 ---
-
-| <img alt="Dart in CodeView with line numbers and highlighted lines" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="TSX in the midnight theme" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/dark-theme.png"><br>**Themes**<br>Eight built in, or import a VS Code theme. |
-|---|---|
-| <img alt="Markdown with bash, Python and JSON code fences" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. | <img alt="Python being edited in CodeField" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. |
 
 ## ✨ Why val_highlight_flutter?
 
@@ -163,6 +163,11 @@ compile delay (1–3 ms per language otherwise).
 - `CodeStyles` converts a `ValTheme` into cached `TextStyle`s.
 - `lineSpans`, `documentSpans` and `exactSpans` turn a `HighlightResult` into
   `TextSpan`s for your own widgets.
+
+## 📸 Screenshots
+
+| <img alt="Dart in CodeView with line numbers and highlighted lines" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="Python being edited in CodeField" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. | <img alt="Markdown with bash, Python and JSON code fences" src="https://raw.githubusercontent.com/useval/highlight/main/screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. |
+|---|---|---|
 
 ## ⚡ Performance
 

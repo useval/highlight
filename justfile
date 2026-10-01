@@ -111,6 +111,24 @@ screenshots:
 build-web:
     cd {{example}} && {{flutter}} build web
 
+# pub.dev points after publishing; fails under the threshold. The Flutter package needs val_highlight on pub.dev first.
+score package="val_highlight" threshold="160":
+    ./scripts/score.sh {{package}} {{threshold}}
+
+# Same, but never fails, for seeing where the points went.
+score-soft package="val_highlight":
+    ./scripts/score.sh {{package}} 0
+
+# Full pana report from the last `just score`, with every suggestion.
+score-report package="val_highlight":
+    @test -f /tmp/pana-{{package}}.md || (echo "run 'just score {{package}}' first" && exit 1)
+    @cat /tmp/pana-{{package}}.md
+
+# Packaging check for both packages, without uploading. Reports problems, never fails.
+publish-dry:
+    -cd val_highlight && {{flutter}} pub publish --dry-run
+    -cd val_highlight_flutter && {{flutter}} pub publish --dry-run
+
 # Remove build outputs.
 clean:
     cd {{example}} && {{flutter}} clean

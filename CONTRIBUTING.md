@@ -45,6 +45,8 @@ argument lists them. The ones you will use most:
 | `just bench` | Highlighting and HTML timings for 600 to 9,600 lines |
 | `just bench-languages` | Speed per language on realistic source |
 | `just sweep` | Runs every grammar over real source files and reports problems |
+| `just score <package>` | The pub.dev score (pana) the package will get after publishing |
+| `just publish-dry` | Packaging check for both packages, without uploading |
 
 ## Tests
 

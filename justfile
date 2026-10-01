@@ -129,6 +129,10 @@ publish-dry:
     -cd val_highlight && {{flutter}} pub publish --dry-run
     -cd val_highlight_flutter && {{flutter}} pub publish --dry-run
 
+# Check, tag and push a release of one package; CI publishes it from the tag. Asks before pushing.
+release package:
+    ./scripts/release.sh {{package}}
+
 # Remove build outputs.
 clean:
     cd {{example}} && {{flutter}} clean

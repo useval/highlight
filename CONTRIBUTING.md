@@ -118,6 +118,49 @@ A maintainer is requested for review automatically. CI runs the same checks as
 `just check`, which need to pass. Expect review comments — most pull requests
 go through a round or two.
 
+## Releasing
+
+Maintainers only. The two packages are versioned and released independently,
+each with its own tag:
+
+| Package | Tag |
+|---|---|
+| `val_highlight` | `val_highlight-v<version>` |
+| `val_highlight_flutter` | `val_highlight_flutter-v<version>` |
+
+To release:
+
+1. Set `version` in the package's `pubspec.yaml`, and rename its changelog's
+   `## Unreleased` heading to that version.
+2. If `val_highlight_flutter` needs something new from `val_highlight`,
+   release `val_highlight` first and raise the `val_highlight: ^x.y.z`
+   constraint in `val_highlight_flutter/pubspec.yaml`.
+3. Commit, then run `just release <package>`. It checks the changelog, runs
+   `just check` and the pub.dev score, and asks before it tags and pushes.
+4. The **Publish** workflow re-runs the checks on the tag and publishes the
+   package to pub.dev.
+
+A version already on pub.dev, such as a first release published by hand, is
+only tagged; the workflow skips the publish step.
+
+### Setting up a new package on pub.dev
+
+Automated publishing can only be enabled once a package exists, so the first
+version of each package is published by hand, from inside its folder:
+
+```sh
+cd val_highlight
+fvm flutter pub publish
+```
+
+Publish `val_highlight` before `val_highlight_flutter`, which depends on it.
+Then, on pub.dev, for each package:
+
+1. **Admin → Transfer to publisher** → `useval.io`.
+2. **Admin → Automated publishing** → enable publishing from GitHub Actions,
+   with repository `useval/highlight` and tag pattern
+   `<package>-v{{version}}`.
+
 ## License
 
 val_highlight is released under the [BSD 3-Clause License](LICENSE). Your

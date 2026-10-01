@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The publish workflow runs these same checks before every release.
+  workflow_call:
 
 jobs:
   check:

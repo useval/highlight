@@ -42,21 +42,30 @@ fi
 MAX_POINTS=160
 DEFICIT=$((MAX_POINTS - THRESHOLD))
 
-FLUTTER_ROOT=$(fvm flutter --version --machine 2>/dev/null |
+# Locally, use the SDK pinned in .fvmrc; on CI, the one already on PATH.
+if command -v fvm >/dev/null 2>&1; then
+  FLUTTER="fvm flutter"
+  DART="fvm dart"
+else
+  FLUTTER="flutter"
+  DART="dart"
+fi
+
+FLUTTER_ROOT=$($FLUTTER --version --machine 2>/dev/null |
   sed -n 's/.*"flutterRoot": *"\([^"]*\)".*/\1/p')
 
 printf '\n\033[1m▸ %s: publish dry run\033[0m\n' "$PACKAGE"
 # Catches packaging problems pana does not: oversized archives, files that are
 # checked in but gitignored, layout conventions. Uncommitted changes are a
 # warning here, so this never fails the gate.
-(cd "$PACKAGE" && fvm flutter pub publish --dry-run) || true
+(cd "$PACKAGE" && $FLUTTER pub publish --dry-run) || true
 
 printf '\n\033[1m▸ %s: pana\033[0m\n' "$PACKAGE"
-if ! fvm dart pub global list 2>/dev/null | grep -q '^pana '; then
-  fvm dart pub global activate pana >/dev/null
+if ! $DART pub global list 2>/dev/null | grep -q '^pana '; then
+  $DART pub global activate pana >/dev/null
 fi
 
-fvm dart pub global run pana \
+$DART pub global run pana \
   --no-warning \
   --flutter-sdk "$FLUTTER_ROOT" \
   --exit-code-threshold "$DEFICIT" \

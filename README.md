@@ -15,10 +15,6 @@
 
 ---
 
-| <img alt="Dart in CodeView with line numbers and highlighted lines" src="screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="TSX in the midnight theme" src="screenshots/dark-theme.png"><br>**Themes**<br>Eight built in, or import a VS Code theme. |
-|---|---|
-| <img alt="Markdown with bash, Python and JSON code fences" src="screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. | <img alt="Python being edited in CodeField" src="screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. |
-
 ## 📦 Packages
 
 | Package | Use it for |
@@ -35,6 +31,10 @@ CodeView(source, language: dartLanguage)
 // Pure Dart
 final html = const Highlighter().toHtml(source, language: dartLanguage);
 ```
+
+| <img alt="Dart in CodeView with line numbers and highlighted lines" src="screenshots/code-view.png"><br>**CodeView**<br>Line numbers, highlighted lines, selection. | <img alt="TSX in the midnight theme" src="screenshots/dark-theme.png"><br>**Themes**<br>Eight built in, or import a VS Code theme. |
+|---|---|
+| <img alt="Markdown with bash, Python and JSON code fences" src="screenshots/embedded.png"><br>**Languages inside languages**<br>Markdown fences, HTML with CSS and JavaScript. | <img alt="Python being edited in CodeField" src="screenshots/editor.png"><br>**CodeField**<br>An editor that highlights as you type. |
 
 ## ⚡ Performance
 

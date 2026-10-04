@@ -18,5 +18,5 @@ topics:
   - syntax-highlighting
   - highlighter
   - code
-  - tokenizer
+  - highlight
   - html

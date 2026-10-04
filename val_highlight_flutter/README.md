@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/useval/highlight/main/assets/plusfinity-logo.png" width="112" alt="Plusfinity logo">
-</p>
-
 <h1 align="center">val_highlight_flutter</h1>
 
 <p align="center"><strong>Syntax-highlighted code for Flutter.</strong></p>

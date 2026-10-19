@@ -60,6 +60,7 @@ class CodeField extends StatefulWidget {
     this.editing = const CodeEditing(),
     this.shortcuts,
     this.inputFormatters,
+    this.undoController,
     this.lineNumbers = false,
     this.firstLineNumber = 1,
     this.gutterStyle,
@@ -128,6 +129,11 @@ class CodeField extends StatefulWidget {
   /// Formatters applied after the editing behaviour, such as a length
   /// limit.
   final List<TextInputFormatter>? inputFormatters;
+
+  /// Controls the field's undo history, as in [TextField.undoController].
+  /// Every edit the field makes itself — an auto-closed pair, a toggled
+  /// comment, an indent — is a single undo step.
+  final UndoHistoryController? undoController;
 
   /// Whether to show line numbers in a gutter.
   final bool lineNumbers;
@@ -569,6 +575,7 @@ class _CodeFieldState extends State<CodeField> {
         smartDashesType: SmartDashesType.disabled,
         smartQuotesType: SmartQuotesType.disabled,
         inputFormatters: [_formatter, ...?widget.inputFormatters],
+        undoController: widget.undoController,
       ),
     );
   }

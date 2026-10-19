@@ -506,4 +506,132 @@ void main() {
       expect(find.byType(EditorDecorations), isNot(paints..rrect()));
     });
   });
+
+  group('undo', () {
+    late UndoHistoryController undo;
+
+    Future<HighlightTextController> pumpUndoable(
+      WidgetTester tester,
+      String text, {
+      int? caret,
+    }) {
+      undo = UndoHistoryController();
+      addTearDown(undo.dispose);
+      return pumpField(
+        tester,
+        text,
+        caret: caret,
+        build: (controller) => CodeField(
+          controller: controller,
+          expands: true,
+          undoController: undo,
+        ),
+      );
+    }
+
+    /// Lets the undo history record the current value; it throttles pushes.
+    Future<void> settle(WidgetTester tester) =>
+        tester.pump(const Duration(seconds: 1));
+
+    Future<void> typeText(WidgetTester tester, String text, int caret) async {
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: caret),
+        ),
+      );
+      await settle(tester);
+    }
+
+    testWidgets('an auto-closed pair is undone in one step', (tester) async {
+      final controller = await pumpUndoable(tester, 'f');
+      await settle(tester);
+      await typeText(tester, 'f(', 2);
+      expect(controller.text, 'f()');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'f');
+      expect(controller.selection, const TextSelection.collapsed(offset: 1));
+      undo.redo();
+      await tester.pump();
+      expect(controller.text, 'f()');
+    });
+
+    testWidgets('a split bracket pair is undone in one step', (tester) async {
+      final controller = await pumpUndoable(tester, 'f() {}', caret: 5);
+      await settle(tester);
+      await typeText(tester, 'f() {\n}', 6);
+      expect(controller.text, 'f() {\n  \n}');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'f() {}');
+    });
+
+    testWidgets('a wrapped selection is undone in one step', (tester) async {
+      final controller = await pumpUndoable(tester, 'a b c');
+      controller.selection = const TextSelection(
+        baseOffset: 2,
+        extentOffset: 3,
+      );
+      await settle(tester);
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'a ( c',
+          selection: TextSelection.collapsed(offset: 3),
+        ),
+      );
+      await settle(tester);
+      expect(controller.text, 'a (b) c');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'a b c');
+    });
+
+    testWidgets('a toggled comment is undone in one step', (tester) async {
+      final controller = await pumpUndoable(tester, 'a();\nb();');
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 9,
+      );
+      await settle(tester);
+      await pressCombo(tester, LogicalKeyboardKey.slash);
+      await settle(tester);
+      expect(controller.text, '// a();\n// b();');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'a();\nb();');
+    });
+
+    testWidgets('an indent is undone in one step', (tester) async {
+      final controller = await pumpUndoable(tester, 'a\nb');
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 3,
+      );
+      await settle(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await settle(tester);
+      expect(controller.text, '  a\n  b');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'a\nb');
+    });
+
+    testWidgets('stepping over a closer adds no undo step', (tester) async {
+      final controller = await pumpUndoable(tester, 'f');
+      await settle(tester);
+      await typeText(tester, 'f(', 2);
+      await typeText(tester, 'f(x)', 3);
+      expect(controller.text, 'f(x)');
+      await typeText(tester, 'f(x))', 4);
+      expect(controller.text, 'f(x)');
+      expect(controller.selection.baseOffset, 4);
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'f()');
+      undo.undo();
+      await tester.pump();
+      expect(controller.text, 'f');
+    });
+  });
 }

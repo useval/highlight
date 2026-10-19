@@ -34,6 +34,8 @@
   `TextEditingValue`.
 * **`CodeField.inputFormatters`** — more formatters, applied after the
   editing behaviour.
+* **`CodeField.undoController`** — the field's undo history. Each edit the
+  field makes itself is one undo step.
 
 ### Changed
 

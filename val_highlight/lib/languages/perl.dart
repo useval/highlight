@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Perl 5.
 const perlLanguage = Grammar(
   name: 'perl',
+  editing: EditingSyntax(lineComment: '#', quotes: '"\'`'),
   aliases: ['pl', 'pm'],
   fileExtensions: ['pl', 'pm', 't', 'psgi'],
   shebangs: ['perl'],

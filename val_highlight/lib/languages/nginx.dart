@@ -8,6 +8,7 @@ const _blocks =
 /// nginx configuration.
 const nginxLanguage = Grammar(
   name: 'nginx',
+  editing: EditingSyntax.hashStyle,
   aliases: ['nginxconf'],
   fileNames: ['nginx.conf'],
   signatures: [

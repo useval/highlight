@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// CSS, including nesting and custom properties.
 const cssLanguage = Grammar(
   name: 'css',
+  editing: EditingSyntax(blockComment: ('/*', '*/')),
   fileExtensions: ['css'],
   caseInsensitive: true,
   signatures: [

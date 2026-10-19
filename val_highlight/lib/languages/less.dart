@@ -9,6 +9,7 @@ const _atRules =
 /// Less.
 const lessLanguage = Grammar(
   name: 'less',
+  editing: EditingSyntax.cStyle,
   fileExtensions: ['less'],
   caseInsensitive: true,
   signatures: [

@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// Haskell.
 const haskellLanguage = Grammar(
   name: 'haskell',
+  editing: EditingSyntax(
+    lineComment: '--',
+    blockComment: ('{-', '-}'),
+    quotes: '"',
+  ),
   aliases: ['hs'],
   fileExtensions: ['hs', 'lhs'],
   signatures: [

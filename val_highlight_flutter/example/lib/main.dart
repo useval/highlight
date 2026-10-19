@@ -259,6 +259,8 @@ class _EditorPageState extends State<EditorPage> {
             child: CodeField(
               controller: _controller,
               expands: true,
+              lineNumbers: true,
+              highlightCurrentLine: true,
               textAlignVertical: TextAlignVertical.top,
               decoration: const InputDecoration(
                 border: InputBorder.none,

@@ -6,6 +6,7 @@ import '../advanced.dart';
 /// following `\` continuations. Heredocs (`RUN <<EOF … EOF`) are strings.
 const dockerfileLanguage = Grammar(
   name: 'dockerfile',
+  editing: EditingSyntax.hashStyle,
   aliases: ['docker', 'containerfile'],
   fileExtensions: ['dockerfile'],
   fileNames: ['Dockerfile', 'Containerfile'],

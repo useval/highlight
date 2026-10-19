@@ -1,3 +1,26 @@
+## Unreleased
+
+### Added
+
+* **`EditingSyntax`** — how a language is edited: its line and block
+  comment markers, bracket pairs and quote characters. Every built-in
+  language declares one; set `Grammar.editing` on your own, or let
+  `EditingSyntax.of` derive it from the grammar's `LineComment`,
+  `BlockComment` and `QuotedString` blocks. `Grammar.extend` takes an
+  `editing` argument.
+* **`HighlightResult.matchingBracket`** — finds the matching bracket by
+  walking tokens, skipping brackets inside strings and comments.
+* **`HighlightResult.isStringOrCommentAt`**, **`isCommentAt`** and
+  **`isInsideStringOrComment`** — tell code apart from strings and
+  comments, at a character or at a caret position. Interpolations inside
+  strings count as code.
+* **`ScopeTable.isStringOrComment`** and **`isComment`** — the same
+  questions for a scope stack, answered from a table built once per stack.
+
+### Changed
+
+* Markdown highlights HTML comments (`<!-- -->`) as comments.
+
 ## 0.1.0
 
 First release.

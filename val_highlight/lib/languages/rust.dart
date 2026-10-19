@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// Rust.
 const rustLanguage = Grammar(
   name: 'rust',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"',
+  ),
   aliases: ['rs'],
   fileExtensions: ['rs'],
   signatures: [

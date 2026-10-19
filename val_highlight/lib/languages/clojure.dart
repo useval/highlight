@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Clojure, ClojureScript and EDN.
 const clojureLanguage = Grammar(
   name: 'clojure',
+  editing: EditingSyntax(lineComment: ';', quotes: '"'),
   aliases: ['clj', 'cljs', 'cljc', 'edn'],
   fileExtensions: ['clj', 'cljs', 'cljc', 'edn'],
   signatures: [

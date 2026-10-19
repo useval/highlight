@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Sass in SCSS syntax.
 const scssLanguage = Grammar(
   name: 'scss',
+  editing: EditingSyntax.cStyle,
   aliases: ['sass'],
   fileExtensions: ['scss'],
   caseInsensitive: true,

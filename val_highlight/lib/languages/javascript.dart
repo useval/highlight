@@ -4,6 +4,11 @@ import '../src/languages/ecmascript.dart';
 /// JavaScript, including JSX-free modern syntax.
 const javascriptLanguage = Grammar(
   name: 'javascript',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"\'`',
+  ),
   aliases: ['js', 'mjs', 'cjs'],
   fileExtensions: ['js', 'mjs', 'cjs'],
   shebangs: ['node', 'deno', 'bun'],

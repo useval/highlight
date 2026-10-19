@@ -15,7 +15,7 @@ library;
 
 export 'src/detect.dart' show Detection, LanguageDetector;
 export 'src/engine/scope_table.dart' show ScopeTable;
-export 'src/grammar/grammar.dart' show Grammar, GrammarException;
+export 'src/grammar/grammar.dart' show EditingSyntax, Grammar, GrammarException;
 export 'src/grammar/scopes.dart' show Scopes;
 export 'src/highlighter.dart' show Highlighter;
 export 'src/incremental.dart' show IncrementalHighlighter;

@@ -8,6 +8,7 @@ import 'html.dart';
 /// starts with markup is HTML until its first PHP tag.
 const phpLanguage = Grammar(
   name: 'php',
+  editing: EditingSyntax.cStyle,
   aliases: ['php8', 'phtml'],
   fileExtensions: ['php', 'phtml', 'php8', 'php7'],
   shebangs: ['php'],

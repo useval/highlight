@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Scala 2 and 3.
 const scalaLanguage = Grammar(
   name: 'scala',
+  editing: EditingSyntax.cStyle,
   aliases: ['sc'],
   fileExtensions: ['scala', 'sc', 'sbt'],
   signatures: [

@@ -7,6 +7,7 @@ import '../advanced.dart';
 /// registry; otherwise their content is scoped as [Scopes.code].
 const markdownLanguage = Grammar(
   name: 'markdown',
+  editing: EditingSyntax(blockComment: ('<!--', '-->'), quotes: '`'),
   aliases: ['md', 'mkdown', 'mkd'],
   fileExtensions: ['md', 'markdown', 'mkd'],
   // Inline code can wrap across lines, but never across a blank line.
@@ -39,6 +40,7 @@ const markdownLanguage = Grammar(
       endReferencesBegin: true,
       rules: [TokenRule(r'[^\n]+', scope: Scopes.code)],
     ),
+    BlockComment('<!--', '-->'),
     TokenRule(r'^#{1,6}(?=[ \t]|$).*$', scope: Scopes.heading),
     TokenRule(r'^.+\n(?:=+|-+)[ \t]*$', scope: Scopes.heading),
     TokenRule(r'^[ \t]*(?:[-*_][ \t]*){3,}$', scope: Scopes.meta),

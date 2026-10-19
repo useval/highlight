@@ -2,6 +2,7 @@ import '../engine/compiler.dart';
 import 'scopes.dart';
 
 part 'blocks.dart';
+part 'editing.dart';
 
 /// A language grammar: an ordered list of [Rule]s plus a named repository of
 /// reusable rule lists.
@@ -27,6 +28,7 @@ final class Grammar {
     this.signatures = const [],
     this.restartLine,
     this.detectable = true,
+    this.editing,
   });
 
   /// Canonical, lower-case language name, such as `dart`.
@@ -75,6 +77,11 @@ final class Grammar {
   /// grammars such as plain text and the generic fallback.
   final bool detectable;
 
+  /// How code in this language is edited: comment markers, brackets and
+  /// quotes. When `null`, [EditingSyntax.of] derives them from the
+  /// grammar's comment and string blocks.
+  final EditingSyntax? editing;
+
   /// Returns a new grammar based on this one.
   ///
   /// [rules] are placed *before* the existing top-level rules, so they take
@@ -88,6 +95,7 @@ final class Grammar {
     List<String>? aliases,
     List<String>? fileExtensions,
     List<String>? fileNames,
+    EditingSyntax? editing,
   }) {
     return Grammar(
       name: name ?? this.name,
@@ -102,6 +110,7 @@ final class Grammar {
       signatures: signatures,
       restartLine: restartLine,
       detectable: detectable,
+      editing: editing ?? this.editing,
     );
   }
 
@@ -179,6 +188,7 @@ final class Grammar {
       signatures: signatures,
       restartLine: restartLine,
       detectable: detectable,
+      editing: editing,
     );
   }
 

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// SQL, covering the common ANSI syntax plus popular dialect keywords.
 const sqlLanguage = Grammar(
   name: 'sql',
+  editing: EditingSyntax(lineComment: '--', blockComment: ('/*', '*/')),
   aliases: ['postgresql', 'postgres', 'mysql', 'sqlite', 'plsql', 'tsql'],
   fileExtensions: ['sql'],
   caseInsensitive: true,

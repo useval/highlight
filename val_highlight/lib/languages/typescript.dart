@@ -4,6 +4,11 @@ import '../src/languages/ecmascript.dart';
 /// TypeScript.
 const typescriptLanguage = Grammar(
   name: 'typescript',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"\'`',
+  ),
   aliases: ['ts', 'mts', 'cts'],
   fileExtensions: ['ts', 'mts', 'cts'],
   shebangs: ['ts-node', 'tsx'],

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Java (21+), including records, sealed types and text blocks.
 const javaLanguage = Grammar(
   name: 'java',
+  editing: EditingSyntax.cStyle,
   aliases: ['jsp'],
   fileExtensions: ['java'],
   signatures: [

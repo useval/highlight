@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// PowerShell. Keywords and operators are case-insensitive.
 const powershellLanguage = Grammar(
   name: 'powershell',
+  editing: EditingSyntax(lineComment: '#', blockComment: ('<#', '#>')),
   aliases: ['ps1', 'pwsh', 'ps', 'posh'],
   fileExtensions: ['ps1', 'psm1', 'psd1'],
   shebangs: ['pwsh', 'powershell'],

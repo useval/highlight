@@ -4,6 +4,11 @@ import '../src/languages/ecmascript.dart';
 /// JavaScript with JSX elements, as used by React.
 const jsxLanguage = Grammar(
   name: 'jsx',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"\'`',
+  ),
   aliases: ['react'],
   fileExtensions: ['jsx'],
   signatures: [

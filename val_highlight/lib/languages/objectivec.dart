@@ -4,6 +4,7 @@ import 'c.dart';
 /// Objective-C and Objective-C++.
 const objectiveCLanguage = Grammar(
   name: 'objectivec',
+  editing: EditingSyntax.cStyle,
   aliases: ['objc', 'objective-c', 'obj-c', 'objectivecpp', 'objc++'],
   fileExtensions: ['m', 'mm'],
   signatures: [

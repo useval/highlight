@@ -4,6 +4,11 @@ import '../src/languages/ecmascript.dart';
 /// TypeScript with JSX elements, as used by React.
 const tsxLanguage = Grammar(
   name: 'tsx',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"\'`',
+  ),
   fileExtensions: ['tsx'],
   signatures: [
     r'\breturn\s*\(?\s*<[A-Za-z>]',

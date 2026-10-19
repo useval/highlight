@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// Swift (6), including raw strings, macros and result builders.
 const swiftLanguage = Grammar(
   name: 'swift',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"',
+  ),
   fileExtensions: ['swift'],
   shebangs: ['swift'],
   signatures: [

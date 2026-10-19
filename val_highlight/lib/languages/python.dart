@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Python 3.
 const pythonLanguage = Grammar(
   name: 'python',
+  editing: EditingSyntax.hashStyle,
   aliases: ['py', 'py3', 'gyp'],
   fileExtensions: ['py', 'pyw', 'pyi'],
   shebangs: ['python', 'python3'],

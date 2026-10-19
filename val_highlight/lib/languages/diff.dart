@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Unified and git diffs.
 const diffLanguage = Grammar(
   name: 'diff',
+  editing: EditingSyntax.none,
   aliases: ['patch'],
   fileExtensions: ['diff', 'patch'],
   signatures: [r'^@@ -\d+(?:,\d+)? \+\d+(?:,\d+)? @@', r'^diff --git '],

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Ruby, including Gemfiles, Podfiles, Rakefiles and Fastlane files.
 const rubyLanguage = Grammar(
   name: 'ruby',
+  editing: EditingSyntax(lineComment: '#', quotes: '"\'`'),
   aliases: ['rb', 'jruby', 'podfile', 'gemfile'],
   fileExtensions: ['rb', 'rake', 'gemspec', 'podspec', 'ru', 'rbw', 'thor'],
   fileNames: [

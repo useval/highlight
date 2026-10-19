@@ -14,6 +14,14 @@ library;
 
 export 'package:val_highlight/val_highlight.dart';
 
+export 'src/code_editing.dart'
+    show
+        CodeEditing,
+        CodeEditingFormatter,
+        IndentCodeIntent,
+        OutdentCodeIntent,
+        ToggleCommentIntent,
+        toggleComment;
 export 'src/code_field.dart' show CodeField;
 export 'src/code_highlighter.dart' show CodeHighlighter;
 export 'src/code_styles.dart' show CodeStyles, textStyleFromStyle;

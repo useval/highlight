@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Kotlin, including Kotlin script (`.kts`, such as `build.gradle.kts`).
 const kotlinLanguage = Grammar(
   name: 'kotlin',
+  editing: EditingSyntax.cStyle,
   aliases: ['kt', 'kts'],
   fileExtensions: ['kt', 'kts'],
   shebangs: ['kotlin'],

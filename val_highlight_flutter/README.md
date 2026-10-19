@@ -27,8 +27,9 @@
   to show code, `CodeField(controller: …)` to edit it.
 - **Smooth on large files** — a 20,000-line file scrolls with no dropped
   frames, and typing in a 2,000-line editor takes about 14 ms per keystroke.
-- **Real editing** — Tab and Shift+Tab indent and outdent, Enter keeps the
-  indentation, and every edit re-highlights only what it can affect.
+- **Real editing** — auto-closing brackets and quotes, comment toggling,
+  bracket matching, smart indentation and line numbers, on every keyboard;
+  every edit re-highlights only what it can affect.
 - **Native rendering** — plain Flutter text, no WebView and no platform
   code. Works on Android, iOS, macOS, Windows, Linux and the web.
 - **Follows your app** — light and dark themes switch with the app, and
@@ -98,10 +99,54 @@ CodeField(controller: controller, expands: true)
 `CodeField` is a `TextField` for code:
 
 - monospace, no autocorrect or smart quotes;
-- Tab and Shift+Tab indent and outdent (`indent` sets the unit);
+- brackets and quotes close themselves, typing a closer steps over it, and
+  Backspace deletes an empty pair;
+- typing a bracket or quote over a selection wraps it;
 - Enter keeps the current indentation, adding a level after `{`, `[`, `(`
-  or `:`;
+  or `:`, and moves the closer of `{|}` onto its own line;
+- Tab and Shift+Tab indent and outdent (`indent` sets the unit);
+- Ctrl+/ (Cmd+/ on Apple platforms) comments and uncomments lines;
+- the bracket at the caret and its match are outlined;
 - each edit re-scans only the lines it can affect.
+
+Brackets, quotes and comment markers come from the language
+(`EditingSyntax`), so Rust lifetimes or Python `#` comments behave. Typing
+is handled as text changes rather than key presses, so it works the same
+on hardware keyboards, on-screen keyboards and voice input, and never
+touches text an input method is still composing.
+
+```dart
+CodeField(
+  controller: controller,
+  lineNumbers: true,
+  highlightCurrentLine: true,
+  highlightedLines: {3, 4},
+  editing: const CodeEditing(autoClose: false), // or CodeEditing.none
+)
+```
+
+Line numbers and line bands are painted from the text's own layout, so
+wrapped lines line up, and only visible lines are painted.
+
+Each shortcut sends an intent: `IndentCodeIntent`, `OutdentCodeIntent` or
+`ToggleCommentIntent`. Rebind keys with `shortcuts` (`const {}` gives Tab
+back to focus traversal), or change what an intent does with an `Actions`
+widget above the field:
+
+```dart
+Actions(
+  actions: {
+    ToggleCommentIntent: CallbackAction<ToggleCommentIntent>(
+      onInvoke: (_) => myToggle(),
+    ),
+  },
+  child: CodeField(controller: controller),
+)
+```
+
+For a plain `TextField`, add
+`CodeEditingFormatter(controller: controller)` to its `inputFormatters` to
+get the same typing behaviour.
 
 Flutter lays out a text field's whole text on every change, and styled runs
 make that slower. So for documents over 300 lines, `CodeField` colours only

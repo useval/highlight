@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Protocol Buffers (proto2, proto3 and editions).
 const protobufLanguage = Grammar(
   name: 'protobuf',
+  editing: EditingSyntax.cStyle,
   aliases: ['proto'],
   fileExtensions: ['proto'],
   signatures: [

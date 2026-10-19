@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Zig.
 const zigLanguage = Grammar(
   name: 'zig',
+  editing: EditingSyntax(lineComment: '//'),
   fileExtensions: ['zig', 'zon'],
   signatures: [
     r'@import\("std"\)',

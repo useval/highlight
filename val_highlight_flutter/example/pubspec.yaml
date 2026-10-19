@@ -11,7 +11,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  val_highlight: ^0.1.0
+  val_highlight: ^0.1.1
   val_highlight_flutter: ^0.1.0
 
 dev_dependencies:

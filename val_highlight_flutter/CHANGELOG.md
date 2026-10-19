@@ -1,4 +1,4 @@
-## Unreleased
+## 0.1.1
 
 ### Added
 
@@ -45,8 +45,8 @@
   behaviours with `CodeEditing`.
 * Enter keeps the indentation on on-screen keyboards too, not only on
   hardware keyboards.
-* Requires the unreleased `val_highlight` changes above (`EditingSyntax`
-  and the bracket and context queries on `HighlightResult`).
+* Requires `val_highlight` 0.1.1 (`EditingSyntax` and the bracket and
+  context queries on `HighlightResult`).
 
 ## 0.1.0
 

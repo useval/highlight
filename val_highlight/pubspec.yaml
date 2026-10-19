@@ -1,6 +1,6 @@
 name: val_highlight
 description: "Syntax highlighting for 55 languages in pure Dart. Incremental updates, themes, VS Code theme import, and HTML output. Runs on every platform."
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/useval/highlight
 repository: https://github.com/useval/highlight/tree/main/val_highlight
 issue_tracker: https://github.com/useval/highlight/issues

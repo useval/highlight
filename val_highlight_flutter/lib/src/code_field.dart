@@ -243,6 +243,7 @@ class _CodeFieldState extends State<CodeField> {
   void initState() {
     super.initState();
     widget.controller.addListener(_onChanged);
+    PaintingBinding.instance.systemFonts.addListener(_onFontsChanged);
   }
 
   @override
@@ -272,6 +273,7 @@ class _CodeFieldState extends State<CodeField> {
   @override
   void dispose() {
     widget.controller.removeListener(_onChanged);
+    PaintingBinding.instance.systemFonts.removeListener(_onFontsChanged);
     _outer?.removeListener(_onOuterScroll);
     _ownScroll?.dispose();
     _outerMoved.dispose();
@@ -284,6 +286,16 @@ class _CodeFieldState extends State<CodeField> {
     _schedule();
     // The gutter widens when the line count gains a digit.
     if (widget.lineNumbers && _digitsFor() != _digitCount) setState(() {});
+  }
+
+  /// A font finished loading, so the text was laid out again: lay out the
+  /// digits again too, and repaint the gutter where the lines now are.
+  void _onFontsChanged() {
+    _digits?.dispose();
+    _currentDigits?.dispose();
+    _digits = null;
+    _currentDigits = null;
+    if (mounted) setState(() {});
   }
 
   void _onOuterScroll() {

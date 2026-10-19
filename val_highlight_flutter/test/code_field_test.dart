@@ -417,6 +417,32 @@ void main() {
       );
     });
 
+    testWidgets('a font that finishes loading relays out the gutter', (
+      tester,
+    ) async {
+      await pumpField(
+        tester,
+        'a\nb',
+        build: (controller) =>
+            CodeField(controller: controller, expands: true, lineNumbers: true),
+      );
+      GutterDigits? digits() => tester
+          .widget<EditorDecorations>(find.byType(EditorDecorations))
+          .digits;
+      final before = digits();
+      await tester.binding.handleSystemMessage(<String, Object?>{
+        'type': 'fontsChange',
+      });
+      await tester.pump();
+      expect(digits(), isNot(same(before)));
+      expect(
+        find.byType(EditorDecorations),
+        paints
+          ..paragraph()
+          ..paragraph(),
+      );
+    });
+
     testWidgets('the gutter widens as the line count gains a digit', (
       tester,
     ) async {

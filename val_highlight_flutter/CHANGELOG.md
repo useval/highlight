@@ -22,7 +22,8 @@
 * **Line numbers in `CodeField`** — `lineNumbers`, `firstLineNumber` and
   `gutterStyle`, plus `highlightedLines`, `highlightCurrentLine` and their
   colors. They are painted from the text's own layout, so wrapped lines
-  line up, and only visible lines are painted.
+  line up, only visible lines are painted, and they follow the text when
+  a font finishes loading late.
 * **Shortcuts as intents** — `IndentCodeIntent`, `OutdentCodeIntent` and
   `ToggleCommentIntent`. Rebind keys with `CodeField.shortcuts` (defaults in
   `CodeField.defaultShortcuts`), or override an intent with an `Actions`

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Erlang.
 const erlangLanguage = Grammar(
   name: 'erlang',
+  editing: EditingSyntax(lineComment: '%'),
   aliases: ['erl'],
   fileExtensions: ['erl', 'hrl', 'escript'],
   fileNames: ['rebar.config'],

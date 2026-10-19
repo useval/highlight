@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Elixir.
 const elixirLanguage = Grammar(
   name: 'elixir',
+  editing: EditingSyntax.hashStyle,
   aliases: ['ex', 'exs'],
   fileExtensions: ['ex', 'exs', 'heex'],
   fileNames: ['mix.lock'],

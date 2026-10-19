@@ -122,6 +122,129 @@ final class HighlightResult {
     }
   }
 
+  /// Whether the character at [offset] is inside a string, comment or
+  /// regular expression. Interpolations inside strings count as code.
+  bool isStringOrCommentAt(int offset) {
+    if (offset < 0 || offset >= code.length) return false;
+    return scopes.isStringOrComment(_stacks[tokenAt(offset)]);
+  }
+
+  /// Whether the character at [offset] is inside a comment.
+  bool isCommentAt(int offset) {
+    if (offset < 0 || offset >= code.length) return false;
+    return scopes.isComment(_stacks[tokenAt(offset)]);
+  }
+
+  /// Whether text typed at caret position [offset], between
+  /// `code[offset - 1]` and `code[offset]`, would land inside a string or
+  /// comment.
+  ///
+  /// Unlike [isStringOrCommentAt], this answers for a position between
+  /// characters: right after a closing quote is outside the string, while
+  /// the end of a line comment or of an unterminated string is inside.
+  /// [syntax] supplies the block comment marker; it defaults to
+  /// [EditingSyntax.of] the [language].
+  bool isInsideStringOrComment(int offset, [EditingSyntax? syntax]) {
+    if (offset <= 0 || offset > code.length) return false;
+    final before = tokenAt(offset - 1);
+    final stack = _stacks[before];
+    if (!scopes.isStringOrComment(stack)) return false;
+    if (_ends[before] > offset) return true;
+    if (offset < code.length) {
+      if (scopes.isStringOrComment(_stacks[before + 1])) return true;
+      final next = code.codeUnitAt(offset);
+      if (next != 0x0A && next != 0x0D) return false;
+    }
+    // At the end of a line, right after a string or comment: still inside
+    // unless it was closed there.
+    if (scopes.isComment(stack)) {
+      final close = (syntax ?? EditingSyntax.of(language)).blockComment?.$2;
+      return close == null ||
+          offset - close.length <= tokenStart(before) ||
+          !code.startsWith(close, offset - close.length);
+    }
+    final last = code.codeUnitAt(offset - 1);
+    final quote = last == 0x22 || last == 0x27 || last == 0x60;
+    final opened =
+        tokenStart(before) < offset - 1 ||
+        (before > 0 && scopes.isStringOrComment(_stacks[before - 1]));
+    return !(quote && opened);
+  }
+
+  /// Offset of the bracket matching the one at [offset], or `-1` if the
+  /// character at [offset] is not a bracket in code, or has no match within
+  /// [limit] characters.
+  ///
+  /// [brackets] lists pairs as consecutive opening and closing characters,
+  /// as in [EditingSyntax.brackets]. Brackets inside strings and comments
+  /// are skipped, so `f(")")` matches correctly. The search walks tokens,
+  /// jumping over a whole string or comment at once.
+  int matchingBracket(
+    int offset, {
+    String brackets = '()[]{}',
+    int limit = 1 << 20,
+  }) {
+    if (offset < 0 || offset >= code.length) return -1;
+    final unit = code.codeUnitAt(offset);
+    var pair = -1;
+    for (var i = 0; i + 1 < brackets.length; i += 2) {
+      if (brackets.codeUnitAt(i) == unit) {
+        pair = i;
+        break;
+      }
+      if (brackets.codeUnitAt(i + 1) == unit) {
+        pair = i + 1;
+        break;
+      }
+    }
+    if (pair < 0) return -1;
+    final open = brackets.codeUnitAt(pair & ~1);
+    final close = brackets.codeUnitAt(pair | 1);
+    if (open == close) return -1;
+    var token = tokenAt(offset);
+    if (scopes.isStringOrComment(_stacks[token])) return -1;
+    var depth = 0;
+    var i = offset;
+    if (pair.isEven) {
+      final stop = code.length - offset > limit ? offset + limit : code.length;
+      while (i < stop) {
+        final end = _ends[token];
+        if (!scopes.isStringOrComment(_stacks[token])) {
+          final until = end < stop ? end : stop;
+          for (; i < until; i++) {
+            final c = code.codeUnitAt(i);
+            if (c == open) {
+              depth++;
+            } else if (c == close && --depth == 0) {
+              return i;
+            }
+          }
+        }
+        i = end;
+        token++;
+      }
+    } else {
+      final stop = offset > limit ? offset - limit : 0;
+      while (i >= stop) {
+        final start = tokenStart(token);
+        if (!scopes.isStringOrComment(_stacks[token])) {
+          final until = start > stop ? start : stop;
+          for (; i >= until; i--) {
+            final c = code.codeUnitAt(i);
+            if (c == close) {
+              depth++;
+            } else if (c == open && --depth == 0) {
+              return i;
+            }
+          }
+        }
+        i = start - 1;
+        token--;
+      }
+    }
+    return -1;
+  }
+
   /// Renders the result as HTML. See [HtmlRenderer] for options.
   String toHtml([HtmlRenderer renderer = const HtmlRenderer()]) =>
       renderer.render(this);

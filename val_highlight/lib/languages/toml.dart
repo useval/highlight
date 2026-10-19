@@ -9,6 +9,7 @@ const _dottedKey = '$_key(?:[ \\t]*\\.[ \\t]*$_key)*';
 /// TOML.
 const tomlLanguage = Grammar(
   name: 'toml',
+  editing: EditingSyntax.hashStyle,
   fileExtensions: ['toml'],
   fileNames: ['Cargo.lock', 'Pipfile', 'poetry.lock'],
   signatures: [

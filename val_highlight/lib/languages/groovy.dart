@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Groovy, including Gradle build scripts (`build.gradle`).
 const groovyLanguage = Grammar(
   name: 'groovy',
+  editing: EditingSyntax.cStyle,
   aliases: ['gradle'],
   fileExtensions: ['groovy', 'gradle', 'gvy', 'gy', 'gsh'],
   fileNames: ['Jenkinsfile'],

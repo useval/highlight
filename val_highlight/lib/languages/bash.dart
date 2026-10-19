@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Bash and POSIX shell scripts.
 const bashLanguage = Grammar(
   name: 'bash',
+  editing: EditingSyntax(lineComment: '#', quotes: '"\'`'),
   aliases: ['sh', 'shell', 'zsh', 'console'],
   fileExtensions: ['sh', 'bash', 'zsh'],
   shebangs: ['bash', 'sh', 'zsh', 'dash', 'ksh'],

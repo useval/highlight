@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// JSON, including the comments allowed by JSONC.
 const jsonLanguage = Grammar(
   name: 'json',
+  editing: EditingSyntax(quotes: '"'),
   aliases: ['jsonc'],
   fileExtensions: ['json', 'jsonc'],
   signatures: [

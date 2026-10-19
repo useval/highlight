@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Julia.
 const juliaLanguage = Grammar(
   name: 'julia',
+  editing: EditingSyntax(lineComment: '#', blockComment: ('#=', '=#')),
   aliases: ['jl'],
   fileExtensions: ['jl'],
   shebangs: ['julia'],

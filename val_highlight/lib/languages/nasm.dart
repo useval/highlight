@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// x86 assembly in NASM/YASM syntax.
 const nasmLanguage = Grammar(
   name: 'nasm',
+  editing: EditingSyntax(lineComment: ';', quotes: '"\'`'),
   aliases: ['asm', 'x86asm', 'assembly'],
   fileExtensions: ['asm', 'nasm', 's'],
   caseInsensitive: true,

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 /// Interned scope names and scope stacks for one highlight result.
 ///
 /// Every token records a single stack id. A stack is a chain of scopes from
@@ -17,6 +19,11 @@ final class ScopeTable {
   final List<int> _scopes = [-1];
   final Map<int, int> _stackIds = {};
   List<List<int>?>? _paths;
+
+  // Per stack: bit 0 = inside a string, comment or regexp; bit 1 = inside a
+  // comment. Grown lazily, since stacks are only ever appended.
+  Uint8List _kinds = Uint8List(0);
+  int _kindCount = 0;
 
   /// Number of stacks, including the root.
   int get stackCount => _parents.length;
@@ -72,5 +79,39 @@ final class ScopeTable {
     }
     paths[stack] = path;
     return path;
+  }
+
+  /// Whether [stack] is inside a string, comment or regular expression.
+  ///
+  /// An interpolation inside a string, such as `${x}`, is code again: its
+  /// stacks are not.
+  bool isStringOrComment(int stack) => _kind(stack) & 1 != 0;
+
+  /// Whether [stack] is inside a comment.
+  bool isComment(int stack) => _kind(stack) & 2 != 0;
+
+  int _kind(int stack) {
+    if (stack >= _kindCount) _classify();
+    return _kinds[stack];
+  }
+
+  void _classify() {
+    final count = stackCount;
+    if (_kinds.length < count) {
+      _kinds = Uint8List(count < 64 ? 64 : count * 2)
+        ..setRange(0, _kindCount, _kinds);
+    }
+    for (var id = _kindCount == 0 ? 1 : _kindCount; id < count; id++) {
+      final name = _names[_scopes[id]];
+      final dot = name.indexOf('.');
+      final head = dot < 0 ? name : name.substring(0, dot);
+      _kinds[id] = switch (head) {
+        'comment' => 3,
+        'string' || 'regexp' => _kinds[_parents[id]] | 1,
+        'interpolation' => 0,
+        _ => _kinds[_parents[id]],
+      };
+    }
+    _kindCount = count;
   }
 }

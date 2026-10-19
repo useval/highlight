@@ -10,6 +10,7 @@ const _controlCommands = [
 /// CMake.
 const cmakeLanguage = Grammar(
   name: 'cmake',
+  editing: EditingSyntax(lineComment: '#', quotes: '"'),
   aliases: ['cmakelists'],
   fileExtensions: ['cmake'],
   fileNames: ['CMakeLists.txt'],

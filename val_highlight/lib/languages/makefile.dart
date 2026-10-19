@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Make (GNU make syntax).
 const makefileLanguage = Grammar(
   name: 'makefile',
+  editing: EditingSyntax.hashStyle,
   aliases: ['make', 'mk', 'mak'],
   fileExtensions: ['mk', 'mak'],
   fileNames: ['Makefile', 'GNUmakefile', 'makefile'],

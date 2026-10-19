@@ -4,6 +4,7 @@ import '../val_highlight.dart';
 /// is used for placeholders and for code in an unknown language.
 const plainTextLanguage = Grammar(
   name: 'plaintext',
+  editing: EditingSyntax.none,
   detectable: false,
   aliases: ['text', 'txt', 'plain'],
   fileExtensions: ['txt'],

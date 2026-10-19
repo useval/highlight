@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// Go.
 const goLanguage = Grammar(
   name: 'go',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('/*', '*/'),
+    quotes: '"\'`',
+  ),
   aliases: ['golang'],
   fileExtensions: ['go'],
   signatures: [

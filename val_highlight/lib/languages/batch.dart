@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Windows batch files (`.bat`, `.cmd`).
 const batchLanguage = Grammar(
   name: 'batch',
+  editing: EditingSyntax(lineComment: 'REM', quotes: '"'),
   aliases: ['bat', 'cmd', 'dos'],
   fileExtensions: ['bat', 'cmd'],
   caseInsensitive: true,

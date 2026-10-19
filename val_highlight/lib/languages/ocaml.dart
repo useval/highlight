@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// OCaml.
 const ocamlLanguage = Grammar(
   name: 'ocaml',
+  editing: EditingSyntax(blockComment: ('(*', '*)'), quotes: '"'),
   aliases: ['ml'],
   fileExtensions: ['ml', 'mli'],
   signatures: [

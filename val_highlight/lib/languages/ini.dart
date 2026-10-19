@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// INI files and Java `.properties` files.
 const iniLanguage = Grammar(
   name: 'ini',
+  editing: EditingSyntax(lineComment: ';'),
   aliases: ['properties', 'conf', 'cfg', 'editorconfig', 'gitconfig'],
   fileExtensions: ['ini', 'cfg', 'conf', 'properties', 'editorconfig'],
   fileNames: ['.editorconfig', '.gitconfig', 'gradle.properties'],

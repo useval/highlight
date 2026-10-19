@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// GraphQL queries and schema definitions.
 const graphqlLanguage = Grammar(
   name: 'graphql',
+  editing: EditingSyntax(lineComment: '#', quotes: '"'),
   aliases: ['gql'],
   fileExtensions: ['graphql', 'gql', 'graphqls'],
   signatures: [

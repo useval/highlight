@@ -9,6 +9,7 @@ import '../advanced.dart';
 /// `allLanguagesRegistry()` and of `CodeView` when no language is given.
 const genericLanguage = Grammar(
   name: 'generic',
+  editing: EditingSyntax.cStyle,
   detectable: false,
   rules: [
     TokenRule(r'^#!.*$', scope: Scopes.meta),

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// LaTeX and TeX.
 const latexLanguage = Grammar(
   name: 'latex',
+  editing: EditingSyntax(lineComment: '%', quotes: ''),
   aliases: ['tex'],
   fileExtensions: ['tex', 'sty', 'cls', 'ltx', 'bib'],
   // Inline math can wrap across lines, but never across a blank line.

@@ -23,6 +23,7 @@ const _blockEnd = r'^(?![ \t]*$)(?!\1[ \t])|(?![\s\S])';
 /// YAML.
 const yamlLanguage = Grammar(
   name: 'yaml',
+  editing: EditingSyntax.hashStyle,
   aliases: ['yml'],
   fileExtensions: ['yaml', 'yml'],
   signatures: [

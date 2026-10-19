@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Lua 5.4, including Luau-style usage in game and editor scripts.
 const luaLanguage = Grammar(
   name: 'lua',
+  editing: EditingSyntax(lineComment: '--', blockComment: ('--[[', ']]')),
   aliases: ['luau'],
   fileExtensions: ['lua', 'luau', 'rockspec'],
   shebangs: ['lua', 'luajit'],

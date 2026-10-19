@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// C# (12+).
 const csharpLanguage = Grammar(
   name: 'csharp',
+  editing: EditingSyntax.cStyle,
   aliases: ['cs', 'c#'],
   fileExtensions: ['cs', 'csx'],
   signatures: [

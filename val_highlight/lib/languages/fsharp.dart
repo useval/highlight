@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// F#.
 const fsharpLanguage = Grammar(
   name: 'fsharp',
+  editing: EditingSyntax(
+    lineComment: '//',
+    blockComment: ('(*', '*)'),
+    quotes: '"',
+  ),
   aliases: ['fs', 'f#'],
   fileExtensions: ['fs', 'fsi', 'fsx'],
   signatures: [

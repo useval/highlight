@@ -38,6 +38,7 @@ const cCommonRules = <Rule>[
 /// C.
 const cLanguage = Grammar(
   name: 'c',
+  editing: EditingSyntax.cStyle,
   aliases: ['h'],
   fileExtensions: ['c', 'h'],
   signatures: [

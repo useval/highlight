@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// R.
 const rLanguage = Grammar(
   name: 'r',
+  editing: EditingSyntax(lineComment: '#', quotes: '"\'`'),
   aliases: ['rscript', 'splus'],
   fileExtensions: ['r', 'rprofile'],
   fileNames: ['.Rprofile'],

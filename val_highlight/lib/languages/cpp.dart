@@ -4,6 +4,7 @@ import 'c.dart';
 /// C++ (C++23).
 const cppLanguage = Grammar(
   name: 'cpp',
+  editing: EditingSyntax.cStyle,
   aliases: ['c++', 'cxx', 'hpp', 'cc', 'hh'],
   fileExtensions: ['cpp', 'cc', 'cxx', 'hpp', 'hh', 'hxx', 'ipp', 'ixx'],
   signatures: [

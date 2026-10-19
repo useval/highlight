@@ -3,6 +3,11 @@ import '../advanced.dart';
 /// HCL, including Terraform and OpenTofu configuration.
 const hclLanguage = Grammar(
   name: 'hcl',
+  editing: EditingSyntax(
+    lineComment: '#',
+    blockComment: ('/*', '*/'),
+    quotes: '"',
+  ),
   aliases: ['terraform', 'tf', 'opentofu'],
   fileExtensions: ['tf', 'tfvars', 'hcl'],
   signatures: [

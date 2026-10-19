@@ -6,6 +6,7 @@ import 'javascript.dart';
 /// HTML, with embedded CSS in `<style>` and JavaScript in `<script>`.
 const htmlLanguage = Grammar(
   name: 'html',
+  editing: EditingSyntax.markupStyle,
   // Vue and Svelte single-file components are HTML with embedded script and
   // style elements.
   aliases: ['htm', 'xhtml', 'vue', 'svelte'],

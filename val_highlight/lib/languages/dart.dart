@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Dart.
 const dartLanguage = Grammar(
   name: 'dart',
+  editing: EditingSyntax.cStyle,
   fileExtensions: ['dart'],
   rules: [
     IncludeRule('comments'),

@@ -3,6 +3,7 @@ import '../advanced.dart';
 /// Solidity.
 const solidityLanguage = Grammar(
   name: 'solidity',
+  editing: EditingSyntax.cStyle,
   aliases: ['sol'],
   fileExtensions: ['sol'],
   signatures: [

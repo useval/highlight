@@ -162,6 +162,28 @@ final document = IncrementalHighlighter(language: dartLanguage, text: source);
 final updated = document.update(editedSource);
 ```
 
+Results also answer the questions an editor asks, using the tokens, so
+brackets and quotes inside strings and comments are never mistaken for
+code:
+
+```dart
+result.matchingBracket(offset);          // the matching bracket, or -1
+result.isStringOrCommentAt(offset);      // the character at offset
+result.isInsideStringOrComment(caret);   // text typed at a caret position
+```
+
+Each language also describes how it is edited — its comment markers,
+bracket pairs and quote characters — as an `EditingSyntax`:
+
+```dart
+final syntax = EditingSyntax.of(pythonLanguage);
+syntax.lineComment;   // '#'
+syntax.quotes;        // '"\''
+```
+
+Set `editing:` on your own grammar, or leave it out and it is derived from
+the grammar's `LineComment`, `BlockComment` and `QuotedString` blocks.
+
 ## 🔧 Changing a built-in language
 
 ```dart
@@ -178,6 +200,11 @@ final withTodos = dartLanguage.extend(
 
 // Replace a named part of a grammar. `grammar.repository.keys` lists them.
 final quiet = dartLanguage.extend(repository: {'numbers': []});
+
+// Change how it is edited: comment markers, brackets and quotes.
+final backticks = dartLanguage.extend(
+  editing: EditingSyntax.cStyle.copyWith(quotes: '"\'`'),
+);
 ```
 
 A new scope such as `todo` only needs a theme entry:

@@ -29,7 +29,7 @@ jobs:
       published: ${{ steps.pubdev.outputs.published }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Read package and version from the tag
         id: tag
@@ -97,7 +97,7 @@ jobs:
       id-token: write # required to mint the pub.dev credential
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Configures the pub.dev credential from GitHub's OIDC token.
       - uses: dart-lang/setup-dart@v1

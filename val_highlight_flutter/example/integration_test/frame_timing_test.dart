@@ -3,7 +3,7 @@
 // Run in profile mode (debug frames are not representative):
 //   just bench-frames            # macOS
 //   just bench-frames <device>   # any device id
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:val_highlight/languages/dart.dart';

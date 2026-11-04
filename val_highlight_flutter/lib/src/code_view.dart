@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:val_highlight/languages/generic.dart';
 import 'package:val_highlight/languages/plaintext.dart';
 import 'package:val_highlight/val_highlight.dart';

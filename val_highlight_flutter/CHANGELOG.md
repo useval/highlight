@@ -1,3 +1,8 @@
+## 0.1.2
+
+* Migrated from `package:flutter/material.dart` to `material_ui`.
+* Requires Flutter 3.44.0 (Dart 3.12) or later.
+
 ## 0.1.1
 
 ### Added

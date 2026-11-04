@@ -23,10 +23,9 @@ class HighlightTextController extends TextEditingController {
   HighlightTextController({
     super.text,
     required Grammar language,
-    ValTheme? theme,
+    this._theme,
     LanguageRegistry? registry,
-  }) : _theme = theme,
-       _document = IncrementalHighlighter(
+  }) : _document = IncrementalHighlighter(
          language: language,
          text: text ?? '',
          registry: registry,

@@ -12,7 +12,7 @@ library;
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:val_highlight/languages/all.dart';
@@ -30,7 +30,7 @@ const _cardWidth = 560.0;
 const _pagePadding = 26.0;
 
 const _dart = r'''
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shows a greeting that counts taps.
 class Greeting extends StatefulWidget {

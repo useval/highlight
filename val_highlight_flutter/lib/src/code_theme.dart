@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:val_highlight/themes/dark.dart';
 import 'package:val_highlight/themes/light.dart';
 import 'package:val_highlight/val_highlight.dart';

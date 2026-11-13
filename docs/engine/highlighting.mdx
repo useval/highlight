@@ -1,0 +1,121 @@
+---
+title: Highlighting
+description: Highlight code in pure Dart and read the result — flat tokens with scope stacks, lines, and the questions an editor asks.
+---
+import Api from '../api/_highlighting.mdx'
+
+`val_highlight` has no Flutter dependency: the same calls work in a Flutter
+app, on a server, in a command-line tool and on the web.
+
+```dart
+import 'package:val_highlight/val_highlight.dart';
+import 'package:val_highlight/languages/dart.dart';
+
+final result = const Highlighter().highlight(source, language: dartLanguage);
+```
+
+A `Highlighter` holds no mutable state, so one instance can be shared, from
+any isolate. Each language is compiled the first time it is used, and the
+compiled form is kept for the life of the grammar.
+
+## Tokens
+
+A `HighlightResult` splits the source into tokens that cover all of it, with
+no gaps. Each token carries a scope stack, from the outermost scope in:
+
+```dart
+const source = r"var s = 'Hi ${name.length}!';";
+final result = const Highlighter().highlight(source, language: dartLanguage);
+
+for (final token in result.tokens) {
+  print('${token.scopes.join(' > ')}: "${token.text}"');
+}
+```
+
+```text
+keyword: "var"
+: " s "
+operator: "="
+: " "
+string: "'Hi "
+string > interpolation: "${name.length}"
+string: "!'"
+: ";"
+```
+
+Plain text has an empty stack. Neighbouring tokens never share a stack, so a
+token is a whole run of text with the same scopes: one string, one comment,
+one keyword. The [standard scopes](/docs/reference/scopes/) are constants on
+`Scopes`.
+
+Tokens are stored flat, as two integer lists, rather than as objects:
+`result.tokens` builds a light `HighlightToken` view on demand. For speed,
+read them by index — `tokenCount`, `tokenStart(i)`, `tokenEnd(i)` and
+`tokenStack(i)` — and resolve a stack's scopes through `result.scopes`, a
+`ScopeTable`. `tokenAt(offset)` finds the token covering an offset.
+
+## Lines
+
+Renderers usually work a line at a time:
+
+```dart
+for (var line = 0; line < result.lineCount; line++) {
+  result.forEachSegment(line, (start, end, stack) {
+    final scope = result.scopes.scopeOf(stack); // null for plain text
+    // draw source.substring(start, end) in the style for this stack
+  });
+}
+```
+
+`forEachSegment` calls back with the pieces of one line, cut where a token
+crosses the line break, and never includes the break itself. `lineStart` and
+`lineEnd` give a line's offsets; `lineEnd` excludes the `\n` or `\r\n`. Empty
+source has one empty line, and a trailing `\n` starts a final empty line.
+
+## Questions an editor asks
+
+The result answers them from the tokens, so a bracket or a quote inside a
+string or comment is never mistaken for code:
+
+```dart
+final result = const Highlighter().highlight(
+  'f(")") + g[1]',
+  language: dartLanguage,
+);
+
+result.matchingBracket(1);         // 5 — the ")" inside the string is skipped
+result.matchingBracket(10);        // 12
+result.isStringOrCommentAt(3);     // true — the character at offset 3
+result.isInsideStringOrComment(3); // true — text typed between offsets 2 and 3
+result.isInsideStringOrComment(5); // false — right after the closing quote
+```
+
+`matchingBracket` returns `-1` when the character is not a bracket in code,
+or has no match within `limit` characters. Interpolations inside strings
+count as code. `CodeField` uses these for bracket marks and for deciding when
+a quote should close itself.
+
+## By name
+
+To highlight by a language's name or alias, give the highlighter a registry:
+
+```dart
+final highlighter = Highlighter(registry: allLanguagesRegistry());
+final result = highlighter.highlightByName('a: 1', name: 'yml'); // YAML
+```
+
+It throws `UnknownLanguageException` when there is no registry, or the name
+is unknown and the registry has no fallback. A registry also lets Markdown
+highlight its fenced code; see
+[lookup and detection](/docs/engine/lookup/).
+
+## Results across isolates
+
+`HighlightResult.fromBuffers` rebuilds a result from its raw lists
+(`rawEnds`, `rawStacks`), for code that moves results between isolates.
+`CodeHighlighter` in `val_highlight_flutter` already highlights large inputs
+in a background isolate.
+
+## API reference
+
+<Api />

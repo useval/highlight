@@ -1,6 +1,6 @@
 import 'grammar/grammar.dart';
 
-/// Languages addressable by name, alias or file extension.
+/// Languages addressable by name, alias, file name or file extension.
 final class LanguageRegistry {
   /// Creates a registry containing [languages].
   ///
@@ -43,7 +43,8 @@ final class LanguageRegistry {
   /// Language registered as [nameOrAlias], else [fallback].
   Grammar? resolve(String nameOrAlias) => lookup(nameOrAlias) ?? fallback;
 
-  /// Language for [fileName]'s extension, else [fallback].
+  /// Language for [fileName], matched as [forFileName] does, else
+  /// [fallback].
   Grammar? resolveFileName(String fileName) =>
       forFileName(fileName) ?? fallback;
 

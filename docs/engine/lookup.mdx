@@ -1,0 +1,105 @@
+---
+title: Lookup and detection
+description: Find a language by name, alias or file name with LanguageRegistry, highlight languages inside languages, and guess an unknown language with LanguageDetector.
+---
+import Api from '../api/_lookup.mdx'
+
+## Look up a language
+
+A `LanguageRegistry` finds languages by name, alias or file name.
+`allLanguagesRegistry()` holds every built-in language and falls back to
+`genericLanguage`:
+
+```dart
+import 'package:val_highlight/languages/all.dart';
+
+final registry = allLanguagesRegistry();
+
+registry.lookup('kt');                      // kotlinLanguage
+registry.lookup('YML');                     // yamlLanguage: case is ignored
+registry.lookup('something-unknown');       // null
+registry.resolve('something-unknown');      // genericLanguage, the fallback
+registry.forFileName('lib/main.dart');      // dartLanguage
+registry.forFileName('Dockerfile');         // dockerfileLanguage
+registry.forFileName('build.gradle.kts');   // kotlinLanguage
+registry.resolveFileName('notes.xyz');      // genericLanguage
+```
+
+`forFileName` takes a name or a path, and matches a whole file name such as
+`Dockerfile` or `CMakeLists.txt` before the extension. The
+[language list](/docs/languages/) shows every language's names and files.
+
+Build a smaller registry from only the languages you ship, with an optional
+fallback:
+
+```dart
+final registry = LanguageRegistry(
+  [dartLanguage, jsonLanguage, yamlLanguage],
+  plainTextLanguage,
+);
+registry.add(bashLanguage, aliases: ['terminal']);
+```
+
+A later registration replaces an earlier one under the same name.
+
+## Languages inside languages
+
+HTML highlights the content of `<style>` as CSS and `<script>` as JavaScript,
+with no setup; `vue` and `svelte` are aliases of HTML.
+
+Markdown highlights each fenced code block in the language named on its
+fence, such as `json` or `py`, and finds that language in a registry. Give
+one to whatever does the highlighting:
+
+```dart
+final registry = allLanguagesRegistry();
+
+Highlighter(registry: registry);                                        // Dart
+IncrementalHighlighter(language: markdownLanguage, registry: registry); // editors
+CodeHighlighter(registry: registry);                                    // CodeView
+HighlightTextController(language: markdownLanguage, registry: registry); // fields
+```
+
+Without a registry, fenced code gets the plain `code` scope. With one, a fence
+in a language the registry lacks gets the registry's fallback —
+`genericLanguage` for `allLanguagesRegistry()` — or, with no fallback, the
+`code` scope. A fence ends at its closing fence even inside an unterminated
+string of the embedded language, the way `</script>` ends a script.
+
+## Detect a language
+
+`LanguageDetector` guesses the language of a piece of code. It tries, in
+order:
+
+1. the file name, when you pass `fileName` — a whole name such as
+   `Dockerfile`, then the extension;
+2. a `#!` first line, against each grammar's `shebangs`;
+3. a score over the start of the code (up to `sampleSize` characters, 4,096
+   by default): each of a grammar's `signatures` patterns that matches adds
+   `signatureWeight`, each keyword, literal or built-in type found by
+   highlighting the sample adds `keywordWeight`, and each invalid token
+   subtracts `invalidPenalty`. The highest score of at least `minimumScore`
+   wins.
+
+```dart
+const detector = LanguageDetector();
+
+final detection = detector.detect('def f(x):\n    return x * 2\n', allLanguages);
+detection?.language; // pythonLanguage
+detection?.reason;   // 'content'
+
+detector.detect('', allLanguages, fileName: 'src/lib.rs')?.reason;  // 'file name'
+detector.detect('#!/usr/bin/env python3\n…', allLanguages)?.reason; // 'shebang'
+detector.detect('hello there', allLanguages);                        // null
+```
+
+`detect` returns a `Detection` with the `language`, a `score` and the
+`reason`, or `null` when nothing scores high enough. A score only means
+something compared with other candidates for the same input. `genericLanguage`
+and `plainTextLanguage` are never detected: their `detectable` is `false`.
+
+Detection is a heuristic. When you know the language, pass it.
+
+## API reference
+
+<Api />

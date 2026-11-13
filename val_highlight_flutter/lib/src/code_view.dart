@@ -128,7 +128,8 @@ class CodeView extends StatefulWidget {
   /// Text style merged over the default monospace style.
   final TextStyle? textStyle;
 
-  /// Padding inside the background. Defaults to 16 on every side.
+  /// Padding inside the background. Defaults to [CodeTheme.padding], or 16
+  /// on every side.
   final EdgeInsetsGeometry? padding;
 
   /// Whether to show line numbers. Defaults to [CodeTheme.lineNumbers], or

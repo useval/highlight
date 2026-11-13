@@ -57,7 +57,9 @@ class CodeEditing {
   /// selection instead of replacing it.
   final bool wrapSelection;
 
-  /// Whether the bracket at the caret and its match are outlined.
+  /// Whether the bracket next to the caret and its match are marked with a
+  /// background (`CodeField.bracketColor`). The bracket before the caret is
+  /// tried first, then the one after it.
   final bool matchBrackets;
 
   /// Comment markers, brackets and quotes to use instead of the language's.

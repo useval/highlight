@@ -1,0 +1,161 @@
+---
+title: Themes
+description: The 8 built-in themes side by side, theming the Flutter widgets app-wide, adjusting or building a theme, and importing a VS Code theme.
+---
+import { Code } from '@astrojs/starlight/components'
+import sample from '../val_highlight_flutter/tool/screenshots/examples/themes/sample.dart?raw'
+import Themes from './api/_theme-list.mdx'
+import Gallery from './api/_theme-gallery.mdx'
+import Api from './api/_themes.mdx'
+
+A `ValTheme` maps scopes such as `keyword` or `string` to a `Style`. The same
+theme drives the Flutter widgets and the [HTML output](/docs/engine/html/).
+
+## Built-in themes
+
+<Gallery />
+
+Each picture is `CodeView` drawing this sample in one theme:
+
+<Code code={sample} lang="dart" />
+
+<Themes />
+
+Import one from `package:val_highlight/themes/<file>`, or all of them, with
+the list `allThemes`, from `themes/all.dart`. The package's tests check every
+built-in theme: each colour has a contrast ratio of at least 4.5:1 against
+its background (WCAG AA), 7:1 in the two high-contrast themes; every theme
+styles the same scopes as `lightTheme`; and `dark` matches the background.
+
+## In Flutter
+
+By default, `CodeView`, `CodeField` and `HighlightTextController` use
+`lightTheme` in a light app and `darkTheme` in a dark one. Pick a theme for
+one widget with `theme`, or for an editor with the controller's `theme`:
+
+```dart
+CodeView(source, language: dartLanguage, theme: midnightTheme)
+
+final controller = HighlightTextController(
+  language: dartLanguage,
+  theme: sepiaTheme,
+);
+```
+
+### App-wide defaults
+
+Add a `CodeTheme` to your `ThemeData.extensions` to set defaults once.
+Anything set on a widget wins.
+
+```dart
+const codeTheme = CodeTheme(
+  light: sepiaTheme,
+  dark: dimTheme,
+  textStyle: TextStyle(fontFamily: 'JetBrains Mono'),
+  lineNumbers: true,
+);
+
+MaterialApp(
+  theme: ThemeData(extensions: const [codeTheme]),
+  darkTheme: ThemeData(
+    brightness: Brightness.dark,
+    extensions: const [codeTheme],
+  ),
+  home: const MyHome(),
+)
+```
+
+`CodeTheme` is read from the `ThemeData` in effect, so add it to both
+`theme` and `darkTheme` when you set both. `padding` and `lineNumbers` apply
+to `CodeView`; the themes and `textStyle` to every widget. A font family only
+applies if your app bundles the font or the platform has it.
+
+`CodeTheme.resolve(context)` returns the `ValTheme` a widget would use, for
+painting a matching background. The default code text style is the
+`monospace` family — with Menlo, Consolas, Roboto Mono and Courier New as
+fallbacks — at 14 pixels and a line height of 1.5, with letter and word
+spacing fixed at zero so an app-wide text theme can't stretch the code.
+
+:::note
+`CodeTheme` is a `ThemeExtension` from `material_ui`: add it to a
+`material_ui` `ThemeData`. See
+[Getting started](/docs/getting-started/#use-material_ui-in-your-app).
+:::
+
+## Adjust a theme
+
+`extend` returns a new theme: `root` is merged over the current root style,
+and each entry in `styles` replaces the style for that scope.
+
+```dart
+final mine = lightTheme.extend(
+  name: 'mine',
+  styles: {
+    Scopes.keyword: const Style(color: 0xFFE8590C, bold: true),
+  },
+);
+```
+
+`copyWith` replaces whole fields instead of merging them.
+
+## Build a theme
+
+Colours are ARGB integers, so a theme can be `const`. A token's style is its
+scopes' styles merged from the outside in, over `root`, so unset fields
+inherit.
+
+```dart
+const myTheme = ValTheme(
+  name: 'my-theme',
+  dark: true,
+  root: Style(color: 0xFFE6E6E6, background: 0xFF1E1E2E),
+  styles: {
+    Scopes.comment: Style(color: 0xFF7F849C, italic: true),
+    Scopes.string: Style(color: 0xFFA6E3A1),
+    Scopes.number: Style(color: 0xFFFAB387),
+    Scopes.keyword: Style(color: 0xFFCBA6F7, bold: true),
+    Scopes.type: Style(color: 0xFFF9E2AF),
+    Scopes.function: Style(color: 0xFF89B4FA),
+  },
+);
+```
+
+`Style` has `color`, `background`, `bold`, `italic`, `underline` and
+`strikethrough`. Set `dark: true` on a dark theme: the widgets choose their
+line-highlight colours by it.
+
+Scope lookup cascades: a token in `keyword.control.flow` uses that scope's
+style if the theme has one, then `keyword.control`, then `keyword`. A new
+scope from your own grammar rules needs only a theme entry. The
+[standard scopes](/docs/reference/scopes/) are constants on `Scopes`.
+
+## Import a VS Code theme
+
+`ValTheme.fromVsCodeJson` reads the text of a VS Code colour theme file —
+comments and trailing commas allowed — and `ValTheme.fromVsCode` the decoded
+JSON object.
+
+```dart
+// Flutter, from an asset:
+final theme = ValTheme.fromVsCodeJson(
+  await rootBundle.loadString('assets/my-color-theme.json'),
+);
+
+// Dart, from a file:
+final theme = ValTheme.fromVsCodeJson(
+  File('my-color-theme.json').readAsStringSync(),
+);
+```
+
+The importer takes the root style from `colors['editor.foreground']` and
+`colors['editor.background']`, `dark` from the theme's `type` (or from the
+background's brightness when there is none), and the scope styles from
+`tokenColors`, matching TextMate scopes the way VS Code does. The
+[scope table](/docs/reference/scopes/) shows which TextMate scopes each
+val_highlight scope reads. The theme's own `name` is kept unless you pass
+`name`. An `include` of another theme file is not followed; merge included
+files first.
+
+## API reference
+
+<Api />

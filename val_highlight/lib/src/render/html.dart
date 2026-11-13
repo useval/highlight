@@ -25,7 +25,9 @@ final class HtmlRenderer {
   /// When set, styles are written inline and no classes are used.
   final ValTheme? theme;
 
-  /// Whether to wrap the output in `<pre class="vh"><code>…</code></pre>`.
+  /// Whether to wrap the output in `<pre><code>…</code></pre>`. The `<pre>`
+  /// gets class [rootClass], or, when [theme] is set, the theme's root
+  /// style inline.
   final bool wrap;
 
   /// Renders [result].

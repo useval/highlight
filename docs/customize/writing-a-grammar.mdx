@@ -1,0 +1,125 @@
+---
+title: Writing a grammar
+description: Write a language for val_highlight from building blocks — comments, strings, numbers, keywords — and the rules underneath them.
+---
+import Api from '../api/_grammar.mdx'
+
+A language is a `Grammar`: a `const` list of rules, plus named rule lists to
+reuse. Import `package:val_highlight/advanced.dart` for the rule classes. The
+built-in languages are written with exactly this API — read
+[`lib/languages/`](https://github.com/useval/highlight/tree/main/val_highlight/lib/languages)
+for examples.
+
+## From building blocks
+
+Most grammars need no regular expressions:
+
+```dart
+import 'package:val_highlight/advanced.dart';
+
+const confLanguage = Grammar(
+  name: 'conf',
+  fileExtensions: ['conf'],
+  rules: [
+    LineComment(';'),
+    LineComment('#', afterSpace: true),
+    QuotedString('"'),
+    Numbers(),
+    KeywordRule({Scopes.literal: ['true', 'false', 'on', 'off']}),
+    Operators('='),
+  ],
+);
+```
+
+| Block | Covers |
+|---|---|
+| `LineComment('//')` | A comment to the end of the line. With `afterSpace: true` it only starts at a line start or after whitespace, so `#` inside a word is left alone. |
+| `BlockComment('/*', '*/')` | A delimited comment; `nested: true` where comments nest. |
+| `QuotedString('"')` | A string with escapes. Options: `end`, `prefix`, `escape`, `doubled` quotes, `multiline`, `lastInRun` and inner `rules`. A string that isn't `multiline` also ends at the end of its line. |
+| `Interpolation(r'${', '}')` | An expression inside a string, with balanced braces. |
+| `Numbers()` | Decimals, floats with exponents, hex, binary and octal, with an optional digit `separator` and `suffix`. |
+| `Operators('+-*/=')` | Runs of operator characters. |
+| `Annotation('@')` | Annotations, attributes and decorators. |
+| `Preprocessor('#')` | `#include`-style lines, with `\` continuations. |
+| `KeywordRule({…})` | Word lists per scope, found by table lookup, with `otherwise` rules for words not in the lists. |
+| `CommonRules.capitalizedType`, `functionCall`, `memberCall`, `member` | Heuristics for identifiers that are not keywords, for `KeywordRule.otherwise`. |
+
+Extend `BlockRule` and implement `expand()` to make blocks of your own.
+
+## The rules underneath
+
+| Rule | What it does |
+|---|---|
+| `TokenRule(pattern, scope:, captures:)` | Matches a regular expression and gives it a scope; `captures` scopes capture groups. |
+| `RegionRule(begin:, end:, scope:, rules:)` | A section with its own rules inside, such as a string or a comment. Regions nest. `end` is tried before the inner rules. |
+| `IncludeRule('name')` | Inserts a named rule list from the grammar's `repository`; `IncludeRule.self` inserts the top-level rules. |
+
+How matching works:
+
+- **The earliest match wins.** Among rules that match at the same position,
+  the one listed first wins.
+- Patterns are Dart `RegExp` sources compiled in multi-line mode, so `^` and
+  `$` match at line boundaries. Named capture groups are not allowed,
+  because a state's rules are combined into one expression.
+- A grammar is compiled the first time it is used. `grammar.validate()`
+  compiles all of it at once and throws `GrammarException` for a bad
+  pattern, an unknown include or an include cycle — call it in a test.
+
+More `RegionRule` options:
+
+- `endReferencesBegin: true` lets `\1` to `\9` in `end` stand for text
+  `begin` captured — heredocs, raw strings, Markdown fences.
+- `embed: someGrammar` highlights the region's content in another language;
+  `embedCapture: n` takes the language's name from a capture group of `begin`
+  and looks it up in the highlighter's registry. The region's `end` closes it
+  from any depth of the embedded language.
+- `beginScope`, `endScope`, `beginCaptures` and `endCaptures` style the
+  delimiters.
+
+**Keeping it fast.** Start patterns with something specific — a literal, a
+small character class, or `^` for line-start rules — rather than `.`, a
+negated class or a lookbehind. The scanner works out which characters each
+pattern can start with and only tries the rules that can match at a
+position; see [performance](/docs/reference/performance/).
+
+## Grammar options
+
+| Option | What it does |
+|---|---|
+| `aliases`, `fileExtensions`, `fileNames` | The names and files the language is found by. Whole file names win over extensions. |
+| `repository` | Named rule lists for `IncludeRule`. |
+| `caseInsensitive` | Patterns and keywords ignore case. |
+| `unicode` | Patterns are compiled in unicode mode. |
+| `shebangs`, `signatures` | Hints for [detection](/docs/engine/lookup/#detect-a-language): interpreter names for `#!` lines, and patterns that strongly suggest the language. |
+| `detectable` | Whether `LanguageDetector` may pick the grammar. Defaults to `true`. |
+| `restartLine` | Lines no rule looks past. Incremental highlighting normally resumes a line before an edit; a grammar whose rules read further ahead (Markdown's inline code can wrap a whole paragraph) sets this, and resuming starts at the nearest earlier matching line. |
+| `editing` | The `EditingSyntax` editors use. |
+
+## Editing syntax
+
+`EditingSyntax` tells an editor such as `CodeField` how the language is
+edited: `lineComment`, `blockComment`, `brackets` (default `()[]{}`) and
+`quotes` (default `"` and `'`). Every built-in language sets one. For your
+own grammar, set `editing`, or leave it out and `EditingSyntax.of(grammar)`
+derives it from the grammar's blocks: the shortest `LineComment` and
+`BlockComment` markers (the first of equal length), and the quotes of
+single-character `QuotedString`s.
+
+```dart
+EditingSyntax.of(confLanguage).lineComment; // ';'
+EditingSyntax.of(confLanguage).quotes;      // '"'
+EditingSyntax.of(pythonLanguage).lineComment; // '#'
+```
+
+Presets: `EditingSyntax.cStyle` (`//` and `/* */`), `hashStyle` (`#`),
+`markupStyle` (`<!-- -->`) and `none`.
+
+## Adding it to the package
+
+To contribute a language — with golden snapshots, edge-case tests and a
+gallery sample — follow
+[CONTRIBUTING.md](https://github.com/useval/highlight/blob/main/CONTRIBUTING.md#adding-or-changing-a-language).
+
+## API reference
+
+<Api />

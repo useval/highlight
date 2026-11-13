@@ -1,0 +1,74 @@
+---
+title: Performance
+description: How the engine is built for speed, the benchmarks in the repository, and what one run of them measured.
+---
+
+## How it is built
+
+- **One pass over the source.** The scanner walks the source by offset
+  without copying it.
+- **First-character dispatch.** Each rule's pattern is analysed once to find
+  the characters it can start with. The scanner skips positions where no
+  rule can start and tries only the rules that can; rules anchored with `^`
+  are tried only at line starts. A state with a rule that can start almost
+  anywhere uses one combined regular expression instead.
+- **Plain-Dart matchers on native platforms.** Most patterns run as small
+  Dart matchers rather than through the regular-expression engine. On the
+  web, where browsers compile regular expressions to machine code, the
+  scanner keeps using `RegExp`.
+- **Flat output.** Tokens are two integer lists, not a tree of objects.
+- **Incremental updates.** After an edit, scanning stops at the first line
+  whose saved state matches the old one — see
+  [incremental highlighting](/docs/engine/incremental/).
+
+The fast paths must give the same tokens as plain regular expressions. The
+test suite fuzzes dispatch, the plain-Dart matchers and incremental updates
+against them, in every language (`test/dispatch_test.dart`,
+`test/fast_match_test.dart`, `test/incremental_all_test.dart`), and runs the
+core tests compiled to JavaScript as well as on the VM.
+
+## The benchmarks
+
+| Command | Measures |
+|---|---|
+| `just bench` | Highlight + HTML for 600 to 9,600 lines of Dart, compiled to native code, best of 5 runs; then one keystroke with `IncrementalHighlighter` in the 9,600-line file. ([`benchmark/scaling.dart`](https://github.com/useval/highlight/blob/main/val_highlight/benchmark/scaling.dart)) |
+| `just bench-languages` | Highlighting about 256 KB of realistic source in each of ten languages, native, best of 7. ([`benchmark/languages.dart`](https://github.com/useval/highlight/blob/main/val_highlight/benchmark/languages.dart)) |
+| `just bench-js` | The same, compiled to JavaScript and run on Node. |
+| `just bench-frames` | Frame build times for scrolling `CodeView` and typing in `CodeField`, on a device in profile mode. ([`frame_timing_test.dart`](https://github.com/useval/highlight/blob/main/val_highlight_flutter/example/integration_test/frame_timing_test.dart)) |
+
+## One run
+
+These are from one run of `just bench` and `just bench-languages` on an
+Apple M5 laptop, with the Dart SDK of the pinned Flutter 3.44.2. Your numbers
+will differ with the machine and the code; run the benchmarks yourself to
+compare.
+
+| Lines of Dart | Highlight + HTML |
+|---|---|
+| 600 | 1.4 ms |
+| 1,200 | 2.2 ms |
+| 2,400 | 4.1 ms |
+| 4,800 | 7.0 ms |
+| 9,600 | 14.2 ms |
+
+One keystroke in the middle of the 9,600-line file took 0.4 ms with
+`IncrementalHighlighter`, which scanned 2 lines again.
+
+| Language | MB/s (native) |
+|---|---|
+| Dart | 50.7 |
+| JavaScript | 42.9 |
+| Python | 36.8 |
+| JSON | 45.7 |
+| HTML | 30.6 |
+| CSS | 52.7 |
+| YAML | 41.2 |
+| SQL | 52.5 |
+| Bash | 51.8 |
+| Markdown | 58.6 |
+| **All ten** | **44.8** |
+
+The benchmark divides characters by microseconds, so "MB/s" is millions of
+characters a second. Compiled to JavaScript on Node 26, the ten languages
+together ran at 57.0 in the same run; Node's timer there reports whole
+milliseconds, so per-language figures from it are too coarse to quote.

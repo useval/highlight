@@ -1,0 +1,78 @@
+---
+title: HTML output
+description: Render highlighted code as HTML, with CSS classes and a stylesheet generated from a theme, or with inline styles.
+---
+import Api from '../api/_html.mdx'
+
+`HtmlRenderer` writes a `HighlightResult` as HTML, in one of two ways. Both
+escape `&`, `<` and `>` in the code.
+
+## CSS classes
+
+By default each scope becomes a `<span>` with classes, and a theme writes the
+stylesheet for them:
+
+```dart
+import 'package:val_highlight/val_highlight.dart';
+import 'package:val_highlight/languages/dart.dart';
+import 'package:val_highlight/themes/light.dart';
+
+final html = const Highlighter().toHtml(
+  'final n = 42; // answer',
+  language: dartLanguage,
+  renderer: const HtmlRenderer(wrap: true),
+);
+final css = lightTheme.toCss();
+```
+
+```html
+<pre class="vh"><code><span class="vh-keyword">final</span> n <span class="vh-operator">=</span> <span class="vh-number">42</span>; <span class="vh-comment">// answer</span></code></pre>
+```
+
+```css
+.vh{color:#2b2f36;background-color:#fafafb;}
+.vh .vh-addition{color:#1e7a3a;background-color:#e8f7ec;}
+.vh .vh-attribute{color:#6a3fb5;}
+/* … one rule per scope the theme styles */
+```
+
+A nested scope gets a class for each level, so a stylesheet can target
+either: `comment.doc` becomes `class="vh-comment vh-comment-doc"`. Nested
+scope stacks become nested spans. Without `wrap`, the output is the spans
+alone, for your own `<pre>`.
+
+`classPrefix` (default `vh-`) and `rootClass` (default `vh`) rename the
+classes. Set the same ones on the renderer and on `toCss` — for example, to
+put two themes on one page:
+
+```dart
+const renderer = HtmlRenderer(rootClass: 'code-dark', wrap: true);
+final css = darkTheme.toCss(rootClass: 'code-dark');
+```
+
+## Inline styles
+
+Give the renderer a theme and it writes `style` attributes instead, with no
+stylesheet to ship:
+
+```dart
+final result = const Highlighter().highlight(source, language: dartLanguage);
+final html = result.toHtml(const HtmlRenderer(theme: lightTheme, wrap: true));
+```
+
+```html
+<pre style="color:#2b2f36;background-color:#fafafb;"><code><span style="color:#b0226e;">final</span> n <span style="color:#5b616b;">=</span> <span style="color:#9a5b00;">42</span>; <span style="color:#687080;font-style:italic;">// answer</span></code></pre>
+```
+
+Scopes the theme doesn't style get no span at all.
+
+## Styles as CSS
+
+`Style.toCss()` writes one style's declarations, `cssColor` formats an ARGB
+colour (`#rrggbb`, or `rgba(…)` when it is translucent), and `scopeClass`
+gives the class for a scope. See [Themes](/docs/themes/) for building and
+importing themes.
+
+## API reference
+
+<Api />

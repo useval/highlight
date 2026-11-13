@@ -7,10 +7,10 @@
 /// final html = const Highlighter().toHtml(code, language: dartLanguage);
 /// ```
 ///
-/// This is the shared core used by `val_highlight_flutter` (and later
-/// `val_highlight_jaspr`). It has no Flutter dependency. Each language and
-/// theme is its own import, so an app only ships what it uses. Grammar
-/// authoring and raw engine access live in `advanced.dart`.
+/// This is the shared core used by `val_highlight_flutter`. It has no
+/// Flutter dependency. Each language and theme is its own import, so an app
+/// only ships what it uses. The grammar rules, for writing a grammar, are
+/// in `advanced.dart`.
 library;
 
 export 'src/detect.dart' show Detection, LanguageDetector;

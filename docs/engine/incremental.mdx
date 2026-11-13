@@ -1,0 +1,58 @@
+---
+title: Incremental highlighting
+description: Keep a document highlighted as it is edited, re-scanning only the lines an edit can affect.
+---
+import Api from '../api/_incremental.mdx'
+
+An editor highlights the same document after every keystroke.
+`IncrementalHighlighter` keeps it highlighted, and after an edit scans again
+only what the edit can affect. `CodeField` and `HighlightTextController` are
+built on it.
+
+```dart
+final document = IncrementalHighlighter(language: dartLanguage, text: source);
+
+// After each edit, pass the whole new text.
+final result = document.update(editedSource);
+```
+
+`update` takes the full new text and works out the edit itself, from the
+part the old and new text have in common at each end. It returns the new
+`HighlightResult`, which is also `document.result`. The result is always the
+same as highlighting the new text from scratch.
+
+## What gets scanned again
+
+The scanner's state is saved at the start of every line. After an edit,
+scanning resumes a line before the first change, and stops at the first line
+after the edit whose saved state matches the old one; the old tokens are
+reused from there. So typing inside a function scans a line or two, while
+opening a block comment scans until the comment closes — or to the end of
+the document.
+
+`lastRescannedLines` reports how many lines the last `update` scanned. In a
+2,000-line Dart file:
+
+```dart
+final source = [for (var i = 0; i < 2000; i++) 'int f$i() => $i;'].join('\n');
+final document = IncrementalHighlighter(language: dartLanguage, text: source);
+document.lastRescannedLines; // 2000: the first highlight scans everything
+
+document.update(source.replaceFirst('f1000()', 'f1000x()'));
+document.lastRescannedLines; // 2
+
+document.update(source.replaceFirst('int f1000', '/* int f1000'));
+document.lastRescannedLines; // 1001: the comment never closes
+```
+
+Setting `document.language` highlights everything again in the new
+language. Pass `registry` to the constructor for languages named inside the
+code, such as Markdown fences.
+
+A grammar whose rules read more than one line ahead tells the highlighter
+where it can safely resume, with `Grammar.restartLine`; see
+[writing a grammar](/docs/customize/writing-a-grammar/#grammar-options).
+
+## API reference
+
+<Api />

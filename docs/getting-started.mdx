@@ -1,0 +1,127 @@
+---
+title: Getting started
+description: Add val_highlight to a Flutter app or a Dart project, show your first highlighted code, and render highlighted HTML.
+---
+import { Code, TabItem, Tabs } from '@astrojs/starlight/components'
+import app from '../val_highlight_flutter/tool/screenshots/examples/getting_started/app.dart?raw'
+import Libraries from './api/_libraries.mdx'
+
+Pick the package that matches your project: `val_highlight_flutter` for a
+Flutter app, `val_highlight` for pure Dart — a server, a command-line tool or
+a static site generator.
+
+## Install
+
+<Tabs syncKey="platform">
+<TabItem label="Flutter">
+```bash
+flutter pub add val_highlight_flutter val_highlight material_ui
+```
+
+A Flutter app lists `val_highlight` too, because languages and themes are
+imported from `package:val_highlight/…`, and Dart's recommended lints
+(`depend_on_referenced_packages`) flag imports from a package you don't
+depend on. `material_ui` is explained [below](#use-material_ui-in-your-app).
+</TabItem>
+<TabItem label="Dart">
+```bash
+dart pub add val_highlight
+```
+</TabItem>
+</Tabs>
+
+| Package | Requires |
+|---|---|
+| `val_highlight` | Dart 3.9 or later. No Flutter and no `dart:io`, so it runs on the Dart VM, in Flutter and on the web. |
+| `val_highlight_flutter` | Flutter 3.44.0 or later, with Dart 3.12 or later. |
+
+## Show code in Flutter
+
+<Tabs>
+<TabItem label="Preview">
+![A Flutter app showing a four-line Dart main function in CodeView, with line numbers, in the light theme](./images/getting_started/app.png)
+</TabItem>
+<TabItem label="Code">
+<Code code={app} lang="dart" title="lib/main.dart" />
+</TabItem>
+</Tabs>
+
+`CodeView` takes the source and a language; everything else is optional. Its
+theme follows the app's brightness — `lightTheme` in a light app, `darkTheme`
+in a dark one — the code can be selected and copied, and long lines scroll
+sideways. [CodeView](/docs/components/code-view/) shows the rest; to let
+people edit code, see [CodeField](/docs/components/code-field/).
+
+### Use material_ui in your app
+
+`val_highlight_flutter` 0.1.2 is built on
+[`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
+library published as a package, rather than on
+`package:flutter/material.dart`. The two libraries have separate `Theme`,
+`Material` and localizations widgets, so build your app with `material_ui`:
+
+```dart
+import 'package:material_ui/material_ui.dart';
+```
+
+:::caution
+Under a `MaterialApp` from `package:flutter/material.dart`, the widgets can't
+see your app's theme: `CodeView` stays light in a dark app and, while
+`selectable` is on (the default), fails with "No MaterialLocalizations
+found". `CodeField` fails with "No Material widget found". And `CodeTheme`
+can't be added to that library's `ThemeData`, because it is a `material_ui`
+theme extension.
+:::
+
+## Render HTML in Dart
+
+```dart
+import 'package:val_highlight/val_highlight.dart';
+import 'package:val_highlight/languages/dart.dart';
+import 'package:val_highlight/themes/light.dart';
+
+void main() {
+  const source = 'final n = 42; // answer';
+
+  // HTML with CSS classes, and the stylesheet for those classes.
+  final html = const Highlighter().toHtml(
+    source,
+    language: dartLanguage,
+    renderer: const HtmlRenderer(wrap: true),
+  );
+  final css = lightTheme.toCss();
+
+  print(html);
+  print(css);
+}
+```
+
+The HTML it prints:
+
+```html
+<pre class="vh"><code><span class="vh-keyword">final</span> n <span class="vh-operator">=</span> <span class="vh-number">42</span>; <span class="vh-comment">// answer</span></code></pre>
+```
+
+The stylesheet starts with `.vh{color:#2b2f36;background-color:#fafafb;}` and
+has a rule per scope, such as `.vh .vh-keyword{color:#b0226e;}`. To do without
+a stylesheet, write inline styles instead — see
+[HTML output](/docs/engine/html/).
+
+## Imports
+
+| Import | Gives you |
+|---|---|
+| `package:val_highlight_flutter/val_highlight_flutter.dart` | The Flutter widgets, plus everything in `val_highlight.dart`. |
+| `package:val_highlight/val_highlight.dart` | The engine: `Highlighter`, `HighlightResult`, `IncrementalHighlighter`, `HtmlRenderer`, `LanguageRegistry`, `LanguageDetector`, `ValTheme`, `Style`, `Scopes`, `EditingSyntax` and more. |
+| `package:val_highlight/advanced.dart` | The engine plus the rules and building blocks for [writing a grammar](/docs/customize/writing-a-grammar/). |
+| `package:val_highlight/languages/<name>.dart` | One language, such as `languages/kotlin.dart` for `kotlinLanguage`. [Every language](/docs/languages/) lists its file. |
+| `package:val_highlight/languages/all.dart` | Every language, the list `allLanguages`, and `allLanguagesRegistry()`. |
+| `package:val_highlight/themes/<name>.dart` | One theme, such as `themes/midnight.dart` for `midnightTheme`. |
+| `package:val_highlight/themes/all.dart` | Every theme, and the list `allThemes`. |
+
+Each language and theme is a separate library of `const` values, so an app
+includes only the ones it imports — `languages/all.dart` includes them all.
+
+What each library's own documentation says:
+
+<Libraries />

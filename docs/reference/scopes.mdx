@@ -1,0 +1,28 @@
+---
+title: Scopes
+description: The standard scope names the built-in grammars use and the built-in themes style, and the VS Code scopes each one is read from.
+---
+import Scopes from '../api/_scopes.mdx'
+
+A scope names what a piece of code is. The standard ones are constants on
+`Scopes`:
+
+<Scopes />
+
+The last column is used by `ValTheme.fromVsCode`: for each scope, the style
+of the first of those TextMate scopes the VS Code theme defines.
+
+## Nesting and the cascade
+
+A token carries a stack of scopes, such as `string > interpolation`, and its
+style is the styles of its stack merged from the outside in. A theme looks a
+dotted scope up from the most specific name to the least: `comment.doc` uses
+the theme's `comment.doc` style if it has one, and `comment` otherwise. So a
+grammar can introduce a scope such as `keyword.control.flow`, and every
+theme still styles it as a keyword.
+
+In HTML output, a dotted scope becomes one class per level:
+`comment.doc` is `vh-comment vh-comment-doc`.
+
+For editor queries, scopes starting with `string`, `regexp` or `comment` are
+strings or comments, and an `interpolation` inside a string is code again.

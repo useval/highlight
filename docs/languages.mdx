@@ -1,0 +1,57 @@
+---
+title: Languages
+description: Every language val_highlight highlights, with its import, its names and aliases, and the files it is found by.
+---
+import Languages from './api/_languages.mdx'
+
+<Languages />
+
+**Names** are what a registry looks up — in a Markdown code fence, with
+`highlightByName`, or with `LanguageRegistry.lookup` — ignoring case.
+**Files** are the extensions and whole file names that
+`LanguageRegistry.forFileName` and `LanguageDetector` match; a whole name
+wins over an extension. This table is generated from `allLanguages`, so it
+lists exactly what the package ships.
+
+## Import a language
+
+Each language is its own library of one `const` grammar:
+
+```dart
+import 'package:val_highlight/languages/kotlin.dart'; // kotlinLanguage
+import 'package:val_highlight/languages/python.dart'; // pythonLanguage
+```
+
+A language library exports only its grammar; import
+`package:val_highlight/val_highlight.dart` (or `val_highlight_flutter`) as
+well for `Highlighter` and the rest. `languages/all.dart` imports every
+language, with the list `allLanguages` and the registry
+`allLanguagesRegistry()` — convenient, but your app then includes every
+grammar.
+
+## The fallbacks
+
+- **`genericLanguage`** highlights code in a language val_highlight doesn't
+  know: `//`, `/* */` and `#` comments, quoted strings, numbers, a broad set
+  of common keywords and literals, types, function calls, annotations and
+  operators. It is the fallback of `allLanguagesRegistry()` and of
+  `CodeView`.
+- **`plainTextLanguage`** highlights nothing, at almost no cost.
+
+Language detection never picks either of them.
+
+## Languages inside languages
+
+HTML highlights `<style>` as CSS and `<script>` as JavaScript. Markdown
+highlights each fenced block in the language its fence names, when it is
+given a registry — see
+[languages inside languages](/docs/engine/lookup/#languages-inside-languages).
+
+## Something missing?
+
+Change a built-in language from your own app — add keywords, put your own
+rules first — with [changing a language](/docs/customize/changing-a-language/),
+or write a new one from building blocks with
+[writing a grammar](/docs/customize/writing-a-grammar/). To add a language to
+the package itself, see
+[CONTRIBUTING.md](https://github.com/useval/highlight/blob/main/CONTRIBUTING.md#adding-or-changing-a-language).

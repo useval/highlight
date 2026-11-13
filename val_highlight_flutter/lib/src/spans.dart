@@ -19,8 +19,8 @@ List<TextSpan> lineSpans(HighlightResult result, int line, CodeStyles styles) {
   return spans;
 }
 
-/// Spans for every line of [result], joined with `\n`. Carriage returns are
-/// dropped so they never render.
+/// Spans for every line of [result], joined with `\n`. The `\r` of a
+/// `\r\n` line break is dropped, so it never renders.
 List<TextSpan> documentSpans(HighlightResult result, CodeStyles styles) {
   final spans = <TextSpan>[];
   for (var line = 0; line < result.lineCount; line++) {

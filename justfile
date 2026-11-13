@@ -103,9 +103,17 @@ example-web:
 samples:
     cd {{example}} && {{dart}} run tool/generate_samples.dart && {{dart}} format lib/samples.g.dart
 
-# Regenerate the README images in screenshots/. Review them before committing.
+# Regenerate the README images in screenshots/, and every docs image. Review them before committing.
 screenshots:
     cd val_highlight_flutter && {{flutter}} test tool/screenshots/generate_test.dart --update-goldens
+
+# Regenerate the docs' images in docs/images/ from tool/screenshots/examples/. Review them before committing.
+docs-screenshots:
+    cd val_highlight_flutter && {{flutter}} test tool/screenshots/generate_test.dart --plain-name docs
+
+# Regenerate the docs' API reference and tables in docs/api/ from the source.
+docs:
+    cd val_highlight_flutter && {{dart}} run tool/docs/api_reference.dart
 
 # Build the Flutter example for the web into val_highlight_flutter/example/build/web.
 build-web:

@@ -1,0 +1,48 @@
+---
+title: Flutter widgets
+description: The widgets in val_highlight_flutter — show code, edit it, or highlight a plain TextField — each with a preview and the code behind it.
+---
+import { Image } from 'astro:assets'
+import img_code_view from '../images/code_view/basic.png'
+import img_code_field from '../images/code_field/editor.png'
+import img_text_field from '../images/text_field/query.png'
+import img_rendering from '../images/rendering/inline_spans.png'
+
+Each page opens with the widget as the package draws it, the code behind the
+picture, then its options and an API reference generated from the source:
+every parameter with its type and default, and every member.
+
+<div class="uv-cards">
+  <a class="uv-card" href="/docs/components/code-view/">
+    <Image src={img_code_view} alt="" width={492} />
+    <span class="uv-card-name">CodeView</span>
+    <span class="uv-card-blurb">Show code: line numbers, highlighted lines, tappable tokens, long files</span>
+  </a>
+  <a class="uv-card" href="/docs/components/code-field/">
+    <Image src={img_code_field} alt="" width={492} />
+    <span class="uv-card-name">CodeField</span>
+    <span class="uv-card-blurb">Edit code: auto-closing brackets, indentation, comment toggling</span>
+  </a>
+  <a class="uv-card" href="/docs/components/text-field/">
+    <Image src={img_text_field} alt="" width={492} />
+    <span class="uv-card-name">Highlighted TextField</span>
+    <span class="uv-card-blurb">Highlighting and code typing in a TextField you already have</span>
+  </a>
+  <a class="uv-card" href="/docs/components/rendering/">
+    <Image src={img_rendering} alt="" width={492} />
+    <span class="uv-card-name">Custom rendering</span>
+    <span class="uv-card-blurb">Highlighted spans for your own widgets</span>
+  </a>
+</div>
+
+Every preview is rendered by the package's screenshot generator from the
+example file shown on the page
+([`tool/screenshots/examples/`](https://github.com/useval/highlight/tree/main/val_highlight_flutter/tool/screenshots/examples)),
+in a light Material 3 app, so the picture and the code always agree. The
+generator draws `monospace` with JetBrains Mono, and turns off its
+ligatures so `=>` shows as typed.
+
+The widgets take their app-wide defaults — the light and dark themes, the
+code text style, and for `CodeView` its padding and line numbers — from a
+`CodeTheme` set once on your `ThemeData`. See
+[Themes](/docs/themes/#app-wide-defaults).

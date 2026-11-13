@@ -1,4 +1,5 @@
-/// Grammar authoring and engine access for `val_highlight`.
+/// Grammar authoring for `val_highlight`: everything in `val_highlight.dart`,
+/// plus the rules and building blocks grammars are written with.
 ///
 /// Import this to write or extend a grammar; validate one eagerly with
 /// `Grammar.validate`. The built-in grammars use exactly this API.

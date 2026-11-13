@@ -26,7 +26,8 @@ final class Detection {
 ///
 /// Checks run from cheapest and surest to most expensive:
 ///
-/// 1. the file name's extension, when given;
+/// 1. the file name, when given: a whole name such as `Dockerfile`, then
+///    the extension;
 /// 2. a `#!` first line against [Grammar.shebangs];
 /// 3. a content score over the first [sampleSize] characters: each
 ///    [Grammar.signatures] pattern that matches adds [signatureWeight], and

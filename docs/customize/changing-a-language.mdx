@@ -1,0 +1,77 @@
+---
+title: Changing a language
+description: Add or remove keywords, put your own rules in front of a built-in grammar, replace a named part of it, or change how it is edited — from your own app.
+---
+
+Grammars are immutable `const` values. These methods return a new grammar,
+which you use wherever you would have used the built-in one. Most requests
+for different highlighting need nothing more.
+
+## Keywords
+
+```dart
+import 'package:val_highlight/advanced.dart';
+import 'package:val_highlight/languages/dart.dart';
+
+final myDart = dartLanguage.withKeywords(
+  add: {Scopes.typeBuiltin: ['Widget', 'BuildContext']},
+  remove: ['get', 'set'],
+);
+```
+
+`add` maps a scope to words that get it; a word already in another scope
+moves. Words in `remove` lose their scope and highlight like any other
+identifier. The change applies to every keyword table in the grammar,
+including those inside regions and the repository.
+
+## Your own rules first
+
+```dart
+final withTodos = dartLanguage.extend(
+  rules: [const TokenRule(r'\bTODO\b', scope: 'todo')],
+);
+```
+
+`extend` puts `rules` before the grammar's own top-level rules, so they win
+when two rules match at the same position. The earliest match still wins,
+though: in `TODO(); // TODO: ship`, the first `TODO` gets the `todo` scope,
+but the second is part of a comment that starts earlier, so it stays in the
+`comment` token.
+
+A new scope such as `todo` only needs a theme entry to show:
+
+```dart
+final theme = lightTheme.extend(styles: {'todo': const Style(bold: true)});
+```
+
+## Replace a named part
+
+A grammar keeps reusable rule lists in its `repository`, by name, and
+`extend` adds to it, replacing entries with the same name:
+
+```dart
+dartLanguage.repository.keys; // comments, nestedComment, strings, numbers, …
+
+// Numbers are no longer highlighted.
+final quiet = dartLanguage.extend(repository: {'numbers': []});
+```
+
+`extend` also takes `name`, `aliases`, `fileExtensions` and `fileNames`, for
+registering the result as a language of its own.
+
+## How it is edited
+
+`CodeField` takes comment markers, brackets and quotes from the grammar's
+`EditingSyntax`. Change them with `editing`:
+
+```dart
+final backticks = dartLanguage.extend(
+  editing: EditingSyntax.cStyle.copyWith(quotes: '"\'`'),
+);
+```
+
+To change them for one field only, pass `CodeEditing(syntax: …)` to that
+`CodeField` instead; see [CodeField](/docs/components/code-field/#configure-editing).
+
+The results on this page are checked by
+[`val_highlight/test/docs/snippets_test.dart`](https://github.com/useval/highlight/blob/main/val_highlight/test/docs/snippets_test.dart).

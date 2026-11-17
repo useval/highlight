@@ -16,13 +16,19 @@ a static site generator. Coming from a 0.x version? See
 <Tabs syncKey="platform">
 <TabItem label="Flutter">
 ```bash
-flutter pub add val_highlight_flutter val_highlight material_ui
+flutter pub add val_highlight_flutter val_highlight
 ```
 
 A Flutter app lists `val_highlight` too, because languages and themes are
 imported from `package:val_highlight/…`, and Dart's recommended lints
 (`depend_on_referenced_packages`) flag imports from a package you don't
-depend on. `material_ui` is explained [below](#use-material_ui-in-your-app).
+depend on.
+
+The examples on these pages build their apps with
+[`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
+library as a package (`flutter pub add material_ui`). Apart from
+`CodeField`, the widgets work the same with `package:flutter/material.dart`
+or any other design system.
 </TabItem>
 <TabItem label="Dart">
 ```bash
@@ -47,32 +53,21 @@ dart pub add val_highlight
 </TabItem>
 </Tabs>
 
-`CodeView` takes the source and a language; everything else is optional. Its
-theme follows the app's brightness — `lightTheme` in a light app, `darkTheme`
-in a dark one — the code can be selected and copied, and long lines scroll
-sideways. [CodeView](/docs/components/code-view/) shows the rest; to let
-people edit code, see [CodeField](/docs/components/code-field/).
+`CodeView` takes the source and a language; everything else is optional.
+Its theme follows the platform's brightness — `lightTheme` in light mode,
+`darkTheme` in dark mode — and long lines scroll sideways. To follow your
+app's own light and dark mode instead, add a `CodeTheme`; see
+[app-wide defaults](/docs/themes/#app-wide-defaults). To let people select
+and copy the code, put it — or the page around it — in a `SelectionArea`.
+[CodeView](/docs/components/code-view/) shows the rest; to let people edit
+code, see [CodeField](/docs/components/code-field/).
 
-### Use material_ui in your app
+### Which library to import
 
-`val_highlight_flutter` is built on
-[`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
-library published as a package, rather than on
-`package:flutter/material.dart`. The two libraries have separate `Theme`,
-`Material` and localizations widgets, so build your app with `material_ui`:
-
-```dart
-import 'package:material_ui/material_ui.dart';
-```
-
-:::caution
-Under a `MaterialApp` from `package:flutter/material.dart`, the widgets can't
-see your app's theme: `CodeView` stays light in a dark app and, while
-`selectable` is on (the default), fails with "No MaterialLocalizations
-found". `CodeField` fails with "No Material widget found". And `CodeTheme`
-can't be added to that library's `ThemeData`, because it is a `material_ui`
-theme extension.
-:::
+| Import | Use it for |
+|---|---|
+| `package:val_highlight_flutter/val_highlight_flutter.dart` | `CodeView`, `HighlightTextController`, `CodeTheme` and the rest. Built on Flutter's widgets layer only, so it works in any app: `package:flutter/material.dart`, [`material_ui`](https://pub.dev/packages/material_ui), Cupertino or your own design system. |
+| `package:val_highlight_flutter/material.dart` | All of the above, plus `CodeField`, an editor built on `material_ui`'s `TextField`. It needs a `material_ui` `MaterialApp` above it. In other apps, give your own text field a `HighlightTextController`; see [highlighted TextField](/docs/components/text-field/). |
 
 ## Render HTML in Dart
 
@@ -112,7 +107,8 @@ a stylesheet, write inline styles instead — see
 
 | Import | Gives you |
 |---|---|
-| `package:val_highlight_flutter/val_highlight_flutter.dart` | The Flutter widgets, plus everything in `val_highlight.dart`. |
+| `package:val_highlight_flutter/val_highlight_flutter.dart` | The Flutter widgets except `CodeField`, plus everything in `val_highlight.dart`. |
+| `package:val_highlight_flutter/material.dart` | Everything in `val_highlight_flutter.dart`, plus `CodeField`. |
 | `package:val_highlight/val_highlight.dart` | The engine: `Highlighter`, `HighlightResult`, `IncrementalHighlighter`, `HtmlRenderer`, `LanguageRegistry`, `LanguageDetector`, `ValTheme`, `Style`, `Scopes`, `EditingSyntax` and more. |
 | `package:val_highlight/advanced.dart` | The engine plus the rules and building blocks for [writing a grammar](/docs/customize/writing-a-grammar/). |
 | `package:val_highlight/languages/<name>.dart` | One language, such as `languages/kotlin.dart` for `kotlinLanguage`. [Every language](/docs/languages/) lists its file. |

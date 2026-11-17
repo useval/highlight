@@ -19,7 +19,7 @@ import 'highlight_text_controller.dart';
 ///
 /// Use [CodeEditing.none] to turn every behavior off.
 @immutable
-class CodeEditing {
+final class CodeEditing {
   /// Creates editing behavior. Everything is on by default.
   const CodeEditing({
     this.autoIndent = true,
@@ -102,21 +102,21 @@ class CodeEditing {
 
 /// Indents the selected lines, or inserts an indent at the caret. Bound to
 /// Tab in `CodeField`.
-class IndentCodeIntent extends Intent {
+final class IndentCodeIntent extends Intent {
   /// Creates an indent intent.
   const IndentCodeIntent();
 }
 
 /// Removes one indent from the selected lines. Bound to Shift+Tab in
 /// `CodeField`.
-class OutdentCodeIntent extends Intent {
+final class OutdentCodeIntent extends Intent {
   /// Creates an outdent intent.
   const OutdentCodeIntent();
 }
 
 /// Comments or uncomments the selected lines. Bound to Ctrl+/ (Cmd+/ on
 /// Apple platforms) in `CodeField`.
-class ToggleCommentIntent extends Intent {
+final class ToggleCommentIntent extends Intent {
   /// Creates a toggle-comment intent.
   const ToggleCommentIntent();
 }
@@ -139,7 +139,11 @@ class ToggleCommentIntent extends Intent {
 /// with hardware keyboards, on-screen keyboards and voice input. Text being
 /// composed by an input method is never changed. Each change it makes is a
 /// single edit, so one undo reverts it.
-class CodeEditingFormatter extends TextInputFormatter {
+///
+/// What it needs to remember between edits, such as which closers it
+/// inserted, is kept on the [controller], so creating a new formatter in
+/// each build is fine.
+final class CodeEditingFormatter extends TextInputFormatter {
   /// Creates a formatter for [controller].
   CodeEditingFormatter({
     required this.controller,
@@ -151,15 +155,14 @@ class CodeEditingFormatter extends TextInputFormatter {
   final HighlightTextController controller;
 
   /// The behavior to apply.
-  CodeEditing editing;
+  final CodeEditing editing;
 
   /// One level of indentation, for Enter.
-  String indent;
+  final String indent;
 
   // Offsets of closers inserted automatically, in increasing order. Only
   // these are stepped over or deleted with their opener.
-  final List<int> _closers = [];
-  String? _text;
+  List<int> get _closers => controller.autoClosers;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -167,14 +170,16 @@ class CodeEditingFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final value = _format(oldValue, newValue);
-    _text = value.text;
+    controller.autoClosersText = value.text;
     return value;
   }
 
   TextEditingValue _format(TextEditingValue oldValue, TextEditingValue value) {
-    // Something other than this formatter changed the text: the recorded
+    // Something other than a formatter changed the text: the recorded
     // closers may no longer be where they were.
-    if (!identical(oldValue.text, _text)) _closers.clear();
+    if (!identical(oldValue.text, controller.autoClosersText)) {
+      _closers.clear();
+    }
     final edit = _Edit.between(oldValue, value);
     if (edit == null) {
       _closers.clear();

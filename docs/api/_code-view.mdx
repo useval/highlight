@@ -8,10 +8,14 @@ Shows syntax-highlighted code.
 CodeView(source, language: dartLanguage)
 ```
 
-Everything else is optional. The theme follows the app's brightness
-(see `CodeTheme` for app-wide defaults). Results are cached, and inputs
-above `CodeHighlighter.isolateThreshold` are highlighted in a background
+Everything else is optional. The theme follows the brightness (see
+`CodeTheme` for app-wide defaults). Results are cached, and inputs above
+`CodeHighlighter.isolateThreshold` are highlighted in a background
 isolate while plain text is shown.
+
+Code is always laid out left to right, even in a right-to-left app. To
+let people select and copy it, put it — or the page around it — inside
+a `SelectionArea`; line numbers are never selected.
 
 Short code renders as one text block. Code with more than
 `virtualizeAbove` lines, placed where its height is bounded, renders one
@@ -25,14 +29,13 @@ const CodeView(
   List<Grammar> detectLanguages = const [],
   Grammar fallbackLanguage = genericLanguage,
   ValTheme? theme,
-  TextStyle? textStyle,
+  TextStyle? style,
   EdgeInsetsGeometry? padding,
   bool? lineNumbers,
   int firstLineNumber = 1,
   Set<int> highlightedLines = const {},
   Color? highlightColor,
   bool wrap = false,
-  bool selectable = true,
   CodeHighlighter? highlighter,
   int virtualizeAbove = 1000,
   CodeGutterBuilder? gutterBuilder,
@@ -53,20 +56,19 @@ Creates a code view.
 | `fallbackLanguage` | `Grammar` | `genericLanguage` | Language used when `language` is `null` and detection finds nothing. Defaults to `genericLanguage`, which highlights what most languages share. Use `plainTextLanguage` for no highlighting. |
 | `detectLanguages` | `List<Grammar>` | `const []` | Candidates for detection when `language` is `null`. |
 | `theme` | `ValTheme?` |  | Color theme. Defaults to `CodeTheme` or the built-in light/dark theme. |
-| `textStyle` | `TextStyle?` |  | Text style merged over the default monospace style. |
-| `padding` | `EdgeInsetsGeometry?` |  | Padding inside the background. Defaults to `CodeTheme.padding`, or 16 on every side. |
-| `lineNumbers` | `bool?` |  | Whether to show line numbers. Defaults to `CodeTheme.lineNumbers`, or `false`. |
+| `style` | `TextStyle?` |  | Text style merged over the default code style (`CodeTheme.textStyleOf`). |
+| `padding` | `EdgeInsetsGeometry?` |  | Padding inside the background. Defaults to `CodeThemeData.padding`, or 16 on every side. |
+| `lineNumbers` | `bool?` |  | Whether to show line numbers. Defaults to `CodeThemeData.lineNumbers`, or `false`. |
 | `firstLineNumber` | `int` | `1` | Number shown for the first line. |
 | `highlightedLines` | `Set<int>` | `const {}` | Line numbers (as shown in the gutter) to highlight. |
 | `highlightColor` | `Color?` |  | Background for `highlightedLines`. |
 | `wrap` | `bool` | `false` | Whether long lines wrap. When `false`, code scrolls horizontally. |
-| `selectable` | `bool` | `true` | Whether the code can be selected and copied. |
 | `highlighter` | `CodeHighlighter?` |  | Highlighter to use. Defaults to `CodeHighlighter.shared`. |
 | `virtualizeAbove` | `int` | `1000` | Line count above which rows are built lazily. |
 | `gutterBuilder` | `CodeGutterBuilder?` |  | Custom gutter cells. |
 | `lineBuilder` | `CodeLineBuilder?` |  | Custom rows. Setting this always renders one row per line. |
 | `header` | `Widget?` |  | A widget shown above the code, such as a title or copy button. |
-| `scrollController` | `ScrollController?` |  | Vertical scroll controller for the lazy list. |
+| `scrollController` | `ScrollController?` |  | Vertical scroll controller for the lazy list. Only attached while the code is laid out lazily (see `virtualizeAbove`). |
 | `onTokenTap` | `ValueChanged<CodeToken>?` |  | Called when a token is tapped, such as an identifier to jump to. Whitespace is not tappable. |
 | `spanBuilder` | `CodeSpanBuilder?` |  | Builds each token's span, for hover effects, links, tooltips or custom styling. Takes priority over `onTokenTap`. |
 
@@ -99,27 +101,47 @@ Creates a token.
 |---|---|---|
 | `scope` | `String?` | Innermost scope, or `null` for plain text. |
 
+### `CodeLineDetails`
+
+One line of a `CodeView`, as passed to `CodeView.gutterBuilder` and
+`CodeView.lineBuilder`.
+
+```dart
+const CodeLineDetails({
+  required int line,
+  required int lineNumber,
+  required bool highlighted,
+})
+```
+
+Creates the details of a line.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `line` | `int` | *required* | Zero-based index of the line in the code. |
+| `lineNumber` | `int` | *required* | Number shown in the gutter: `line` plus `CodeView.firstLineNumber`. |
+| `highlighted` | `bool` | *required* | Whether `lineNumber` is in `CodeView.highlightedLines`. |
+
 ### `CodeGutterBuilder`
 
-Builds the gutter cell for `lineNumber`. Return a fixed-width widget so
-rows stay aligned.
+Builds the gutter cell for `line`. Return a fixed-width widget so rows
+stay aligned.
 
 ```dart
 typedef CodeGutterBuilder = Widget Function(
   BuildContext context,
-  int lineNumber,
-  bool highlighted,
+  CodeLineDetails line,
 )
 ```
 
 ### `CodeLineBuilder`
 
-Wraps the row for zero-based `line`. `child` is the default row.
+Wraps the row for `line`. `child` is the default row.
 
 ```dart
 typedef CodeLineBuilder = Widget Function(
   BuildContext context,
-  int line,
+  CodeLineDetails line,
   Widget child,
 )
 ```

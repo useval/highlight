@@ -17,7 +17,8 @@ to native code, compiled to JavaScript, and compiled to WebAssembly. So it
 works in Flutter on Android, iOS, macOS, Windows, Linux and the web, on
 servers, and in command-line tools. `val_highlight_flutter` draws with
 ordinary Flutter text, with no platform code, so it runs wherever Flutter
-does.
+does. Its main library needs only Flutter's widgets layer; `CodeField`, in
+`package:val_highlight_flutter/material.dart`, needs `material_ui`.
 
 The engine's tests run on the Dart VM and again compiled to JavaScript, and
 the two give the same tokens for every language. The widget tests run with

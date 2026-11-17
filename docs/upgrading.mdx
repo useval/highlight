@@ -1,26 +1,32 @@
 ---
 title: Upgrading to 1.0
-description: What changed between 0.x and 1.0 of val_highlight, and how to update your code for each breaking change.
+description: What changed between 0.x and 1.0 of val_highlight and val_highlight_flutter, and how to update your code for each breaking change.
 ---
 
-1.0 is the first stable release: from here on, breaking changes only come
-with a new major version (see [versions](/docs/reference/platforms/#versions)).
-Code that only highlights — with `Highlighter`, `allLanguagesRegistry()`
-and the built-in themes — needs no changes. The changes below affect code
-that builds a registry with a fallback, reads detection results, writes its
-own grammar blocks, or used the engine's internal buffers.
-
-Update the constraints:
+1.0 is the first stable release of both packages: from here on, breaking
+changes only come with a new major version (see
+[versions](/docs/reference/platforms/#versions)). Update both constraints
+together, since `val_highlight_flutter` 1.0 needs `val_highlight` 1.0:
 
 ```yaml
 dependencies:
   val_highlight: ^1.0.0
+  val_highlight_flutter: ^1.0.0
 ```
 
-The full list, including fixes, is in the
-[changelog](https://github.com/useval/highlight/blob/main/val_highlight/CHANGELOG.md).
+In the engine, code that only highlights — with `Highlighter`,
+`allLanguagesRegistry()` and the built-in themes — needs no changes. In the
+widgets, the biggest change is that they no longer depend on Material: see
+[val_highlight_flutter](#val_highlight_flutter) below.
 
-## Registry fallback is named
+The full lists, including fixes, are in the changelogs of
+[`val_highlight`](https://github.com/useval/highlight/blob/main/val_highlight/CHANGELOG.md)
+and
+[`val_highlight_flutter`](https://github.com/useval/highlight/blob/main/val_highlight_flutter/CHANGELOG.md).
+
+## val_highlight
+
+### Registry fallback is named
 
 `LanguageRegistry` takes the fallback by name, and its list of languages is
 required:
@@ -37,7 +43,7 @@ LanguageRegistry(const []);
 
 `LanguageRegistry(allLanguages)` and `allLanguagesRegistry()` are unchanged.
 
-## Detection reasons are an enum
+### Detection reasons are an enum
 
 `Detection.reason` is a `DetectionReason` instead of a string:
 
@@ -51,7 +57,7 @@ if (detection?.reason == DetectionReason.fileName) …
 
 The values are `fileName`, `shebang` and `content`.
 
-## Grammar building blocks
+### Grammar building blocks
 
 `Operators` takes its characters as a required argument, and `Annotation`
 and `Preprocessor` take every argument by name:
@@ -87,7 +93,7 @@ final class Pragma extends BlockRule { … }
 `cCommonRules`. If you built on them, copy the lists you need into your
 grammar.
 
-## Engine internals are private
+### Engine internals are private
 
 These were for the engine's own use and are gone:
 
@@ -97,7 +103,7 @@ These were for the engine's own use and are gone:
 | `ScopeTable()`, `nameId`, `push` | Nothing: a result's `ScopeTable` is read-only. |
 | Setting `IncrementalHighlighter.lastRescannedLines` | It is read-only. |
 
-## Behavior changes
+### Behavior changes
 
 These compile unchanged but can give different results:
 
@@ -118,3 +124,104 @@ These compile unchanged but can give different results:
 - **Delimiters longer than 1,024 characters**, such as a code fence of
   thousands of backticks, are plain text. They used to throw
   `GrammarException`.
+
+## val_highlight_flutter
+
+### Import CodeField from material.dart
+
+`CodeView`, `HighlightTextController`, `CodeTheme` and the rest now need only
+Flutter's widgets layer, so they work in any app. `CodeField` is built on
+`material_ui` and moved to its own library, which also exports everything
+else:
+
+```dart
+// 0.x
+import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+
+// 1.0, where you use CodeField
+import 'package:val_highlight_flutter/material.dart';
+```
+
+### CodeTheme is a widget
+
+`CodeTheme` used to be a `ThemeExtension` on `ThemeData`. It is now an
+inherited widget holding a `CodeThemeData`, and the brightness it picks the
+light or dark theme by is the platform's unless you set it. To follow your
+app's light and dark mode, put it in `MaterialApp.builder`:
+
+```dart
+// 0.x
+MaterialApp(
+  theme: ThemeData(extensions: const [CodeTheme(light: sepiaTheme)]),
+)
+
+// 1.0
+MaterialApp(
+  builder: (context, child) => CodeTheme(
+    data: CodeThemeData(
+      light: sepiaTheme,
+      brightness: Theme.of(context).brightness,
+    ),
+    child: child!,
+  ),
+)
+```
+
+`CodeTheme.maybeOf(context)` and `CodeTheme.of(context)` return the
+`CodeThemeData`. `CodeTheme.resolve` and `CodeTheme.textStyleOf` are
+unchanged.
+
+### CodeView
+
+- **Selection is the app's.** `CodeView` no longer wraps itself in a
+  `SelectionArea`, and `selectable` is gone. Put the view, or the page, in
+  a `SelectionArea` to let people select and copy code:
+
+  ```dart
+  // 0.x
+  CodeView(source, language: dartLanguage)
+
+  // 1.0, selectable
+  SelectionArea(child: CodeView(source, language: dartLanguage))
+  ```
+
+- **`textStyle` is `style`**, as on `CodeField` and `Text`.
+- **Builders take a `CodeLineDetails`** with the line's zero-based `line`,
+  its `lineNumber` as shown, and whether it is `highlighted`:
+
+  ```dart
+  // 0.x
+  gutterBuilder: (context, lineNumber, highlighted) => …
+  lineBuilder: (context, line, child) => …
+
+  // 1.0
+  gutterBuilder: (context, line) => … line.lineNumber … line.highlighted …
+  lineBuilder: (context, line, child) => … line.line …
+  ```
+
+### CodeField and HighlightTextController
+
+- **`margin` is `styleMargin`**, beside `styleAllBelow`.
+- **`lineNumbers` follows `CodeTheme`** when you don't set it, as on
+  `CodeView`.
+- **`HighlightTextController.window` is gone.** It was for coloring part of
+  a long text in a plain `TextField`; use `CodeField`, which does that
+  itself.
+- **`CodeEditingFormatter.editing` and `indent` are final.** Create a new
+  formatter to change them; it keeps its state on the controller, so
+  creating one in `build` is fine.
+
+### Final classes
+
+`CodeToken`, `CodeEditing`, `CodeHighlighter`, `CodeEditingFormatter`,
+`CodeThemeData` and the three intents are `final`: they can no longer be
+extended or implemented.
+
+### Behavior changes
+
+- Code is laid out left to right in `CodeView` and `CodeField`, even in a
+  right-to-left app.
+- Edits made by `CodeField` shortcuts, such as Tab, go through its
+  `inputFormatters`.
+- `CodeView` rows grow with the text scale, and screen readers skip its line
+  numbers.

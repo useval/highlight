@@ -3,9 +3,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:val_highlight/languages/dart.dart';
-import 'package:val_highlight_flutter/src/code_field.dart';
+import 'package:val_highlight_flutter/material.dart';
+import 'package:val_highlight_flutter/src/code_editing.dart'
+    show indentText, newlineKeepingIndent, outdentLines;
 import 'package:val_highlight_flutter/src/editor_decorations.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/src/highlight_text_controller.dart'
+    show HighlightTextControllerInternals;
 
 String _lines(int n) =>
     List.generate(n, (i) => 'final value$i = compute($i); // $i').join('\n');
@@ -282,6 +285,32 @@ void main() {
   });
 
   group('shortcuts', () {
+    testWidgets('shortcut edits go through the input formatters', (
+      tester,
+    ) async {
+      final controller = await pumpField(
+        tester,
+        'abc',
+        build: (controller) => CodeField(
+          controller: controller,
+          expands: true,
+          inputFormatters: [LengthLimitingTextInputFormatter(4)],
+        ),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(controller.text.length, lessThanOrEqualTo(4));
+    });
+
+    testWidgets('default shortcuts are the same map every time', (
+      tester,
+    ) async {
+      expect(
+        identical(CodeField.defaultShortcuts, CodeField.defaultShortcuts),
+        isTrue,
+      );
+    });
+
     testWidgets('Ctrl+/ toggles a comment', (tester) async {
       final controller = await pumpField(tester, 'a();\nb();', caret: 2);
       await pressCombo(tester, LogicalKeyboardKey.slash);
@@ -374,6 +403,36 @@ void main() {
           ..paragraph()
           ..paragraph(),
       );
+    });
+
+    testWidgets('CodeTheme can turn line numbers on', (tester) async {
+      await pumpField(
+        tester,
+        'a\nb',
+        wrap: (field) => CodeTheme(
+          data: const CodeThemeData(lineNumbers: true),
+          child: field,
+        ),
+      );
+      expect(textLeft(tester), greaterThan(16));
+    });
+
+    testWidgets('code stays left to right in a right-to-left app', (
+      tester,
+    ) async {
+      await pumpField(
+        tester,
+        'a\nb',
+        wrap: (field) =>
+            Directionality(textDirection: TextDirection.rtl, child: field),
+        build: (controller) =>
+            CodeField(controller: controller, expands: true, lineNumbers: true),
+      );
+      final editable = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
+      expect(editable.textDirection, TextDirection.ltr);
+      expect(textLeft(tester), greaterThan(16));
     });
 
     testWidgets('no gutter by default', (tester) async {

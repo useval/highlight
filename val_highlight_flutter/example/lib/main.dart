@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:val_highlight/languages/all.dart';
 import 'package:val_highlight/themes/all.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 
 import 'samples.dart';
 
@@ -32,6 +32,12 @@ class _ExampleAppState extends State<ExampleApp> {
         colorSchemeSeed: const Color(0xFFB0226E),
         brightness: Brightness.dark,
       ),
+      // The code widgets follow the app's light/dark mode, not the
+      // platform's.
+      builder: (context, child) => CodeTheme(
+        data: CodeThemeData(brightness: Theme.of(context).brightness),
+        child: child!,
+      ),
       home: DefaultTabController(
         length: 3,
         child: Scaffold(
@@ -57,7 +63,11 @@ class _ExampleAppState extends State<ExampleApp> {
             ),
           ),
           body: const TabBarView(
-            children: [GalleryPage(), EditorPage(), LargeFilePage()],
+            children: [
+              SelectionArea(child: GalleryPage()),
+              EditorPage(),
+              SelectionArea(child: LargeFilePage()),
+            ],
           ),
         ),
       ),

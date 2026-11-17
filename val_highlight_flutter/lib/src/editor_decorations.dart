@@ -238,10 +238,9 @@ class RenderEditorDecorations extends RenderBox {
 
     final selection = _config.controller.selection;
     final caretLine = selection.isValid
-        ? _lineOf(result, selection.extentOffset)
+        ? result.lineAt(selection.extentOffset)
         : -1;
-    final firstVisible = _lineOf(
-      result,
+    final firstVisible = result.lineAt(
       editable
           .getPositionForPoint(
             localToGlobal(Offset(visible.left + 1, visible.top + 1)),
@@ -334,19 +333,5 @@ class RenderEditorDecorations extends RenderBox {
       }
     }
     return _match;
-  }
-
-  static int _lineOf(HighlightResult result, int offset) {
-    var low = 0;
-    var high = result.lineCount - 1;
-    while (low < high) {
-      final mid = (low + high + 1) >> 1;
-      if (result.lineStart(mid) <= offset) {
-        low = mid;
-      } else {
-        high = mid - 1;
-      }
-    }
-    return low;
   }
 }

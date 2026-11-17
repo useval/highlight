@@ -26,6 +26,7 @@ void main() {
       'package:val_highlight/themes/dark.dart',
       'package:val_highlight/val_highlight.dart',
       'package:val_highlight_flutter/val_highlight_flutter.dart',
+      'package:val_highlight_flutter/material.dart',
     ]) {
       expect(libraries, contains(uri));
     }
@@ -34,6 +35,8 @@ void main() {
     for (final id in [
       'CodeView',
       'CodeView.new',
+      'CodeThemeData.brightness',
+      'CodeLineDetails.lineNumber',
       'CodeView.code',
       'CodeField.defaultShortcuts',
       'Grammar.validate',

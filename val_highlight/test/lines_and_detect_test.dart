@@ -34,6 +34,22 @@ void main() {
       ]);
     });
 
+    test('lineAt finds the line holding an offset', () {
+      final result = const Highlighter().highlight(
+        'ab\r\ncd\n\nef',
+        language: plainTextLanguage,
+      );
+      expect(
+        [for (var i = -1; i <= result.code.length + 1; i++) result.lineAt(i)],
+        [0, 0, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3, 3],
+      );
+      final empty = const Highlighter().highlight(
+        '',
+        language: plainTextLanguage,
+      );
+      expect(empty.lineAt(0), 0);
+    });
+
     test('tokenAt finds the covering token', () {
       final r = highlighter.highlight('x = 1', language: dartLanguage);
       expect(r.tokenAt(0), 0);

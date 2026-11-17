@@ -3,6 +3,36 @@ title: Troubleshooting
 description: Common problems with val_highlight and val_highlight_flutter, what causes them, and how to fix them.
 ---
 
+## The code widgets don't follow my app's dark mode
+
+They follow the platform's brightness unless a `CodeTheme` says otherwise.
+Set it from your app's theme in `MaterialApp.builder` (or your app's
+equivalent):
+
+```dart
+MaterialApp(
+  builder: (context, child) => CodeTheme(
+    data: CodeThemeData(brightness: Theme.of(context).brightness),
+    child: child!,
+  ),
+)
+```
+
+See [app-wide defaults](/docs/themes/#app-wide-defaults).
+
+## The code in a `CodeView` can't be selected
+
+Selection belongs to the app: put the view, or the page around it, in a
+`SelectionArea`. Line numbers are never selected.
+
+## `CodeField` throws "No Material widget found"
+
+`CodeField` is built on `material_ui`'s `TextField`, which needs a
+`material_ui` `MaterialApp` or `Material` above it. An app built on
+`package:flutter/material.dart` or another design system can give its own
+text field a `HighlightTextController` and a `CodeEditingFormatter`; see
+[highlighted TextField](/docs/components/text-field/).
+
 ## Code inside Markdown fences is not highlighted
 
 Markdown looks up the language named on each fence in a registry, and the

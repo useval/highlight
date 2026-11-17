@@ -69,8 +69,9 @@ for (var line = 0; line < result.lineCount; line++) {
 
 `forEachSegment` calls back with the pieces of one line, cut where a token
 crosses the line break, and never includes the break itself. `lineStart` and
-`lineEnd` give a line's offsets; `lineEnd` excludes the `\n` or `\r\n`. Empty
-source has one empty line, and a trailing `\n` starts a final empty line.
+`lineEnd` give a line's offsets; `lineEnd` excludes the `\n` or `\r\n`, and
+`lineAt(offset)` finds the line holding an offset. Empty source has one
+empty line, and a trailing `\n` starts a final empty line.
 
 ## Questions an editor asks
 

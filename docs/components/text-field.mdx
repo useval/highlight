@@ -33,7 +33,7 @@ final controller = HighlightTextController(
 |---|---|
 | `language` | Required. The grammar to highlight with. Set `controller.language` later to switch; the text is highlighted again. |
 | `text` | The initial text. |
-| `theme` | A `ValTheme`. Without one, the controller follows `CodeTheme` and the app's brightness. Settable as `controller.theme`. |
+| `theme` | A `ValTheme`. Without one, the controller follows `CodeTheme` and the brightness. Settable as `controller.theme`. |
 | `registry` | A `LanguageRegistry` that resolves languages named inside the text, such as Markdown code fences. |
 
 Give the field a monospace style: `CodeTheme.textStyleOf(context)` is the one
@@ -44,7 +44,9 @@ the package's widgets use.
 `CodeEditingFormatter` brings `CodeField`'s typing to a plain `TextField`:
 brackets and quotes that close themselves, typing over a selection to wrap
 it, and Enter that keeps the indentation. Add it to `inputFormatters`, as the
-example does. It takes `editing` and `indent`, like `CodeField`.
+example does. It takes `editing` and `indent`, like `CodeField`. What it
+remembers between edits is kept on the controller, so creating it in
+`build`, as the example does, is fine.
 
 Keys are `CodeField`'s own: a plain `TextField` gets no Tab, Shift+Tab or
 Ctrl+/ shortcuts, no bracket marks and no line numbers. When you need those,
@@ -53,12 +55,9 @@ use [CodeField](/docs/components/code-field/).
 ## Long text
 
 A plain `TextField` colors the whole text, and Flutter lays all of it out on
-every change. For long text, use `CodeField`, which colors only the lines on
-screen, or set `controller.window` to the zero-based lines to color:
-
-```dart
-controller.window = (first: 0, last: 199);
-```
+every change, which gets slow after a few hundred lines. For long text, use
+[`CodeField`](/docs/components/code-field/#large-documents), which colors
+only the lines on screen.
 
 ## API reference
 

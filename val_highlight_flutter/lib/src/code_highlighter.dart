@@ -13,7 +13,7 @@ import 'package:val_highlight/val_highlight.dart';
 /// ```dart
 /// final highlighter = CodeHighlighter(registry: allLanguagesRegistry());
 /// ```
-class CodeHighlighter {
+final class CodeHighlighter {
   /// Creates a highlighter.
   CodeHighlighter({
     this.registry,

@@ -22,9 +22,13 @@ the text's own layout, so wrapped lines line up.
 
 Laying out a text field is proportional to its styled runs, so for
 documents longer than `styleAllBelow` lines only the visible lines, plus
-`margin` lines on each side, are colored. The window follows scrolling
+`styleMargin` lines on each side, are colored. The window follows scrolling
 (of the field itself or of an enclosing scroll view) and is computed from
 the laid-out text, so wrapped lines are handled exactly.
+
+The field is built on `material_ui`'s `TextField`, so it needs a
+`material_ui` `MaterialApp` (or `Material`) above it. Code is always
+laid out left to right, even in a right-to-left app.
 
 ```dart
 const CodeField({
@@ -42,13 +46,13 @@ const CodeField({
   ScrollController? scrollController,
   TextAlignVertical? textAlignVertical,
   int styleAllBelow = 300,
-  int margin = 150,
+  int styleMargin = 150,
   String indent = '  ',
   CodeEditing editing = const CodeEditing(),
   Map<ShortcutActivator, Intent>? shortcuts,
   List<TextInputFormatter>? inputFormatters,
   UndoHistoryController? undoController,
-  bool lineNumbers = false,
+  bool? lineNumbers,
   int firstLineNumber = 1,
   TextStyle? gutterStyle,
   Set<int> highlightedLines = const {},
@@ -76,13 +80,13 @@ Creates a code editor.
 | `scrollController` | `ScrollController?` |  | Scroll controller for the field's own scrolling. |
 | `textAlignVertical` | `TextAlignVertical?` |  | Vertical alignment of the text. |
 | `styleAllBelow` | `int` | `300` | Documents with at most this many lines are colored in full. |
-| `margin` | `int` | `150` | Lines colored beyond each edge of the visible area. |
+| `styleMargin` | `int` | `150` | Lines colored beyond each edge of the visible area, once the document is longer than `styleAllBelow` lines. |
 | `indent` | `String` | `'  '` | Text inserted by Tab and removed by Shift+Tab, such as two spaces or `'\t'`. Enter keeps the current line's indentation, adding one level after an opening `{`, `[`, `(` or `:`. |
 | `editing` | `CodeEditing` | `const CodeEditing()` | What typing, Enter and Backspace do beyond inserting text. Use `CodeEditing.none` for a plain text field. |
 | `shortcuts` | `Map<ShortcutActivator, Intent>?` |  | Keys and the intents they send. Defaults to `defaultShortcuts`; pass `const {}` for none, so Tab moves focus as in other fields. |
-| `inputFormatters` | `List<TextInputFormatter>?` |  | Formatters applied after the editing behavior, such as a length limit. |
+| `inputFormatters` | `List<TextInputFormatter>?` |  | Formatters applied after the editing behavior, such as a length limit. Edits made by shortcuts, such as Tab, go through them too. |
 | `undoController` | `UndoHistoryController?` |  | Controls the field's undo history, as in `TextField.undoController`. Every edit the field makes itself — an auto-closed pair, a toggled comment, an indent — is a single undo step. |
-| `lineNumbers` | `bool` | `false` | Whether to show line numbers in a gutter. |
+| `lineNumbers` | `bool?` |  | Whether to show line numbers in a gutter. Defaults to `CodeThemeData.lineNumbers`, or `false`. |
 | `firstLineNumber` | `int` | `1` | Number shown for the first line. |
 | `gutterStyle` | `TextStyle?` |  | Style of the line numbers. Defaults to the code style in a faded text color. |
 | `highlightedLines` | `Set<int>` | `const {}` | Line numbers, as shown in the gutter, to highlight. |

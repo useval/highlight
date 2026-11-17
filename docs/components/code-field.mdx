@@ -20,11 +20,24 @@ highlighted, and the parenthesis before the caret and its match are marked.
 
 ## Usage
 
-`CodeField` is a multi-line `TextField` for code. Its text, language and theme
-live in a `HighlightTextController`: create it once, change
-`controller.language` or `controller.theme` whenever you like, and dispose it
-with the widget that owns it. `controller.result` is the current
-`HighlightResult`.
+```dart
+import 'package:val_highlight/languages/dart.dart';
+import 'package:val_highlight_flutter/material.dart';
+
+CodeField(controller: controller)
+```
+
+`CodeField` is a multi-line `TextField` for code, built on `material_ui`, so
+it comes from `package:val_highlight_flutter/material.dart` and needs a
+`material_ui` `MaterialApp` above it. In an app with another design system,
+give your own text field a `HighlightTextController` and a
+`CodeEditingFormatter`; see [highlighted TextField](/docs/components/text-field/).
+
+Its text, language and theme live in a `HighlightTextController`: create it
+once, change `controller.language` or `controller.theme` whenever you like,
+and dispose it with the widget that owns it. `controller.result` is the
+current `HighlightResult`. Code is always laid out left to right, even in a
+right-to-left app.
 
 `CodeField` paints no background, so paint the theme's behind it, as the
 example does. `CodeTheme.resolve(context, controller.theme)` returns the
@@ -104,8 +117,8 @@ CodeField(
 )
 ```
 
-The gutter, the line bands and the bracket marks are painted from the text's
-own layout, so they line up with wrapped lines, only visible lines are
+`lineNumbers` defaults to `CodeTheme`'s, or off. The gutter, the line bands
+and the bracket marks are painted from the text's own layout, so they line up with wrapped lines, only visible lines are
 painted, and they follow the text when a font finishes loading late. The
 gutter has room for at least two digits and widens when the line count gains
 one. `firstLineNumber`, `gutterStyle`, `highlightColor`, `currentLineColor`
@@ -122,7 +135,9 @@ Each shortcut sends an intent: `IndentCodeIntent` (Tab), `OutdentCodeIntent`
 CodeField(controller: controller, shortcuts: const {})
 ```
 
-To change what an intent does, put an `Actions` widget above the field:
+Edits made by shortcuts go through the field's `inputFormatters`, the same
+as typed text. To change what an intent does, put an `Actions` widget above
+the field:
 
 ```dart
 Actions(
@@ -159,8 +174,8 @@ is one undo step.
 
 Flutter lays out a text field's whole text on every change, and styled runs
 make that slower. So for a document of more than `styleAllBelow` lines (300
-by default), `CodeField` colors only the visible lines plus `margin` lines
-on each side (150 by default), and the rest is plain text. The colored
+by default), `CodeField` colors only the visible lines plus `styleMargin`
+lines on each side (150 by default), and the rest is plain text. The colored
 window follows scrolling — the field's own, or that of a scroll view around
 it. Moving the window lays the whole field out again, so while you scroll it
 moves only when the visible lines come close to its edge, and it is centered

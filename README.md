@@ -20,7 +20,7 @@
 | Package | Use it for |
 |---|---|
 | [`val_highlight`](val_highlight/) | The engine, in pure Dart: 55 languages plus a generic fallback, flat tokens, incremental updates, language detection, 8 themes, VS Code theme import and HTML output. Runs on the VM, in Flutter and on the web. |
-| [`val_highlight_flutter`](val_highlight_flutter/) | Flutter widgets: `CodeView` to show code, `CodeField` to edit it, `HighlightTextController`, and `CodeTheme` for app-wide defaults. |
+| [`val_highlight_flutter`](val_highlight_flutter/) | Flutter widgets: `CodeView` to show code, `HighlightTextController` for any text field, and `CodeTheme` for app-wide defaults, in any app; and `CodeField`, an editor built on `material_ui`. |
 
 A `val_highlight_jaspr` package is planned, built on the same engine.
 
@@ -99,7 +99,7 @@ pin.
 
 ## Built by Val
 
-`val_highlight` is part of [Val](https://useval.io), the live visual layer
+`val_highlight` is part of [Val](https://useval.ai), the live visual layer
 for AI agents.
 
 ## 💬 Community

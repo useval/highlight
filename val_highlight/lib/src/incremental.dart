@@ -91,7 +91,7 @@ final class IncrementalHighlighter {
     // Resume one line before the line holding the first change, because a
     // rule's lookahead may have read across the line break. Grammars whose
     // lookahead reaches further name the lines it never crosses.
-    var line = _lineOf(old, prefix) - 1;
+    var line = old.lineAt(prefix) - 1;
     if (line < 0) line = 0;
     final restart = _restartLine;
     while (line > 0 &&
@@ -207,7 +207,7 @@ final class IncrementalHighlighter {
     final oldEditEnd = old.code.length - suffix;
     final newEditEnd = text.length - suffix;
     // Old lines starting at or before `prefix` are unchanged.
-    final keep = _lineOf(old, prefix) + 1;
+    final keep = old.lineAt(prefix) + 1;
     // Old lines starting after the edited range survive, shifted.
     var after = keep;
     while (after < old.lineCount && old.lineStart(after) <= oldEditEnd) {
@@ -230,19 +230,5 @@ final class IncrementalHighlighter {
       starts[at++] = old.lineStart(i) + delta;
     }
     return starts;
-  }
-
-  static int _lineOf(HighlightResult result, int offset) {
-    var low = 0;
-    var high = result.lineCount - 1;
-    while (low < high) {
-      final mid = (low + high + 1) >> 1;
-      if (result.lineStart(mid) <= offset) {
-        low = mid;
-      } else {
-        high = mid - 1;
-      }
-    }
-    return low;
   }
 }

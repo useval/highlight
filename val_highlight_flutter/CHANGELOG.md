@@ -1,6 +1,51 @@
-## Unreleased
+## 1.0.0
 
+The API is now stable: from here on, breaking changes only come with a new
+major version. `docs/upgrading.mdx` shows each change below with before
+and after code.
+
+### Breaking
+
+* **Material is optional.** The main library needs only Flutter's widgets
+  layer, so `CodeView`, `HighlightTextController` and `CodeTheme` work in
+  apps built on `package:flutter/material.dart`, `material_ui`, Cupertino
+  or anything else. 0.1.2 threw in a `flutter/material.dart` app.
+  `CodeField`, built on `material_ui`, moved to
+  `package:val_highlight_flutter/material.dart`, which also exports
+  everything else.
+* **`CodeTheme` is an inherited widget** holding a `CodeThemeData`, instead
+  of a `ThemeExtension`. It picks the light or dark theme by
+  `CodeThemeData.brightness`, or the platform's brightness; set it from
+  your app's theme in `MaterialApp.builder` to follow the app's mode.
+* **`CodeView` is selectable inside a `SelectionArea`** you provide; it no
+  longer adds its own, and `selectable` is gone.
+* **`CodeView.textStyle` is `style`**, as on `CodeField`.
+* **`gutterBuilder` and `lineBuilder` take a `CodeLineDetails`** (`line`,
+  `lineNumber`, `highlighted`) instead of positional arguments.
+* **`CodeField.margin` is `styleMargin`**, and `CodeField.lineNumbers`
+  falls back to `CodeThemeData.lineNumbers`.
+* **`HighlightTextController.window` is no longer public.** Use `CodeField`
+  for long text.
+* **`CodeEditingFormatter.editing` and `indent` are final.** The formatter
+  keeps its state on the controller, so creating one in `build` works.
+* **Final classes:** `CodeToken`, `CodeEditing`, `CodeHighlighter`,
+  `CodeEditingFormatter`, `CodeThemeData` and the three intents.
 * Requires `val_highlight` 1.0.0.
+
+### Fixed
+
+* `CodeView` rows were cut off at large text scales.
+* Code was laid out right to left in a right-to-left app; `CodeView` and
+  `CodeField` now always lay it out left to right.
+* Edits made by `CodeField` shortcuts, such as Tab, skipped
+  `inputFormatters`.
+* Screen readers read `CodeView`'s line numbers.
+* A `CodeEditingFormatter` created in `build` lost track of the closers it
+  inserted, so typing `)` after an auto-closed `(` added a second one.
+* A failed background highlight is reported to `FlutterError` instead of
+  being dropped.
+* `CodeField.defaultShortcuts` returns the same map each time, so a
+  rebuild no longer rebinds the shortcuts.
 
 ## 0.1.2
 

@@ -6,6 +6,7 @@
 | `package:val_highlight/languages/all.dart` | Every built-in language, for apps that want them all. |
 | `package:val_highlight/themes/all.dart` | Every built-in theme. |
 | `package:val_highlight/val_highlight.dart` | Fast, light, fully customizable syntax highlighting in pure Dart. |
+| `package:val_highlight_flutter/material.dart` | `CodeField`, a code editor built on `material_ui`'s `TextField`: everything in `val_highlight_flutter.dart`, plus the editor. |
 | `package:val_highlight_flutter/val_highlight_flutter.dart` | Flutter widgets for `val_highlight`. |
 
 <details>
@@ -50,6 +51,22 @@ in `advanced.dart`.
 </details>
 
 <details>
+<summary><code>package:val_highlight_flutter/material.dart</code>: more</summary>
+
+```dart
+import 'package:val_highlight_flutter/material.dart';
+import 'package:val_highlight/languages/dart.dart';
+
+CodeField(controller: HighlightTextController(language: dartLanguage))
+```
+
+The field needs a `material_ui` `MaterialApp` (or `Material`) above it.
+In an app with another design system, give your own text field a
+`HighlightTextController` and a `CodeEditingFormatter` instead.
+
+</details>
+
+<details>
 <summary><code>package:val_highlight_flutter/val_highlight_flutter.dart</code>: more</summary>
 
 ```dart
@@ -59,8 +76,12 @@ import 'package:val_highlight/languages/dart.dart';
 CodeView(source, language: dartLanguage)
 ```
 
-This library re-exports `package:val_highlight/val_highlight.dart`, so
-one import covers the core API. Languages and themes are separate
-imports under `package:val_highlight/languages/` and `themes/`.
+This library needs only Flutter's widgets layer, so it works in any app,
+whatever its design system. The code editor, `CodeField`, is built on
+`material_ui` and is in `package:val_highlight_flutter/material.dart`.
+
+It re-exports `package:val_highlight/val_highlight.dart`, so one import
+covers the core API. Languages and themes are separate imports under
+`package:val_highlight/languages/` and `themes/`.
 
 </details>

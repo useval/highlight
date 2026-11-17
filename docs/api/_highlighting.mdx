@@ -78,6 +78,7 @@ cached per stack id stay valid; later results may only add stacks.
 | `tokenAt(int offset)` | `int` | Index of the token covering `offset`, or `tokenCount` if `offset` is at or past the end. |
 | `lineCount` | `int` | Number of lines. Empty code has one empty line, and a trailing `\n` starts a final empty line. |
 | `lineStart(int line)` | `int` | Start offset of line `line`. |
+| `lineAt(int offset)` | `int` | The line holding `offset`. An offset at a line break belongs to the line the break ends; offsets before the start or past the end belong to the first or last line. |
 | `lineEnd(int line)` | `int` | End offset of line `line`, excluding its `\n` or `\r\n`. |
 | `forEachSegment(…)` | `void` | Calls `segment` for each piece of line `line`, in order, with the piece's offsets and scope stack. Pieces never include the line break. |
 | `isStringOrCommentAt(int offset)` | `bool` | Whether the character at `offset` is inside a string, comment or regular expression. Interpolations inside strings count as code. |

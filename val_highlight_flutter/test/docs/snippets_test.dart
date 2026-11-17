@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:val_highlight/languages/all.dart';
 import 'package:val_highlight/themes/all.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 
 const source = 'void main() {\n  print(1);\n}\n';
 
@@ -28,15 +28,18 @@ void main() {
         source,
         language: dartLanguage,
         lineNumbers: true,
-        gutterBuilder: (context, lineNumber, highlighted) => SizedBox(
+        gutterBuilder: (context, line) => SizedBox(
           width: 32,
           child: Text(
-            '$lineNumber',
+            '${line.lineNumber}',
             textAlign: TextAlign.right,
-            style: TextStyle(fontWeight: highlighted ? FontWeight.bold : null),
+            style: TextStyle(
+              fontWeight: line.highlighted ? FontWeight.bold : null,
+            ),
           ),
         ),
       ),
+      const SelectionArea(child: CodeView(source, language: dartLanguage)),
       CodeView(
         source,
         language: dartLanguage,
@@ -153,7 +156,6 @@ void main() {
       text: 'SELECT 1;',
     );
     addTearDown(controller.dispose);
-    controller.window = (first: 0, last: 199);
     await tester.pumpWidget(
       _app(
         TextField(
@@ -171,26 +173,32 @@ void main() {
       theme: sepiaTheme,
     );
     addTearDown(controller.dispose);
-    const codeTheme = CodeTheme(
-      light: sepiaTheme,
-      dark: dimTheme,
-      textStyle: TextStyle(fontFamily: 'JetBrains Mono'),
-      lineNumbers: true,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(extensions: const [codeTheme]),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          extensions: const [codeTheme],
+    Widget app(ThemeMode mode) => MaterialApp(
+      themeMode: mode,
+      theme: ThemeData(),
+      darkTheme: ThemeData(brightness: Brightness.dark),
+      builder: (context, child) => CodeTheme(
+        data: CodeThemeData(
+          light: sepiaTheme,
+          dark: dimTheme,
+          brightness: Theme.of(context).brightness,
+          textStyle: const TextStyle(fontFamily: 'JetBrains Mono'),
+          lineNumbers: true,
         ),
-        home: const Scaffold(
-          body: CodeView(source, language: dartLanguage, theme: midnightTheme),
-        ),
+        child: child!,
+      ),
+      home: const Scaffold(
+        body: CodeView(source, language: dartLanguage, theme: midnightTheme),
       ),
     );
-    final context = tester.element(find.byType(CodeView));
+    await tester.pumpWidget(app(ThemeMode.light));
+    var context = tester.element(find.byType(CodeView));
     expect(CodeTheme.resolve(context), same(sepiaTheme));
+    expect(CodeTheme.brightnessOf(context), Brightness.light);
+    await tester.pumpWidget(app(ThemeMode.dark));
+    await tester.pumpAndSettle();
+    context = tester.element(find.byType(CodeView));
+    expect(CodeTheme.resolve(context), same(dimTheme));
     expect(CodeTheme.textStyleOf(context).fontSize, 14);
     expect(CodeTheme.textStyleOf(context).height, 1.5);
 

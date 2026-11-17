@@ -30,7 +30,7 @@ styles the same scopes as `lightTheme`; and `dark` matches the background.
 ## In Flutter
 
 By default, `CodeView`, `CodeField` and `HighlightTextController` use
-`lightTheme` in a light app and `darkTheme` in a dark one. Pick a theme for
+`lightTheme` or `darkTheme` by the platform's brightness. Pick a theme for
 one widget with `theme`, or for an editor with the controller's `theme`:
 
 ```dart
@@ -44,43 +44,41 @@ final controller = HighlightTextController(
 
 ### App-wide defaults
 
-Add a `CodeTheme` to your `ThemeData.extensions` to set defaults once.
-Anything set on a widget wins.
+Put a `CodeTheme` above your app's content to set defaults once. Anything
+set on a widget wins. In `MaterialApp.builder` it sits below the app's
+theme, so it can follow the app's own light and dark mode:
 
 ```dart
-const codeTheme = CodeTheme(
-  light: sepiaTheme,
-  dark: dimTheme,
-  textStyle: TextStyle(fontFamily: 'JetBrains Mono'),
-  lineNumbers: true,
-);
-
 MaterialApp(
-  theme: ThemeData(extensions: const [codeTheme]),
-  darkTheme: ThemeData(
-    brightness: Brightness.dark,
-    extensions: const [codeTheme],
+  theme: ThemeData(),
+  darkTheme: ThemeData(brightness: Brightness.dark),
+  builder: (context, child) => CodeTheme(
+    data: CodeThemeData(
+      light: sepiaTheme,
+      dark: dimTheme,
+      brightness: Theme.of(context).brightness,
+      textStyle: const TextStyle(fontFamily: 'JetBrains Mono'),
+      lineNumbers: true,
+    ),
+    child: child!,
   ),
   home: const MyHome(),
 )
 ```
 
-`CodeTheme` is read from the `ThemeData` in effect, so add it to both
-`theme` and `darkTheme` when you set both. `padding` and `lineNumbers` apply
-to `CodeView`; the themes and `textStyle` to every widget. A font family only
-applies if your app bundles the font or the platform has it.
+`brightness` picks `light` or `dark`; without it, the platform's brightness
+does. `padding` applies to `CodeView`, `lineNumbers` to `CodeView` and
+`CodeField`, and the themes and `textStyle` to every widget. A font family
+only applies if your app bundles the font or the platform has it.
+`CodeTheme` is a plain inherited widget, so it works the same in a
+`CupertinoApp`, a `WidgetsApp` or anywhere in the tree.
 
 `CodeTheme.resolve(context)` returns the `ValTheme` a widget would use, for
-painting a matching background. The default code text style is the
+painting a matching background, and `CodeTheme.brightnessOf(context)` the
+brightness it picked it by. The default code text style is the
 `monospace` family — with Menlo, Consolas, Roboto Mono and Courier New as
 fallbacks — at 14 pixels and a line height of 1.5, with letter and word
 spacing fixed at zero so an app-wide text theme can't stretch the code.
-
-:::note
-`CodeTheme` is a `ThemeExtension` from `material_ui`: add it to a
-`material_ui` `ThemeData`. See
-[Getting started](/docs/getting-started/#use-material_ui-in-your-app).
-:::
 
 ## Adjust a theme
 

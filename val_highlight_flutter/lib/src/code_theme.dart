@@ -1,59 +1,136 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:val_highlight/themes/dark.dart';
 import 'package:val_highlight/themes/light.dart';
 import 'package:val_highlight/val_highlight.dart';
 
-/// App-wide defaults for code widgets, set once on [ThemeData.extensions].
-///
-/// ```dart
-/// MaterialApp(
-///   theme: ThemeData(extensions: [CodeTheme(light: myTheme)]),
-/// )
-/// ```
+/// App-wide defaults for the code widgets, provided by a [CodeTheme].
 ///
 /// Anything set directly on a widget wins over these defaults.
 @immutable
-class CodeTheme extends ThemeExtension<CodeTheme> {
+final class CodeThemeData {
   /// Creates code defaults.
-  const CodeTheme({
+  const CodeThemeData({
     this.light,
     this.dark,
+    this.brightness,
     this.textStyle,
     this.padding,
     this.lineNumbers,
   });
 
-  /// Theme used when the app is light. Defaults to `lightTheme`.
+  /// Theme used when [brightness] is light. Defaults to `lightTheme`.
   final ValTheme? light;
 
-  /// Theme used when the app is dark. Defaults to `darkTheme`.
+  /// Theme used when [brightness] is dark. Defaults to `darkTheme`.
   final ValTheme? dark;
+
+  /// Whether to use [light] or [dark]. Defaults to the platform's
+  /// brightness, from [MediaQuery]. Set it from your app's theme when the
+  /// app does not follow the platform:
+  ///
+  /// ```dart
+  /// CodeThemeData(brightness: Theme.of(context).brightness)
+  /// ```
+  final Brightness? brightness;
 
   /// Base text style for code, merged over the default monospace style.
   final TextStyle? textStyle;
 
-  /// Padding around code blocks.
+  /// Padding around code in `CodeView`.
   final EdgeInsetsGeometry? padding;
 
-  /// Whether code blocks show line numbers.
+  /// Whether `CodeView` and `CodeField` show line numbers.
   final bool? lineNumbers;
 
-  /// The nearest [CodeTheme], if any.
-  static CodeTheme? maybeOf(BuildContext context) =>
-      Theme.of(context).extension<CodeTheme>();
-
-  /// The [ValTheme] to use: [override] if given, otherwise the app default
-  /// for the current brightness.
-  static ValTheme resolve(BuildContext context, [ValTheme? override]) {
-    if (override != null) return override;
-    final codeTheme = maybeOf(context);
-    return Theme.of(context).brightness == Brightness.dark
-        ? codeTheme?.dark ?? darkTheme
-        : codeTheme?.light ?? lightTheme;
+  /// Returns a copy with the given fields replaced.
+  CodeThemeData copyWith({
+    ValTheme? light,
+    ValTheme? dark,
+    Brightness? brightness,
+    TextStyle? textStyle,
+    EdgeInsetsGeometry? padding,
+    bool? lineNumbers,
+  }) {
+    return CodeThemeData(
+      light: light ?? this.light,
+      dark: dark ?? this.dark,
+      brightness: brightness ?? this.brightness,
+      textStyle: textStyle ?? this.textStyle,
+      padding: padding ?? this.padding,
+      lineNumbers: lineNumbers ?? this.lineNumbers,
+    );
   }
 
-  /// The default code text style: monospace, merged with [CodeTheme] and
-  /// then [override].
+  @override
+  bool operator ==(Object other) =>
+      other is CodeThemeData &&
+      other.light == light &&
+      other.dark == dark &&
+      other.brightness == brightness &&
+      other.textStyle == textStyle &&
+      other.padding == padding &&
+      other.lineNumbers == lineNumbers;
+
+  @override
+  int get hashCode =>
+      Object.hash(light, dark, brightness, textStyle, padding, lineNumbers);
+}
+
+/// Sets [CodeThemeData] for the code widgets below it.
+///
+/// It works in any app, whatever its design system. Put one above your
+/// app's content, for example in `MaterialApp.builder`, so it can follow
+/// the app's own brightness:
+///
+/// ```dart
+/// MaterialApp(
+///   builder: (context, child) => CodeTheme(
+///     data: CodeThemeData(
+///       light: sepiaTheme,
+///       dark: dimTheme,
+///       brightness: Theme.of(context).brightness,
+///     ),
+///     child: child!,
+///   ),
+/// )
+/// ```
+///
+/// Without a [CodeTheme], the widgets use `lightTheme` or `darkTheme` by
+/// the platform's brightness.
+class CodeTheme extends InheritedTheme {
+  /// Provides [data] to the code widgets in [child].
+  const CodeTheme({super.key, required this.data, required super.child});
+
+  /// The defaults.
+  final CodeThemeData data;
+
+  /// The nearest [CodeThemeData], if any.
+  static CodeThemeData? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CodeTheme>()?.data;
+
+  /// The nearest [CodeThemeData], or the default one.
+  static CodeThemeData of(BuildContext context) =>
+      maybeOf(context) ?? const CodeThemeData();
+
+  /// The brightness the code widgets use: [CodeThemeData.brightness], or
+  /// the platform's.
+  static Brightness brightnessOf(BuildContext context) =>
+      maybeOf(context)?.brightness ??
+      MediaQuery.maybePlatformBrightnessOf(context) ??
+      Brightness.light;
+
+  /// The [ValTheme] to use: [override] if given, otherwise the default for
+  /// [brightnessOf].
+  static ValTheme resolve(BuildContext context, [ValTheme? override]) {
+    if (override != null) return override;
+    final data = maybeOf(context);
+    return brightnessOf(context) == Brightness.dark
+        ? data?.dark ?? darkTheme
+        : data?.light ?? lightTheme;
+  }
+
+  /// The default code text style: monospace, merged with
+  /// [CodeThemeData.textStyle] and then [override].
   ///
   /// Letter and word spacing are fixed at zero so an app-wide text theme
   /// cannot stretch code or its line numbers.
@@ -69,25 +146,9 @@ class CodeTheme extends ThemeExtension<CodeTheme> {
   }
 
   @override
-  CodeTheme copyWith({
-    ValTheme? light,
-    ValTheme? dark,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? padding,
-    bool? lineNumbers,
-  }) {
-    return CodeTheme(
-      light: light ?? this.light,
-      dark: dark ?? this.dark,
-      textStyle: textStyle ?? this.textStyle,
-      padding: padding ?? this.padding,
-      lineNumbers: lineNumbers ?? this.lineNumbers,
-    );
-  }
+  Widget wrap(BuildContext context, Widget child) =>
+      CodeTheme(data: data, child: child);
 
   @override
-  CodeTheme lerp(covariant CodeTheme? other, double t) {
-    if (other == null) return this;
-    return t < 0.5 ? this : other;
-  }
+  bool updateShouldNotify(CodeTheme oldWidget) => data != oldWidget.data;
 }

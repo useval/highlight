@@ -186,7 +186,7 @@ void main() {
         dartLanguage,
         jsonLanguage,
         yamlLanguage,
-      ], plainTextLanguage);
+      ], fallback: plainTextLanguage);
       registry.add(bashLanguage, aliases: ['terminal']);
       expect(registry.lookup('terminal'), same(bashLanguage));
       expect(registry.resolve('kotlin'), same(plainTextLanguage));
@@ -199,18 +199,18 @@ void main() {
         allLanguages,
       );
       expect(byContent?.language, same(pythonLanguage));
-      expect(byContent?.reason, 'content');
+      expect(byContent?.reason, DetectionReason.content);
 
       final byName = detector.detect('', allLanguages, fileName: 'src/lib.rs');
       expect(byName?.language, same(rustLanguage));
-      expect(byName?.reason, 'file name');
+      expect(byName?.reason, DetectionReason.fileName);
 
       final byShebang = detector.detect(
         '#!/usr/bin/env python3\nprint(1)\n',
         allLanguages,
       );
       expect(byShebang?.language, same(pythonLanguage));
-      expect(byShebang?.reason, 'shebang');
+      expect(byShebang?.reason, DetectionReason.shebang);
 
       expect(detector.detect('hello there', allLanguages), isNull);
       expect(
@@ -346,7 +346,7 @@ void main() {
       expect(mine.lookup(Scopes.string), lightTheme.lookup(Scopes.string));
     });
 
-    test('scope lookup cascades', () {
+    test('a dotted scope builds on its prefixes', () {
       expect(
         lightTheme.lookup('keyword.control.flow'),
         lightTheme.lookup(Scopes.keyword),
@@ -375,4 +375,101 @@ void main() {
       expect(theme.lookup(Scopes.comment)?.italic, isTrue);
     });
   });
+  group('docs/engine/streaming.mdx', () {
+    test('streaming updates re-scan only the end', () {
+      final registry = allLanguagesRegistry();
+      final document = IncrementalHighlighter(
+        language: markdownLanguage,
+        registry: registry,
+      );
+      const reply =
+          'Here is the fix:\n\n```dart\nvoid main() {\n  print("hi");\n}\n```\n'
+          '\nAnd the config:\n\n```json\n{"a": [1, 2]}\n```\n';
+      final text = List.filled(40, reply).join();
+      var sent = '';
+      var maxRescanned = 0;
+      for (var i = 0; i < text.length; i += 20) {
+        sent = text.substring(0, i + 20 > text.length ? text.length : i + 20);
+        document.update(sent);
+        if (sent.length > 200 && document.lastRescannedLines > maxRescanned) {
+          maxRescanned = document.lastRescannedLines;
+        }
+      }
+      final full = Highlighter(
+        registry: registry,
+      ).highlight(text, language: markdownLanguage);
+      expect(_tokens(document.result), _tokens(full));
+      expect(maxRescanned, lessThan(20));
+    });
+  });
+
+  group('docs/upgrading.mdx', () {
+    test('1.0 forms of the changed calls', () {
+      final registry = LanguageRegistry([
+        dartLanguage,
+        yamlLanguage,
+      ], fallback: plainTextLanguage);
+      expect(registry.resolve('nope'), same(plainTextLanguage));
+      expect(LanguageRegistry(const []).languages, isEmpty);
+
+      final detection = const LanguageDetector().detect(
+        '',
+        allLanguages,
+        fileName: 'a.dart',
+      );
+      expect(detection?.reason == DetectionReason.fileName, isTrue);
+
+      const blocks = <Rule>[
+        Operators('+-*/%=<>!&|^~?:'),
+        Operators('+-*/=', scope: Scopes.operator),
+        Annotation(scope: Scopes.meta),
+        Preprocessor(sigil: '%'),
+        _Pragma(),
+      ];
+      const grammar = Grammar(name: 'blocks', rules: blocks);
+      grammar.validate();
+
+      final result = const Highlighter().highlight(
+        '<a(b>',
+        language: dartLanguage,
+      );
+      expect(result.matchingBracket(2, brackets: '()[]{}'), -1);
+    });
+  });
+
+  group('docs/reference/troubleshooting.mdx', () {
+    test('a registry with a fallback never throws', () {
+      final highlighter = Highlighter(registry: allLanguagesRegistry());
+      expect(
+        highlighter.highlightByName('x', name: 'nope').language,
+        same(genericLanguage),
+      );
+      expect(allLanguagesRegistry().lookup('nope'), isNull);
+      expect(
+        () => const Highlighter().highlightByName('x', name: 'dart'),
+        throwsA(isA<UnknownLanguageException>()),
+      );
+    });
+
+    test('validate finds grammar mistakes', () {
+      const broken = Grammar(name: 'broken', rules: [TokenRule('(')]);
+      expect(
+        broken.validate,
+        throwsA(
+          isA<GrammarException>().having(
+            (e) => e.toString(),
+            'message',
+            contains('broken'),
+          ),
+        ),
+      );
+    });
+  });
+}
+
+final class _Pragma extends BlockRule {
+  const _Pragma();
+
+  @override
+  List<Rule> expand() => const [TokenRule('#pragma', scope: Scopes.meta)];
 }

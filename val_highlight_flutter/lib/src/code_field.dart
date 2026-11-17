@@ -32,7 +32,7 @@ export 'code_editing.dart' show indentText, newlineKeepingIndent, outdentLines;
 ///
 /// Laying out a text field is proportional to its styled runs, so for
 /// documents longer than [styleAllBelow] lines only the visible lines, plus
-/// [margin] lines on each side, are coloured. The window follows scrolling
+/// [margin] lines on each side, are colored. The window follows scrolling
 /// (of the field itself or of an enclosing scroll view) and is computed from
 /// the laid-out text, so wrapped lines are handled exactly.
 class CodeField extends StatefulWidget {
@@ -107,10 +107,10 @@ class CodeField extends StatefulWidget {
   /// Vertical alignment of the text.
   final TextAlignVertical? textAlignVertical;
 
-  /// Documents with at most this many lines are coloured in full.
+  /// Documents with at most this many lines are colored in full.
   final int styleAllBelow;
 
-  /// Lines coloured beyond each edge of the visible area.
+  /// Lines colored beyond each edge of the visible area.
   final int margin;
 
   /// Text inserted by Tab and removed by Shift+Tab, such as two spaces or
@@ -126,7 +126,7 @@ class CodeField extends StatefulWidget {
   /// `const {}` for none, so Tab moves focus as in other fields.
   final Map<ShortcutActivator, Intent>? shortcuts;
 
-  /// Formatters applied after the editing behaviour, such as a length
+  /// Formatters applied after the editing behavior, such as a length
   /// limit.
   final List<TextInputFormatter>? inputFormatters;
 
@@ -357,7 +357,7 @@ class _CodeFieldState extends State<CodeField> {
 
     // Moving the window re-lays out the whole field, so keep it while the
     // visible lines stay clear of its edges; while scrolling, only move it
-    // when they get close. Once scrolling stops, re-centre it.
+    // when they get close. Once scrolling stops, re-center it.
     final current = controller.window;
     final slack = settled ? widget.margin ~/ 2 : widget.margin ~/ 5;
     if (current != null &&

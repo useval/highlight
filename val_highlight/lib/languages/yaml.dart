@@ -12,6 +12,12 @@ const _key =
     r'''(?:[^\s#:\-\[\]{},'"!&*|>%@`][^#:\n]*?|-[^\s#:\n][^#:\n]*?'''
     r'''|"(?:[^"\\\n]|\\.)*"|'(?:[^'\n]|'')*')''';
 
+/// A mapping key inside a flow collection, where plain keys cannot contain
+/// the flow indicators `[]{},`.
+const _flowKey =
+    r'''(?:[^\s#:\-\[\]{},'"!&*|>%@`][^#:\n\[\]{},]*?|-[^\s#:\n\[\]{},][^#:\n\[\]{},]*?'''
+    r'''|"(?:[^"\\\n]|\\.)*"|'(?:[^'\n]|'')*')''';
+
 /// What follows a key: optional spaces, then `:` and a space or line end.
 const _keyEnd = r'(?=[ \t]*:(?:[ \t]|$))';
 
@@ -56,7 +62,7 @@ const yamlLanguage = Grammar(
     ),
     // `key:` inside a flow mapping, after `{` or `,`.
     TokenRule(
-      '([{,])([ \\t]*)($_key)$_keyEnd',
+      '([{,])([ \\t]*)($_flowKey)$_keyEnd',
       captures: {1: Scopes.punctuation, 3: Scopes.property},
     ),
     TokenRule(r'[&*][^\s,\[\]{}]+', scope: Scopes.variable),

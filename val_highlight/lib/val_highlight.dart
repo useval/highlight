@@ -13,7 +13,7 @@
 /// in `advanced.dart`.
 library;
 
-export 'src/detect.dart' show Detection, LanguageDetector;
+export 'src/detect.dart' show Detection, DetectionReason, LanguageDetector;
 export 'src/engine/scope_table.dart' show ScopeTable;
 export 'src/grammar/grammar.dart' show EditingSyntax, Grammar, GrammarException;
 export 'src/grammar/scopes.dart' show Scopes;

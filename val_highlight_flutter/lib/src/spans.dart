@@ -33,7 +33,7 @@ List<TextSpan> documentSpans(HighlightResult result, CodeStyles styles) {
 /// Spans covering every character of [result] exactly, as a text field
 /// needs. When [composing] is a valid range, that range is underlined.
 ///
-/// Only code within [styled] (all of it by default) is coloured; the rest
+/// Only code within [styled] (all of it by default) is colored; the rest
 /// is plain text, which keeps huge documents cheap to lay out. Adjacent
 /// pieces with the same style share one span.
 List<TextSpan> exactSpans(

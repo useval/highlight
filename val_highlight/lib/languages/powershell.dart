@@ -79,7 +79,7 @@ const powershellLanguage = Grammar(
     'variables': [
       TokenRule(r'\$(?:true|false|null)\b', scope: Scopes.literal),
       TokenRule(r'\$this\b', scope: Scopes.variableLanguage),
-      TokenRule(r'\$\{[^}\n]*\}', scope: Scopes.variable),
+      TokenRule(r'\$\{[^{}\n]*\}', scope: Scopes.variable),
       TokenRule(
         r'[$@](?:(?:global|local|script|private|using|env|variable):)?'
         r'[A-Za-z_]\w*|\$[_?^$]',

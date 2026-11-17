@@ -205,6 +205,6 @@ final class _QuoteLike extends BlockRule {
 /// A name followed by `(` on the same line is a call. (Lookahead stays on
 /// the line so incremental re-highlighting never needs to look further.)
 const _call = TokenRule(
-  r'[A-Za-z_$][\w$]*(?=[ \t]*\()',
+  r'(?<![\w$])[A-Za-z_$][\w$]*(?=[ \t]*\()',
   scope: Scopes.function,
 );

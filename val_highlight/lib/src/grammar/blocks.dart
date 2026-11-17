@@ -5,8 +5,9 @@ part of 'grammar.dart';
 ///
 /// The built-in blocks cover what most languages repeat: comments, strings,
 /// numbers, operators and annotations, so most grammars need no regular
-/// expressions. Extend this class to make your own blocks.
-abstract class BlockRule extends Rule {
+/// expressions. Extend this class to make your own blocks; subclasses must
+/// be `final`, `base` or `sealed`.
+abstract base class BlockRule extends Rule {
   /// Base constructor for blocks.
   const BlockRule();
 
@@ -287,11 +288,9 @@ final class Numbers extends BlockRule {
 
 /// Runs of operator characters, such as `+`, `==` or `>>=`.
 final class Operators extends BlockRule {
-  /// Creates an operator block matching runs of [chars].
-  const Operators([
-    this.chars = '+-*/%=<>!&|^~?:',
-    this.scope = Scopes.operator,
-  ]);
+  /// Creates an operator block matching runs of [chars], such as
+  /// `'+-*/%=<>!&|^~?:'`.
+  const Operators(this.chars, {this.scope = Scopes.operator});
 
   /// Characters that make up operators.
   final String chars;
@@ -307,7 +306,7 @@ final class Operators extends BlockRule {
 /// `@app.route`.
 final class Annotation extends BlockRule {
   /// Creates an annotation block starting with [sigil].
-  const Annotation([this.sigil = '@', this.scope = Scopes.meta]);
+  const Annotation({this.sigil = '@', this.scope = Scopes.meta});
 
   /// Character that starts an annotation.
   final String sigil;
@@ -325,7 +324,7 @@ final class Annotation extends BlockRule {
 /// lines continued with a trailing backslash.
 final class Preprocessor extends BlockRule {
   /// Creates a preprocessor block starting with [sigil].
-  const Preprocessor([this.sigil = '#', this.scope = Scopes.meta]);
+  const Preprocessor({this.sigil = '#', this.scope = Scopes.meta});
 
   /// Character that starts a directive.
   final String sigil;
@@ -353,7 +352,7 @@ abstract final class CommonRules {
 
   /// An identifier followed by `(` or `<T>(` is a function.
   static const functionCall = TokenRule(
-    r'[A-Za-z_$][\w$]*(?=[ \t]*(?:<[^<>()\n]*>)?[ \t]*(?:\r?\n[ \t]*)?\()',
+    r'(?<![\w$])[A-Za-z_$][\w$]*(?=[ \t]*(?:<[^<>()\n]*>)?[ \t]*(?:\r?\n[ \t]*)?\()',
     scope: Scopes.function,
   );
 

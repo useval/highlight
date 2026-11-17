@@ -55,7 +55,7 @@ const markdownLanguage = Grammar(
       scope: Scopes.code,
     ),
     TokenRule(
-      r'!?\[[^\]\n]*\](?:\([^)\n]*\)|\[[^\]\n]*\])',
+      r'!?\[[^\[\]\n]*\](?:\((?:[^()\n]|\([^()\n]*\))*\)|\[[^\[\]\n]*\])',
       scope: Scopes.link,
     ),
     TokenRule(r'<(?:https?://|mailto:)[^>\s]+>', scope: Scopes.link),
@@ -66,7 +66,7 @@ const markdownLanguage = Grammar(
       scope: Scopes.emphasis,
     ),
     TokenRule(r'~~[^~\n]+~~', scope: Scopes.deletion),
-    TokenRule(r'</?[A-Za-z][^>\n]*>', scope: Scopes.tag),
+    TokenRule(r'</?[A-Za-z][^<>\n]*>', scope: Scopes.tag),
     TokenRule(r'\\[\\`*_{}\[\]()#+\-.!|~>]', scope: Scopes.stringEscape),
   ],
 );

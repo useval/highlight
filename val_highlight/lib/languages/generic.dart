@@ -28,8 +28,9 @@ const genericLanguage = Grammar(
     QuotedString("'''", multiline: true),
     QuotedString('"'),
     // A single quote only starts a string when it closes on the same line,
-    // so Rust lifetimes and Lisp quotes stay plain.
-    TokenRule(r"'(?:[^'\\\n]|\\.)*'", scope: Scopes.string),
+    // so Rust lifetimes and Lisp quotes stay plain. An escaped quote never
+    // starts one.
+    TokenRule(r"(?<!\\)'(?:[^'\\\n]|\\.)*'", scope: Scopes.string),
     TokenRule(r'`[^`\n]*`', scope: Scopes.string),
     Annotation(),
     Numbers(suffix: '[uUlLfFdDnmM]{0,3}'),
@@ -68,6 +69,6 @@ const genericLanguage = Grammar(
       word: r'(?<![\w$])[A-Za-z_$][\w$]*',
       otherwise: [CommonRules.capitalizedType, CommonRules.functionCall],
     ),
-    Operators(),
+    Operators('+-*/%=<>!&|^~?:'),
   ],
 );

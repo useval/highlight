@@ -45,6 +45,9 @@ document.update(source.replaceFirst('int f1000', '/* int f1000'));
 document.lastRescannedLines; // 1001: the comment never closes
 ```
 
+For text that grows at its end, such as a streamed reply, see
+[streaming text](/docs/engine/streaming/).
+
 Setting `document.language` highlights everything again in the new
 language. Pass `registry` to the constructor for languages named inside the
 code, such as Markdown fences.

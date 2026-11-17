@@ -126,8 +126,9 @@ String cssColor(int argb) {
 
 /// A color theme: a [root] style plus a style per scope.
 ///
-/// Scope lookup cascades: `title.function.call` tries `title.function.call`,
-/// then `title.function`, then `title`.
+/// A scope's style builds on those of its dotted prefixes: `title.function`
+/// takes the fields set for `title`, then those set for `title.function`.
+/// This is how CSS classes from `toCss` combine too.
 final class ValTheme {
   /// Creates a theme.
   const ValTheme({
@@ -163,15 +164,17 @@ final class ValTheme {
   /// Whether this is a dark theme.
   final bool dark;
 
-  /// Style for [scope] alone, using the cascade, without inheritance.
+  /// Style for [scope] alone, without inheriting from enclosing scopes:
+  /// the styles of `a`, `a.b` and `a.b.c` merged in that order for
+  /// `a.b.c`, or `null` if none is set.
   Style? lookup(String scope) {
-    var key = scope;
+    Style? style;
+    var dot = scope.indexOf('.');
     while (true) {
-      final style = styles[key];
-      if (style != null) return style;
-      final dot = key.lastIndexOf('.');
-      if (dot < 0) return null;
-      key = key.substring(0, dot);
+      final own = styles[dot < 0 ? scope : scope.substring(0, dot)];
+      if (own != null) style = style == null ? own : style.merge(own);
+      if (dot < 0) return style;
+      dot = scope.indexOf('.', dot + 1);
     }
   }
 

@@ -5,10 +5,10 @@
 Languages addressable by name, alias, file name or file extension.
 
 ```dart
-LanguageRegistry([
-  Iterable<Grammar> languages = const [],
+LanguageRegistry(
+  Iterable<Grammar> languages, {
   Grammar? fallback,
-])
+})
 ```
 
 Creates a registry containing `languages`.
@@ -24,7 +24,7 @@ the registry does not have.
 | Member | Type | Description |
 |---|---|---|
 | `languages` | `List<Grammar>` | Registered languages, in registration order. |
-| `add(Grammar language, {List<String> aliases = const []})` | `void` | Registers `language` under its name, its aliases and any extra `aliases`. Later registrations replace earlier ones for the same key. |
+| `add(Grammar language, {List<String> aliases = const []})` | `void` | Registers `language` under its name, its aliases and any extra `aliases`. Later registrations replace earlier ones for the same key. Adding a language again only adds the new `aliases`. |
 | `lookup(String nameOrAlias)` | `Grammar?` | Language registered as `nameOrAlias`, or `null`. |
 | `resolve(String nameOrAlias)` | `Grammar?` | Language registered as `nameOrAlias`, else `fallback`. |
 | `resolveFileName(String fileName)` | `Grammar?` | Language for `fileName`, matched as `forFileName` does, else `fallback`. |
@@ -93,7 +93,7 @@ A detected language and how confident the detector is.
 const Detection(
   Grammar language,
   double score, {
-  String reason = 'content',
+  DetectionReason reason = DetectionReason.content,
 })
 ```
 
@@ -103,7 +103,21 @@ Creates a detection result.
 |---|---|---|---|
 | `language` | `Grammar` | *required* | The detected language. |
 | `score` | `double` | *required* | Detection score. Higher is more confident; only useful for comparing candidates for the same input. |
-| `reason` | `String` | `'content'` | Why this language won: `file name`, `shebang` or `content`. |
+| `reason` | `DetectionReason` | `DetectionReason.content` | Which check picked this language. |
+
+### `DetectionReason`
+
+Which check picked a `Detection`'s language.
+
+```dart
+enum DetectionReason { fileName, shebang, content }
+```
+
+| Value | Description |
+|---|---|
+| `fileName` | The file name or extension. |
+| `shebang` | The `#!` first line. |
+| `content` | The content score. |
 
 ### `allLanguages`
 

@@ -33,11 +33,11 @@ the pieces `CodeView` and `HighlightTextController` are made of.
 |---|---|
 | `lineSpans(result, line, styles)` | The spans of one line, without its line break. For one widget per line. |
 | `documentSpans(result, styles)` | Every line, joined with `\n`. The `\r` of a `\r\n` line break is dropped, so it never renders. |
-| `exactSpans(result, styles)` | Spans that cover every character exactly, as a text field needs. It can underline the composing range, and colour only part of the text. |
+| `exactSpans(result, styles)` | Spans that cover every character exactly, as a text field needs. It can underline the composing range, and color only part of the text. |
 
 Plain text gets no style of its own, so it takes the style of the span
 around it. Use `styles.rootStyle(base)` for that: your base style with the
-theme's text colour. The theme's background is left out — paint it on the
+theme's text color. The theme's background is left out — paint it on the
 container, as the example does.
 
 `textStyleFromStyle` converts a single `Style` from a theme into a

@@ -29,14 +29,15 @@
 
 - **Pure Dart** — no native code, no WebView, no JavaScript. The same engine
   runs in Flutter apps, on servers, in command-line tools and on the web.
-- **Linear time** — highlighting time grows in step with input size. On
-  native code it averages about 43 MB/s across realistic sources; compiled
-  to JavaScript, about 62 MB/s.
+- **Linear time** — highlighting time grows in step with input size, even
+  for a line full of one character, which a test checks in every language.
+  On native code it averages about 43 MB/s across realistic sources;
+  compiled to JavaScript, about 55 MB/s.
 - **Incremental** — after an edit, only the lines it can affect are
   re-scanned: about 0.4 ms per keystroke in a 9,600-line file.
 - **Light** — every language and theme is a separate `const` import, so an
   app ships only what it uses.
-- **Customisable** — themes, grammars, renderers and detection can all be
+- **Customizable** — themes, grammars, renderers and detection can all be
   extended or replaced, with the same API the built-in languages use.
 - **Tested on real code** — every grammar has reviewed golden snapshots,
   edge-case tests and incremental fuzzing, and has been run over tens of
@@ -117,7 +118,7 @@ from the file name, a `#!` line, or the content.
 `lightTheme`, `darkTheme`, `sepiaTheme`, `dimTheme`, `midnightTheme`,
 `forestTheme`, `highContrastLightTheme` and `highContrastDarkTheme`, from
 `package:val_highlight/themes/<name>.dart`, or all of them with
-`themes/all.dart` (`allThemes`). Every colour meets WCAG AA contrast (4.5:1);
+`themes/all.dart` (`allThemes`). Every color meets WCAG AA contrast (4.5:1);
 the high-contrast themes meet 7:1.
 
 Adjust a theme, or build one from scratch:
@@ -136,7 +137,7 @@ final theme = ValTheme.fromVsCodeJson(
 );
 ```
 
-It reads the editor colours and `tokenColors`, matching TextMate scopes the
+It reads the editor colors and `tokenColors`, matching TextMate scopes the
 way VS Code does. Comments and trailing commas are allowed.
 
 ## 🧩 Tokens and incremental updates
@@ -193,7 +194,8 @@ final myDart = dartLanguage.withKeywords(
   remove: ['get', 'set'],
 );
 
-// Put your own rules first; they win over the built-in ones.
+// Put your own rules first; they win over the built-in ones at the same
+// position. A comment that starts earlier still keeps its whole text.
 final withTodos = dartLanguage.extend(
   rules: [const TokenRule(r'\bTODO\b', scope: 'todo')],
 );
@@ -240,14 +242,14 @@ const iniLanguage = Grammar(
 | `Interpolation(r'${', '}')` | an expression inside a string, with balanced braces |
 | `Numbers()` | decimals, floats, exponents, hex, binary and octal, digit separators, suffixes |
 | `Operators('+-*/=')` | runs of operator characters |
-| `Annotation('@')` | annotations, attributes and decorators |
-| `Preprocessor('#')` | `#include`-style lines, with `\` continuations |
+| `Annotation()` | annotations, attributes and decorators; `sigil` defaults to `@` |
+| `Preprocessor()` | `#include`-style lines, with `\` continuations; `sigil` defaults to `#` |
 | `KeywordRule({...})` | word lists per scope, with fallback rules for other words |
 | `CommonRules.*` | capitalised types, function calls, and members after `.` |
 
 Blocks are ordinary rules, so they mix freely with `TokenRule`, `RegionRule`
 (nested sections such as strings and comments) and `IncludeRule` (reusable
-rule lists). Extend `BlockRule` to make your own blocks.
+rule lists). Extend `BlockRule` with a `final class` to make your own blocks.
 
 The earliest match wins; among rules that match at the same position, the
 first one listed wins. `grammar.validate()` reports mistakes immediately.
@@ -274,17 +276,17 @@ Measured on a MacBook, compiled to native code, best of several runs:
 
 | Input | Highlight + HTML |
 |---|---|
-| 600 lines of Dart | 1.5 ms |
-| 2,400 lines | 4.3 ms |
-| 9,600 lines | 13.9 ms |
+| 600 lines of Dart | 1.6 ms |
+| 2,400 lines | 4.4 ms |
+| 9,600 lines | 14.4 ms |
 
 Across ten languages of realistic source, highlighting averages about
-43 MB/s natively and about 62 MB/s compiled to JavaScript. One keystroke with
+43 MB/s natively and about 55 MB/s compiled to JavaScript. One keystroke with
 `IncrementalHighlighter` in a 9,600-line file takes about 0.4 ms.
 
 ## Built by Val
 
-`val_highlight` is part of [Val](https://useval.io), the live visual layer
+`val_highlight` is part of [Val](https://useval.ai), the live visual layer
 for AI agents.
 
 ## 💬 Community

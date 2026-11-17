@@ -39,12 +39,13 @@ const confLanguage = Grammar(
 | `Interpolation(r'${', '}')` | An expression inside a string, with balanced braces. |
 | `Numbers()` | Decimals, floats with exponents, hex, binary and octal, with an optional digit `separator` and `suffix`. |
 | `Operators('+-*/=')` | Runs of operator characters. |
-| `Annotation('@')` | Annotations, attributes and decorators. |
-| `Preprocessor('#')` | `#include`-style lines, with `\` continuations. |
+| `Annotation()` | Annotations, attributes and decorators; `sigil` defaults to `@`. |
+| `Preprocessor()` | `#include`-style lines, with `\` continuations; `sigil` defaults to `#`. |
 | `KeywordRule({…})` | Word lists per scope, found by table lookup, with `otherwise` rules for words not in the lists. |
 | `CommonRules.capitalizedType`, `functionCall`, `memberCall`, `member` | Heuristics for identifiers that are not keywords, for `KeywordRule.otherwise`. |
 
-Extend `BlockRule` and implement `expand()` to make blocks of your own.
+Extend `BlockRule` with a `final class` and implement `expand()` to make
+blocks of your own.
 
 ## The rules underneath
 
@@ -59,8 +60,15 @@ How matching works:
 - **The earliest match wins.** Among rules that match at the same position,
   the one listed first wins.
 - Patterns are Dart `RegExp` sources compiled in multi-line mode, so `^` and
-  `$` match at line boundaries. Named capture groups are not allowed,
-  because a state's rules are combined into one expression.
+  `$` match at line boundaries. The rules active at one point are combined
+  into one expression, and their groups renumbered, so group numbers in
+  `captures` and backreferences such as `\1` count within the pattern they
+  are written in.
+- A captured group is located by searching the match for its text, after
+  the previous capture. If the same text also occurs earlier in the match,
+  the earlier one is marked: `\w+\.(\w+)` on `ab.a` marks the first `a`.
+  Match only the part to scope instead, with the context in a lookaround,
+  as in `(?<=\w\.)\w+`.
 - A grammar is compiled the first time it is used. `grammar.validate()`
   compiles all of it at once and throws `GrammarException` for a bad
   pattern, an unknown include or an include cycle — call it in a test.
@@ -81,6 +89,19 @@ small character class, or `^` for line-start rules — rather than `.`, a
 negated class or a lookbehind. The scanner works out which characters each
 pattern can start with and only tries the rules that can match at a
 position; see [performance](/docs/reference/performance/).
+
+**Keeping it linear.** A rule is tried at every position its first
+character allows. If a pattern can start anywhere inside a long run of
+characters and reads to the end of the run before it fails, the time grows
+with the square of the run: `[A-Za-z_]\w*(?=\()` on a 20,000-character
+word with no `(` after it, or `(#+)"` on a line of `#`. Make the pattern fail
+at once everywhere but the start of the run, with a lookbehind —
+`(?<!\w)[A-Za-z_]\w*(?=\()`, `(?<!#)(#+)"` — or stop what it reads at the
+next opener, as `\[[^\[\]\n]*\]` does. The package's own grammars are
+checked this way by
+[`test/hostile_input_test.dart`](https://github.com/useval/highlight/blob/main/val_highlight/test/hostile_input_test.dart),
+which highlights a long run of every punctuation character in every
+language.
 
 ## Grammar options
 

@@ -54,9 +54,15 @@ const goLanguage = Grammar(
       otherwise: [
         TokenRule(r'(?<=\btype[ \t]{1,8})[A-Za-z_]\w*', scope: Scopes.type),
         CommonRules.functionCall,
-        TokenRule(r'[A-Za-z_]\w*(?=\[[^\]\n]*\]\s*\()', scope: Scopes.function),
+        TokenRule(
+          r'[A-Za-z_]\w*(?=\[(?:[^\[\]\n]|\[[^\[\]\n]*\])*\]\s*\()',
+          scope: Scopes.function,
+        ),
         // `Name[K, V]{` is a composite literal of a generic type.
-        TokenRule(r'[A-Za-z_]\w*(?=\[[^\]\n]*\]\s*\{)', scope: Scopes.type),
+        TokenRule(
+          r'[A-Za-z_]\w*(?=\[(?:[^\[\]\n]|\[[^\[\]\n]*\])*\]\s*\{)',
+          scope: Scopes.type,
+        ),
       ],
     ),
     Operators('+-*/%=<>!&|^~:'),

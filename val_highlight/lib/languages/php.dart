@@ -55,7 +55,7 @@ const phpLanguage = Grammar(
       IncludeRule('heredocs'),
       IncludeRule('strings'),
       TokenRule(r'\$this\b', scope: Scopes.variableLanguage),
-      TokenRule(r'\$+[A-Za-z_]\w*', scope: Scopes.variable),
+      TokenRule(r'(?<!\$)\$+[A-Za-z_]\w*', scope: Scopes.variable),
       Numbers(),
       // Members and static calls: `->name(`, `?->name`, `::name(`.
       TokenRule(r'(?<=->|::)[A-Za-z_]\w*(?=[ \t]*\()', scope: Scopes.function),
@@ -153,6 +153,6 @@ const phpLanguage = Grammar(
 /// A name followed by `(` on the same line is a call. (Lookahead stays on
 /// the line so incremental re-highlighting never needs to look further.)
 const _call = TokenRule(
-  r'[A-Za-z_$][\w$]*(?=[ \t]*\()',
+  r'(?<![\w$])[A-Za-z_$][\w$]*(?=[ \t]*\()',
   scope: Scopes.function,
 );

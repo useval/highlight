@@ -13,6 +13,11 @@ const _maxZeroWidth = 32;
 /// Deepest region nesting before new regions are treated as plain text.
 const _maxDepth = 512;
 
+/// Longest end pattern built from a region's begin text, such as a heredoc
+/// tag or a code fence. A longer delimiter is treated as plain text: real
+/// ones are short, and a huge one would not compile.
+const _maxCopiedEnd = 1024;
+
 /// Scanner state at one point: the active region states, innermost first.
 ///
 /// Frames are immutable and share their parents, so saving the state at
@@ -409,7 +414,11 @@ final class Scanner {
 
         case AlternativeKind.region:
           final region = alternative.region!;
-          if (frame.depth >= _maxDepth) {
+          final copiedEnd = region.endReferencesBegin
+              ? substituteBeginRefs(region.end, (n) => match.group(base + n))
+              : null;
+          if (frame.depth >= _maxDepth ||
+              (copiedEnd != null && copiedEnd.length > _maxCopiedEnd)) {
             out.emit(end, frame.stack);
             break;
           }
@@ -422,7 +431,7 @@ final class Scanner {
             alternative.captureOrder,
           );
           frame = ScanFrame(
-            _enter(state, alternative, match, base),
+            _enter(state, alternative, match, base, copiedEnd),
             stack,
             frame,
             start,
@@ -473,11 +482,9 @@ final class Scanner {
     Alternative alternative,
     Match match,
     int base,
+    String? end,
   ) {
     final region = alternative.region!;
-    final end = region.endReferencesBegin
-        ? substituteBeginRefs(region.end, (n) => match.group(base + n))
-        : null;
     Grammar? embed = region.embed;
     final capture = region.embedCapture;
     final embeds = this.embeds;

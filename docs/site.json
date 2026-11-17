@@ -13,6 +13,7 @@
       "items": [
         { "label": "Overview", "page": "index" },
         { "label": "Getting started", "page": "getting-started" },
+        { "label": "Upgrading to 1.0", "page": "upgrading" },
         { "label": "Languages", "page": "languages" },
         { "label": "Themes", "page": "themes" }
       ]
@@ -33,6 +34,7 @@
         { "label": "Highlighting", "page": "engine/highlighting" },
         { "label": "HTML output", "page": "engine/html" },
         { "label": "Incremental highlighting", "page": "engine/incremental" },
+        { "label": "Streaming text", "page": "engine/streaming" },
         { "label": "Lookup and detection", "page": "engine/lookup" }
       ]
     },
@@ -47,7 +49,9 @@
       "label": "Reference",
       "items": [
         { "label": "Scopes", "page": "reference/scopes" },
-        { "label": "Performance", "page": "reference/performance" }
+        { "label": "Performance", "page": "reference/performance" },
+        { "label": "Platforms and versions", "page": "reference/platforms" },
+        { "label": "Troubleshooting", "page": "reference/troubleshooting" }
       ]
     }
   ]

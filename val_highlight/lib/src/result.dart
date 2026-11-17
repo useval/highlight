@@ -11,13 +11,11 @@ import 'render/html.dart';
 /// tree of objects. Token `i` covers `code[tokenStart(i), tokenEnd(i))` and
 /// carries a scope stack id from [scopes]. Tokens always cover all of [code]
 /// with no gaps, and neighbouring tokens never share a stack.
+///
+/// A result never changes once made, though its [scopes] table may gain
+/// stacks (see there). It can be sent to another isolate as it is.
 final class HighlightResult {
-  /// Creates a result from raw token buffers.
-  ///
-  /// Engines use this, and so can code that moves results between isolates.
-  /// [ends] and [stacks] must have at least [tokenCount] entries. Pass
-  /// [lineStarts] if they are already known.
-  HighlightResult.fromBuffers({
+  HighlightResult._({
     required this.code,
     required this.language,
     required this.scopes,
@@ -38,6 +36,10 @@ final class HighlightResult {
   final Grammar language;
 
   /// Scope names and stacks referenced by the tokens.
+  ///
+  /// Results from one `IncrementalHighlighter` share a table that grows as
+  /// the document is edited. A stack id never changes meaning, so styles
+  /// cached per stack id stay valid; later results may only add stacks.
   final ScopeTable scopes;
 
   /// Number of tokens.
@@ -54,13 +56,6 @@ final class HighlightResult {
 
   /// Scope stack id of token [index]. See [scopes].
   int tokenStack(int index) => _stacks[index];
-
-  /// The raw token end offsets, for engines that copy tokens in bulk.
-  /// Only the first [tokenCount] entries are valid.
-  Int32List get rawEnds => _ends;
-
-  /// The raw token stack ids, alongside [rawEnds].
-  Int32List get rawStacks => _stacks;
 
   /// All tokens, in order.
   Iterable<HighlightToken> get tokens =>
@@ -176,15 +171,13 @@ final class HighlightResult {
   /// [limit] characters.
   ///
   /// [brackets] lists pairs as consecutive opening and closing characters,
-  /// as in [EditingSyntax.brackets]. Brackets inside strings and comments
-  /// are skipped, so `f(")")` matches correctly. The search walks tokens,
-  /// jumping over a whole string or comment at once.
-  int matchingBracket(
-    int offset, {
-    String brackets = '()[]{}',
-    int limit = 1 << 20,
-  }) {
+  /// and defaults to the [language]'s [EditingSyntax.brackets]. Brackets
+  /// inside strings and comments are skipped, so `f(")")` matches
+  /// correctly. The search walks tokens, jumping over a whole string or
+  /// comment at once.
+  int matchingBracket(int offset, {String? brackets, int limit = 1 << 20}) {
     if (offset < 0 || offset >= code.length) return -1;
+    brackets ??= EditingSyntax.of(language).brackets;
     final unit = code.codeUnitAt(offset);
     var pair = -1;
     for (var i = 0; i + 1 < brackets.length; i += 2) {
@@ -279,4 +272,33 @@ final class HighlightToken {
 
   @override
   String toString() => 'HighlightToken(${scopes.join(' > ')}: "$text")';
+}
+
+/// A result built from token buffers. Engine-only; not exported.
+HighlightResult resultFromBuffers({
+  required String code,
+  required Grammar language,
+  required ScopeTable scopes,
+  required Int32List ends,
+  required Int32List stacks,
+  required int tokenCount,
+  Int32List? lineStarts,
+}) => HighlightResult._(
+  code: code,
+  language: language,
+  scopes: scopes,
+  ends: ends,
+  stacks: stacks,
+  tokenCount: tokenCount,
+  lineStarts: lineStarts,
+);
+
+/// The token buffers behind a result, for engines that copy tokens in bulk.
+/// Engine-only; not exported. Only the first `tokenCount` entries are valid.
+extension ResultBuffers on HighlightResult {
+  /// Token end offsets.
+  Int32List get rawEnds => _ends;
+
+  /// Token scope stack ids.
+  Int32List get rawStacks => _stacks;
 }

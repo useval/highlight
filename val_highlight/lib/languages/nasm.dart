@@ -15,7 +15,7 @@ const nasmLanguage = Grammar(
   ],
   rules: [
     LineComment(';'),
-    Preprocessor('%'),
+    Preprocessor(sigil: '%'),
     QuotedString('"', escape: null),
     QuotedString("'", escape: null),
     QuotedString('`'),

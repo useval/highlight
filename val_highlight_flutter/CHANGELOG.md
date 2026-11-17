@@ -1,3 +1,7 @@
+## Unreleased
+
+* Requires `val_highlight` 1.0.0.
+
 ## 0.1.2
 
 * Migrated from `package:flutter/material.dart` to `material_ui`.

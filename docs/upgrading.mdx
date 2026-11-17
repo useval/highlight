@@ -1,0 +1,120 @@
+---
+title: Upgrading to 1.0
+description: What changed between 0.x and 1.0 of val_highlight, and how to update your code for each breaking change.
+---
+
+1.0 is the first stable release: from here on, breaking changes only come
+with a new major version (see [versions](/docs/reference/platforms/#versions)).
+Code that only highlights — with `Highlighter`, `allLanguagesRegistry()`
+and the built-in themes — needs no changes. The changes below affect code
+that builds a registry with a fallback, reads detection results, writes its
+own grammar blocks, or used the engine's internal buffers.
+
+Update the constraints:
+
+```yaml
+dependencies:
+  val_highlight: ^1.0.0
+```
+
+The full list, including fixes, is in the
+[changelog](https://github.com/useval/highlight/blob/main/val_highlight/CHANGELOG.md).
+
+## Registry fallback is named
+
+`LanguageRegistry` takes the fallback by name, and its list of languages is
+required:
+
+```dart
+// 0.x
+LanguageRegistry([dartLanguage, yamlLanguage], plainTextLanguage);
+LanguageRegistry();
+
+// 1.0
+LanguageRegistry([dartLanguage, yamlLanguage], fallback: plainTextLanguage);
+LanguageRegistry(const []);
+```
+
+`LanguageRegistry(allLanguages)` and `allLanguagesRegistry()` are unchanged.
+
+## Detection reasons are an enum
+
+`Detection.reason` is a `DetectionReason` instead of a string:
+
+```dart
+// 0.x
+if (detection?.reason == 'file name') …
+
+// 1.0
+if (detection?.reason == DetectionReason.fileName) …
+```
+
+The values are `fileName`, `shebang` and `content`.
+
+## Grammar building blocks
+
+`Operators` takes its characters as a required argument, and `Annotation`
+and `Preprocessor` take every argument by name:
+
+```dart
+// 0.x
+Operators()
+Operators('+-*/=', Scopes.operator)
+Annotation('@', Scopes.meta)
+Preprocessor('%')
+
+// 1.0
+Operators('+-*/%=<>!&|^~?:')
+Operators('+-*/=', scope: Scopes.operator)
+Annotation(scope: Scopes.meta)
+Preprocessor(sigil: '%')
+```
+
+`'+-*/%=<>!&|^~?:'` is what `Operators()` used to default to.
+
+A block of your own must be a `final`, `base` or `sealed` class, because
+`BlockRule` is now a `base` class:
+
+```dart
+// 0.x
+class Pragma extends BlockRule { … }
+
+// 1.0
+final class Pragma extends BlockRule { … }
+```
+
+`languages/c.dart` no longer exports `cKeywords`, `cTypes`, `cLiterals` and
+`cCommonRules`. If you built on them, copy the lists you need into your
+grammar.
+
+## Engine internals are private
+
+These were for the engine's own use and are gone:
+
+| Removed | Instead |
+|---|---|
+| `HighlightResult.fromBuffers`, `rawEnds`, `rawStacks` | Send the `HighlightResult` itself to another isolate; it is sendable as it is. Read tokens with `tokenStart`, `tokenEnd` and `tokenStack`. |
+| `ScopeTable()`, `nameId`, `push` | Nothing: a result's `ScopeTable` is read-only. |
+| Setting `IncrementalHighlighter.lastRescannedLines` | It is read-only. |
+
+## Behavior changes
+
+These compile unchanged but can give different results:
+
+- **Theme lookup merges a scope's prefixes.** `ValTheme.lookup('a.b')` now
+  returns the style of `a` with the fields set for `a.b` on top, the same
+  way the CSS from `toCss` combines classes. It used to return only the
+  most specific style that existed. The built-in themes look the same; a
+  theme of your own that styles both `a` and `a.b` may not.
+- **`matchingBracket` uses the language's brackets** from its
+  `EditingSyntax` unless you pass `brackets`. Pass `brackets: '()[]{}'` for
+  the old default.
+- **A few patterns are stricter, so highlighting stays fast on hostile
+  input**: Markdown link text cannot contain `[`, inline HTML tags in
+  Markdown cannot contain `<`, C++ `[[attributes]]` cannot contain `[`, and
+  `$name(` is no longer marked as a call in C-like languages. The
+  [changelog](https://github.com/useval/highlight/blob/main/val_highlight/CHANGELOG.md)
+  lists every one.
+- **Delimiters longer than 1,024 characters**, such as a code fence of
+  thousands of backticks, are plain text. They used to throw
+  `GrammarException`.

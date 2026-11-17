@@ -1,0 +1,92 @@
+---
+title: Troubleshooting
+description: Common problems with val_highlight and val_highlight_flutter, what causes them, and how to fix them.
+---
+
+## Code inside Markdown fences is not highlighted
+
+Markdown looks up the language named on each fence in a registry, and the
+highlighter has none by default. Give one to whatever does the highlighting:
+
+```dart
+Highlighter(registry: allLanguagesRegistry())
+CodeHighlighter(registry: allLanguagesRegistry()) // for CodeView
+HighlightTextController(
+  language: markdownLanguage,
+  registry: allLanguagesRegistry(),
+)
+```
+
+Without a registry, fenced code gets the plain `code` scope. See
+[languages inside languages](/docs/engine/lookup/#languages-inside-languages).
+
+## `UnknownLanguageException`
+
+`highlightByName` throws it when the highlighter has no registry, or the
+registry has neither the name nor a fallback. `allLanguagesRegistry()`
+falls back to `genericLanguage`, so it never throws. To check a name
+first, use `registry.lookup(name)`, which returns `null` for an unknown
+one.
+
+## The wrong language is detected
+
+Detection is a guess from the file name, a `#!` line and the code itself.
+Pass the language when you know it. When you only know the file name, pass
+`fileName` to `LanguageDetector.detect`, or use
+`registry.forFileName(path)`. For `CodeView`, list only the languages you
+expect in `detectLanguages`: fewer candidates mean fewer wrong guesses. See
+[detect a language](/docs/engine/lookup/#detect-a-language).
+
+## The code is not in a monospace font
+
+The widgets ask for the `monospace` family, with Menlo, Consolas, Roboto
+Mono and Courier New as fallbacks. A platform without any of them shows its
+default font. Bundle a monospace font in your app and pass it as
+`textStyle`, on one widget or app-wide — see
+[app-wide defaults](/docs/themes/#app-wide-defaults).
+
+## The first code in a language takes longer
+
+A language is compiled the first time it is used. Compile the ones you
+expect ahead of time, in idle frames:
+
+```dart
+CodeHighlighter.shared.preload([dartLanguage, jsonLanguage]);
+```
+
+## A large `CodeView` shows plain text at first
+
+Code of 50,000 characters or more is highlighted in a background isolate,
+and shown as plain text until the result arrives. Raise or lower the
+threshold with `CodeHighlighter(isolateThreshold: …)`. For code that grows
+while it is shown, such as a streamed reply, see
+[streaming text](/docs/engine/streaming/).
+
+## Typing in a long `TextField` is slow
+
+Flutter lays out a text field's whole text on every change, and colored
+text makes that slower. `CodeField` colors only the lines on screen once a
+document passes `styleAllBelow` lines; use it for long text. See
+[large documents](/docs/components/code-field/#large-documents).
+
+## The HTML output has no colors
+
+With CSS classes, the colors are in a stylesheet you add to the page:
+`theme.toCss()`. To put the colors in the HTML itself, give the renderer a
+theme: `HtmlRenderer(theme: lightTheme)`. See [HTML output](/docs/engine/html/).
+
+## My grammar throws `GrammarException`
+
+A bad pattern, an unknown include or an include cycle surfaces when that
+part of the grammar is first used. Call `validate` in a test to find them
+all at once; the message names the grammar and the problem:
+
+```dart
+test('my grammar is valid', () => myLanguage.validate());
+```
+
+## A very long delimiter is plain text
+
+A heredoc tag, code fence or raw-string quote whose end pattern would be
+longer than 1,024 characters is not treated as a delimiter. Real ones are
+far shorter, and one that long could not be compiled.

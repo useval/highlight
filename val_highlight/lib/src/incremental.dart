@@ -40,7 +40,8 @@ final class IncrementalHighlighter {
   late ScopeTable _table;
 
   /// Lines re-scanned by the last [update], for diagnostics.
-  int lastRescannedLines = 0;
+  int get lastRescannedLines => _lastRescannedLines;
+  int _lastRescannedLines = 0;
 
   /// The current result.
   HighlightResult get result => _result;
@@ -152,9 +153,9 @@ final class IncrementalHighlighter {
       for (var o = resumedOldLine; o < oldLineCount; o++) {
         checkpoints[o + lineDelta] = _checkpoints[o];
       }
-      lastRescannedLines = resumedOldLine + lineDelta - line;
+      _lastRescannedLines = resumedOldLine + lineDelta - line;
     } else {
-      lastRescannedLines = newStarts.length - line;
+      _lastRescannedLines = newStarts.length - line;
     }
 
     _checkpoints = checkpoints;
@@ -162,7 +163,7 @@ final class IncrementalHighlighter {
   }
 
   void _full(String text) {
-    _table = ScopeTable();
+    _table = newScopeTable();
     final starts = computeLineStarts(text);
     _checkpoints = List<ScanFrame?>.filled(starts.length, null);
     final out = TokenBuffer(text.length ~/ 6);
@@ -177,12 +178,12 @@ final class IncrementalHighlighter {
       ScanFrame(CompiledGrammar.of(_language).root, ScopeTable.root, null),
       0,
     );
-    lastRescannedLines = starts.length;
+    _lastRescannedLines = starts.length;
     _result = _resultFrom(text, out, starts);
   }
 
   HighlightResult _resultFrom(String text, TokenBuffer out, Int32List starts) {
-    return HighlightResult.fromBuffers(
+    return resultFromBuffers(
       code: text,
       language: _language,
       scopes: _table,

@@ -22,7 +22,7 @@ the text's own layout, so wrapped lines line up.
 
 Laying out a text field is proportional to its styled runs, so for
 documents longer than `styleAllBelow` lines only the visible lines, plus
-`margin` lines on each side, are coloured. The window follows scrolling
+`margin` lines on each side, are colored. The window follows scrolling
 (of the field itself or of an enclosing scroll view) and is computed from
 the laid-out text, so wrapped lines are handled exactly.
 
@@ -75,12 +75,12 @@ Creates a code editor.
 | `onChanged` | `ValueChanged<String>?` |  | Called when the user edits the text. |
 | `scrollController` | `ScrollController?` |  | Scroll controller for the field's own scrolling. |
 | `textAlignVertical` | `TextAlignVertical?` |  | Vertical alignment of the text. |
-| `styleAllBelow` | `int` | `300` | Documents with at most this many lines are coloured in full. |
-| `margin` | `int` | `150` | Lines coloured beyond each edge of the visible area. |
+| `styleAllBelow` | `int` | `300` | Documents with at most this many lines are colored in full. |
+| `margin` | `int` | `150` | Lines colored beyond each edge of the visible area. |
 | `indent` | `String` | `'  '` | Text inserted by Tab and removed by Shift+Tab, such as two spaces or `'\t'`. Enter keeps the current line's indentation, adding one level after an opening `{`, `[`, `(` or `:`. |
 | `editing` | `CodeEditing` | `const CodeEditing()` | What typing, Enter and Backspace do beyond inserting text. Use `CodeEditing.none` for a plain text field. |
 | `shortcuts` | `Map<ShortcutActivator, Intent>?` |  | Keys and the intents they send. Defaults to `defaultShortcuts`; pass `const {}` for none, so Tab moves focus as in other fields. |
-| `inputFormatters` | `List<TextInputFormatter>?` |  | Formatters applied after the editing behaviour, such as a length limit. |
+| `inputFormatters` | `List<TextInputFormatter>?` |  | Formatters applied after the editing behavior, such as a length limit. |
 | `undoController` | `UndoHistoryController?` |  | Controls the field's undo history, as in `TextField.undoController`. Every edit the field makes itself — an auto-closed pair, a toggled comment, an indent — is a single undo step. |
 | `lineNumbers` | `bool` | `false` | Whether to show line numbers in a gutter. |
 | `firstLineNumber` | `int` | `1` | Number shown for the first line. |
@@ -97,7 +97,7 @@ Creates a code editor.
 
 ### `CodeEditing`
 
-Editing behaviour for `CodeField`: what typing, Enter and Backspace do
+Editing behavior for `CodeField`: what typing, Enter and Backspace do
 beyond inserting text.
 
 Brackets, quotes and comment markers come from the language's
@@ -110,7 +110,7 @@ CodeField(
 )
 ```
 
-Use `CodeEditing.none` to turn every behaviour off.
+Use `CodeEditing.none` to turn every behavior off.
 
 ```dart
 const CodeEditing({
@@ -122,7 +122,7 @@ const CodeEditing({
 })
 ```
 
-Creates editing behaviour. Everything is on by default.
+Creates editing behavior. Everything is on by default.
 
 | Field | Type | Default | Description |
 |---|---|---|---|

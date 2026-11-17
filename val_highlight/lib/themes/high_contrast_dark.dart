@@ -1,6 +1,6 @@
 import '../val_highlight.dart';
 
-/// A high-contrast dark theme: every colour has at least 7:1 contrast.
+/// A high-contrast dark theme: every color has at least 7:1 contrast.
 const highContrastDarkTheme = ValTheme(
   name: 'high-contrast-dark',
   dark: true,

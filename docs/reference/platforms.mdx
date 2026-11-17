@@ -1,0 +1,62 @@
+---
+title: Platforms and versions
+description: Where val_highlight runs, what differs between native and web, the Dart and Flutter versions each package needs, and what a version number promises.
+---
+
+## Requirements
+
+| Package | Requires |
+|---|---|
+| `val_highlight` | Dart 3.9 or later. No Flutter and no `dart:io`. |
+| `val_highlight_flutter` | Flutter 3.44.0 or later, with Dart 3.12 or later. |
+
+## Platforms
+
+`val_highlight` is pure Dart: it runs on the Dart VM, compiled ahead of time
+to native code, compiled to JavaScript, and compiled to WebAssembly. So it
+works in Flutter on Android, iOS, macOS, Windows, Linux and the web, on
+servers, and in command-line tools. `val_highlight_flutter` draws with
+ordinary Flutter text, with no platform code, so it runs wherever Flutter
+does.
+
+The engine's tests run on the Dart VM and again compiled to JavaScript, and
+the two give the same tokens for every language. The widget tests run with
+`flutter test`, and continuous integration builds the example app for the
+web.
+
+## Native and web
+
+Highlighting gives the same result everywhere. Two things differ in how it
+gets there:
+
+- **Matching.** On native platforms most patterns run as small Dart
+  matchers instead of through the regular-expression engine. On the web,
+  where browsers compile regular expressions to machine code, the scanner
+  uses `RegExp` throughout. See [performance](/docs/reference/performance/).
+- **Background work.** `CodeHighlighter`, which `CodeView` uses, highlights
+  inputs of 50,000 characters or more (its `isolateThreshold`) in a
+  background isolate on native platforms. The web has no isolates, so there
+  it highlights them on a later turn of the event loop instead.
+
+`IncrementalHighlighter`, which `CodeField` and `HighlightTextController`
+use, re-scans only what an edit can affect, so editing does not need a
+background isolate on any platform.
+
+## Versions
+
+The packages follow [semantic versioning](https://semver.org) from 1.0:
+
+- **A major version** (2.0) may remove or rename public API, or change a
+  signature or a default in a way that breaks code written for the
+  previous one. Each comes with a section in
+  [Upgrading](/docs/upgrading/).
+- **A minor version** (1.1) adds features — languages, themes, optional
+  parameters — without breaking code.
+- **A patch version** (1.0.1) fixes bugs.
+
+Highlighting itself improves in minor and patch versions: a grammar fix can
+give a token a different scope. Code that compares token output against
+saved snapshots may need its snapshots updated after an upgrade.
+
+`val_highlight_flutter` re-exports `val_highlight`, so the two packages move
+to a new major version together.

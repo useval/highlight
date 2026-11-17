@@ -42,7 +42,7 @@ const kotlinLanguage = Grammar(
     ),
     Annotation(),
     // Labels: `loop@ for` and `break@loop`.
-    TokenRule(r'[A-Za-z_]\w*@(?=\s)', scope: Scopes.meta),
+    TokenRule(r'(?<!\w)[A-Za-z_]\w*@(?=\s)', scope: Scopes.meta),
     Numbers(octal: false, suffix: '(?:[uU][lL]?|[lL]|[fF])?'),
     // Backtick identifiers: `is`, `in` used as names.
     TokenRule(r'`[^`\n]+`'),

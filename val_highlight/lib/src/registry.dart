@@ -7,7 +7,7 @@ final class LanguageRegistry {
   /// [fallback] is used by [resolve] and [resolveFileName] when nothing
   /// matches, and for embedded code (such as Markdown fences) in a language
   /// the registry does not have.
-  LanguageRegistry([Iterable<Grammar> languages = const [], this.fallback]) {
+  LanguageRegistry(Iterable<Grammar> languages, {this.fallback}) {
     languages.forEach(add);
   }
 
@@ -24,8 +24,11 @@ final class LanguageRegistry {
 
   /// Registers [language] under its name, its aliases and any extra
   /// [aliases]. Later registrations replace earlier ones for the same key.
+  /// Adding a language again only adds the new [aliases].
   void add(Grammar language, {List<String> aliases = const []}) {
-    _languages.add(language);
+    if (!_languages.any((known) => identical(known, language))) {
+      _languages.add(language);
+    }
     for (final key in [language.name, ...language.aliases, ...aliases]) {
       _byName[key.toLowerCase()] = language;
     }

@@ -57,7 +57,9 @@ const rubyLanguage = Grammar(
       rules: [
         TokenRule(r'\\[\s\S]', scope: Scopes.stringEscape),
         Interpolation('#{', '}'),
-        TokenRule(r'\[(?:[^\]\\\n]|\\.)*\]'),
+        // Ruby ends the literal at any unescaped `/`, even inside a class.
+        // The length cap keeps a line full of `[` linear.
+        TokenRule(r'\[(?:[^\]\\\n/]|\\.){0,200}\]'),
       ],
     ),
     TokenRule(r'@@?[A-Za-z_]\w*', scope: Scopes.variable),

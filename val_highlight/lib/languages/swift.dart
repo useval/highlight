@@ -31,13 +31,13 @@ const swiftLanguage = Grammar(
     // Raw strings: `#"…"#`, `##"""…"""##`. The closing quote needs as many
     // `#` as the opening one.
     RegionRule(
-      begin: r'(#+)"""',
+      begin: r'(?<!#)(#+)"""',
       end: r'"""\1',
       scope: Scopes.string,
       endReferencesBegin: true,
     ),
     RegionRule(
-      begin: r'(#+)"',
+      begin: r'(?<!#)(#+)"',
       end: r'"\1|$',
       scope: Scopes.string,
       endReferencesBegin: true,

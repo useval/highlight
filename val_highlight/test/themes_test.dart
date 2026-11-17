@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:test/test.dart';
+import 'package:val_highlight/languages/dart.dart';
 import 'package:val_highlight/themes/all.dart';
+import 'package:val_highlight/val_highlight.dart';
 
 double _luminance(int argb) {
   double channel(int shift) {
@@ -24,6 +26,34 @@ void main() {
   test('theme names are unique', () {
     final names = allThemes.map((t) => t.name).toSet();
     expect(names.length, allThemes.length);
+  });
+
+  group('a dotted scope builds on its prefixes', () {
+    const theme = ValTheme(
+      name: 'test',
+      styles: {
+        'variable': Style(color: 0xFFFF0000),
+        'variable.language': Style(italic: true),
+      },
+    );
+
+    test('lookup merges the prefixes in order', () {
+      expect(
+        theme.lookup('variable.language.this'),
+        const Style(color: 0xFFFF0000, italic: true),
+      );
+      expect(theme.lookup('variable'), const Style(color: 0xFFFF0000));
+      expect(theme.lookup('keyword'), isNull);
+    });
+
+    test('inline styles agree with CSS classes', () {
+      final result = const Highlighter().highlight(
+        'this',
+        language: dartLanguage,
+      );
+      final html = result.toHtml(const HtmlRenderer(theme: theme));
+      expect(html, contains('color:#ff0000;font-style:italic'));
+    });
   });
 
   for (final theme in allThemes) {

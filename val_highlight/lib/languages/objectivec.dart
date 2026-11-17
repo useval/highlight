@@ -1,5 +1,5 @@
 import '../advanced.dart';
-import 'c.dart';
+import '../src/languages/c_family.dart';
 
 /// Objective-C and Objective-C++.
 const objectiveCLanguage = Grammar(

@@ -27,11 +27,15 @@ void main() {
     print(token);
   }
 
-  // 5. Customize: extend a grammar with your own rule.
+  // 5. Customize: extend a grammar with your own rule. Top-level rules match
+  // in code; the `TODO` inside the comment stays part of the comment.
   final withTodo = dartLanguage.extend(
     rules: [const TokenRule(r'\bTODO\b', scope: 'todo')],
   );
-  final todo = highlighter.highlight('// TODO: ship it', language: withTodo);
+  final todo = highlighter.highlight(
+    'TODO(); // TODO: ship it',
+    language: withTodo,
+  );
   print(todo.tokens.map((t) => '${t.scope}: ${t.text}').join(' | '));
 
   // 6. Detect a language.

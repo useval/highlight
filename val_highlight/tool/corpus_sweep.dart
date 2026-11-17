@@ -22,6 +22,7 @@ import 'dart:math';
 import 'package:val_highlight/languages/all.dart';
 import 'package:val_highlight/src/engine/compiler.dart';
 import 'package:val_highlight/src/engine/scanner.dart';
+import 'package:val_highlight/src/engine/scope_table.dart';
 import 'package:val_highlight/val_highlight.dart';
 
 const _maxBytes = 2 * 1024 * 1024;
@@ -159,7 +160,7 @@ void _check(
 ) {
   // Speed and the final state, from a direct scan.
   final compiled = CompiledGrammar.of(language);
-  final table = ScopeTable();
+  final table = newScopeTable();
   final out = TokenBuffer(code.length ~/ 6);
   final scanner = Scanner(
     code: code,

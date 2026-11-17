@@ -1,3 +1,62 @@
+## 1.0.0
+
+The API is now stable: from here on, breaking changes only come with a new
+major version.
+
+### Breaking
+
+* `HighlightResult.fromBuffers`, `rawEnds` and `rawStacks` are gone. A
+  `HighlightResult` can be sent to another isolate as it is.
+* `ScopeTable` can no longer be created or changed outside the package:
+  its constructor, `nameId` and `push` are gone. Results from one
+  `IncrementalHighlighter` share a table, and nothing else can now change
+  it under them.
+* `IncrementalHighlighter.lastRescannedLines` is read-only.
+* `BlockRule` is a `base` class: your blocks must be `final`, `base` or
+  `sealed` classes.
+* `Operators` takes its characters as a required argument and `scope` by
+  name. `Annotation` and `Preprocessor` take `sigil` and `scope` by name:
+  `Preprocessor(sigil: '%')`.
+* `LanguageRegistry` takes its languages as a required argument and
+  `fallback` by name: `LanguageRegistry(languages, fallback: generic)`.
+* `Detection.reason` is a `DetectionReason` instead of a string.
+* `languages/c.dart` no longer exports `cKeywords`, `cTypes`, `cLiterals`
+  and `cCommonRules`.
+* `ValTheme.lookup` merges the styles of a dotted scope's prefixes, so
+  `variable.language` takes what `variable` sets, then its own fields. It
+  used to return only the most specific style, which disagreed with the CSS
+  from `toCss`. The built-in themes look the same.
+* `HighlightResult.matchingBracket` uses the language's
+  `EditingSyntax.brackets` unless `brackets` is given.
+
+### Fixed
+
+* Highlighting time no longer grows with the square of the input on long
+  runs of one pattern. Twenty languages were affected; 80,000 `#` in Swift
+  took 49 seconds. A test now checks every language.
+* A delimiter too long to compile, such as a 100,000-character code fence,
+  threw `GrammarException`. Delimiters longer than 1,024 characters are now
+  plain text.
+* Each distinct heredoc tag, code fence or raw-string delimiter was cached
+  for good, so memory grew without bound on a stream of them. At most 64
+  are kept per grammar.
+* `LanguageRegistry.add` listed a language twice when it was added twice.
+
+### Changed
+
+To keep that time linear, a few patterns are a little stricter:
+
+* Markdown link text cannot contain `[`, and inline HTML tags cannot
+  contain `<`.
+* C++ `[[attributes]]` cannot contain `[`.
+* JavaScript and TypeScript regular expression literals are capped at 300
+  parts, with character classes up to 200 characters.
+* In Ruby regular expressions, a character class ends at an unescaped `/`,
+  as Ruby itself does.
+* YAML keys in `{flow, mappings}` cannot contain `[]{},`, as YAML requires.
+* A function name directly after `$` (`$name(`) is no longer marked as a
+  call in C-like languages.
+
 ## 0.1.1
 
 ### Added

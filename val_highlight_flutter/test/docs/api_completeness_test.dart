@@ -43,7 +43,6 @@ void main() {
       'CodeGutterBuilder',
       'lineSpans',
       'dartLanguage',
-      'cKeywords',
       'allLanguagesRegistry',
       'darkTheme',
       'allThemes',

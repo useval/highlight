@@ -129,7 +129,7 @@ class EditorDecorations extends LeafRenderObjectWidget {
   /// Fill for the matched bracket pair, or `null` for no matching.
   final Color? bracketColor;
 
-  /// Editing behaviour, whose syntax gives the bracket pairs to match.
+  /// Editing behavior, whose syntax gives the bracket pairs to match.
   final CodeEditing editing;
 
   @override

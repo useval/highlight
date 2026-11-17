@@ -28,7 +28,7 @@ final class Highlighter {
   /// Highlights [code] with [language].
   HighlightResult highlight(String code, {required Grammar language}) {
     final compiled = CompiledGrammar.of(language);
-    final table = ScopeTable();
+    final table = newScopeTable();
     final out = TokenBuffer(code.length ~/ 6);
     Scanner(
       code: code,
@@ -36,7 +36,7 @@ final class Highlighter {
       out: out,
       embeds: registry,
     ).scan(ScanFrame(compiled.root, ScopeTable.root, null), 0);
-    return HighlightResult.fromBuffers(
+    return resultFromBuffers(
       code: code,
       language: language,
       scopes: table,

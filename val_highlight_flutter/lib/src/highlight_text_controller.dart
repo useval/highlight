@@ -36,11 +36,11 @@ class HighlightTextController extends TextEditingController {
   CodeStyles? _styles;
   ({int first, int last})? _window;
 
-  /// Zero-based lines to colour, or `null` for all of them.
+  /// Zero-based lines to color, or `null` for all of them.
   ///
   /// Laying out a text field with many thousands of styled runs is slow, so
   /// for large documents only the visible lines, plus a margin, need
-  /// colours. `CodeField` sets this automatically as you scroll.
+  /// colors. `CodeField` sets this automatically as you scroll.
   ({int first, int last})? get window => _window;
   set window(({int first, int last})? value) {
     if (value == _window) return;

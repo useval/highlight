@@ -10,6 +10,12 @@ import 'regex_util.dart';
 /// with its combined expression instead of first-character dispatch.
 const _broadAlternative = 96;
 
+/// States kept per grammar for regions whose end copies text from their
+/// begin, such as heredocs, code fences and raw strings. Each delimiter
+/// needs its own state; past this many, the least recently used is dropped,
+/// so a stream of distinct delimiters cannot grow memory without bound.
+const _maxCopiedEndStates = 64;
+
 /// What kind of rule an [Alternative] came from.
 enum AlternativeKind {
   /// The end pattern of the enclosing region.
@@ -307,6 +313,9 @@ final class CompiledGrammar {
 
   final Map<(RegionRule, String?), CompiledState> _regionStates = {};
   final Map<(RegionRule, String?), CompiledState> _embeddedStates = {};
+
+  // In least recently used order, oldest first.
+  final Map<(RegionRule, String, bool), CompiledState> _copiedEndStates = {};
   final Map<KeywordRule, CompiledKeywords> _keywords = Map.identity();
 
   /// State for the top level of a document.
@@ -331,6 +340,10 @@ final class CompiledGrammar {
   /// State for the content of [region]: its own rules, or the top level of
   /// [embed]. [end] replaces the region's end pattern.
   CompiledState stateFor(RegionRule region, {String? end, Grammar? embed}) {
+    if (end != null && region.endReferencesBegin) {
+      final target = embed == null ? this : CompiledGrammar.of(embed);
+      return target._copiedEndState(region, end, embed != null);
+    }
     if (embed != null) {
       final target = CompiledGrammar.of(embed);
       return target._embeddedStates.putIfAbsent((
@@ -342,6 +355,21 @@ final class CompiledGrammar {
       region,
       end,
     ), () => _compileState(region.rules, region, end));
+  }
+
+  CompiledState _copiedEndState(RegionRule region, String end, bool embedded) {
+    final key = (region, end, embedded);
+    final states = _copiedEndStates;
+    var state = states.remove(key);
+    if (state == null) {
+      if (states.length >= _maxCopiedEndStates) {
+        states.remove(states.keys.first);
+      }
+      state = embedded
+          ? _compileState(grammar.rules, region, end, true)
+          : _compileState(region.rules, region, end);
+    }
+    return states[key] = state;
   }
 
   /// Compiles every reachable state now, so grammar errors surface

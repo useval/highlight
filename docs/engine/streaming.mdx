@@ -1,0 +1,87 @@
+---
+title: Streaming text
+description: Highlight text that arrives a piece at a time, such as a reply from a language model, re-scanning only what each piece adds.
+---
+
+Text that grows a few characters at a time — a model's reply, a log, a
+terminal — is a document edited at its end. `IncrementalHighlighter` keeps
+it highlighted: each update re-scans the last line or so and the new text,
+not everything before it.
+
+```dart
+final document = IncrementalHighlighter(
+  language: markdownLanguage,
+  registry: allLanguagesRegistry(),
+);
+
+var text = '';
+await for (final chunk in reply) {
+  text += chunk;
+  final result = document.update(text);
+  // Show result.
+}
+```
+
+`update` takes the whole text so far and finds what was added. Its result is
+always the same as highlighting that text from scratch. With a registry,
+Markdown highlights each fenced block in its own language as it arrives. A
+string, comment or fence that has opened but not yet closed is highlighted
+to the end of the text until its closer arrives.
+
+In one run on an Apple M5, a 100 KB Markdown reply streamed 20 characters at
+a time took about 0.06 ms per update, 0.3 seconds over all 5,000 updates.
+Highlighting the text so far from scratch on every update averaged 1.4 ms,
+about 7 seconds in all — and that cost keeps growing with the reply.
+
+When pieces arrive faster than the screen redraws, update once per frame
+with the text so far rather than once per piece.
+
+## In Flutter
+
+Keep the `IncrementalHighlighter` in your widget's state, update it when the
+text changes, and build the spans with `documentSpans` and a `CodeStyles`
+(see [custom rendering](/docs/components/rendering/)):
+
+```dart
+class StreamingCode extends StatefulWidget {
+  const StreamingCode({super.key, required this.text});
+
+  final String text;
+
+  @override
+  State<StreamingCode> createState() => _StreamingCodeState();
+}
+
+class _StreamingCodeState extends State<StreamingCode> {
+  late final _document = IncrementalHighlighter(
+    language: markdownLanguage,
+    registry: allLanguagesRegistry(),
+    text: widget.text,
+  );
+  final _styles = CodeStyles(darkTheme);
+
+  @override
+  void didUpdateWidget(StreamingCode oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _document.update(widget.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        style: _styles.rootStyle(
+          const TextStyle(fontFamily: 'monospace', fontSize: 14),
+        ),
+        children: documentSpans(_document.result, _styles),
+      ),
+    );
+  }
+}
+```
+
+`CodeView` works for short streamed blocks too, but it highlights the whole
+text again on every change, and from 50,000 characters it highlights in the
+background and shows plain text until the result arrives — so a long block
+that keeps growing stays plain while it streams. For long or fast streams,
+use `IncrementalHighlighter` as above.

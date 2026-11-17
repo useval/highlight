@@ -50,6 +50,9 @@ tree of objects. Token `i` covers `code[tokenStart(i), tokenEnd(i))` and
 carries a scope stack id from `scopes`. Tokens always cover all of `code`
 with no gaps, and neighbouring tokens never share a stack.
 
+A result never changes once made, though its `scopes` table may gain
+stacks (see there). It can be sent to another isolate as it is.
+
 | Field | Type | Description |
 |---|---|---|
 | `code` | `String` | The highlighted source. |
@@ -57,14 +60,20 @@ with no gaps, and neighbouring tokens never share a stack.
 | `scopes` | `ScopeTable` | Scope names and stacks referenced by the tokens. |
 | `tokenCount` | `int` | Number of tokens. |
 
+<details>
+<summary><code>scopes</code>: more</summary>
+
+Results from one `IncrementalHighlighter` share a table that grows as
+the document is edited. A stack id never changes meaning, so styles
+cached per stack id stay valid; later results may only add stacks.
+
+</details>
+
 | Member | Type | Description |
 |---|---|---|
-| `HighlightResult.fromBuffers({…})` | `HighlightResult` | Creates a result from raw token buffers. |
 | `tokenStart(int index)` | `int` | Start offset of token `index`. |
 | `tokenEnd(int index)` | `int` | End offset (exclusive) of token `index`. |
 | `tokenStack(int index)` | `int` | Scope stack id of token `index`. See `scopes`. |
-| `rawEnds` | `Int32List` | The raw token end offsets, for engines that copy tokens in bulk. Only the first `tokenCount` entries are valid. |
-| `rawStacks` | `Int32List` | The raw token stack ids, alongside `rawEnds`. |
 | `tokens` | `Iterable<HighlightToken>` | All tokens, in order. |
 | `tokenAt(int offset)` | `int` | Index of the token covering `offset`, or `tokenCount` if `offset` is at or past the end. |
 | `lineCount` | `int` | Number of lines. Empty code has one empty line, and a trailing `\n` starts a final empty line. |
@@ -74,17 +83,8 @@ with no gaps, and neighbouring tokens never share a stack.
 | `isStringOrCommentAt(int offset)` | `bool` | Whether the character at `offset` is inside a string, comment or regular expression. Interpolations inside strings count as code. |
 | `isCommentAt(int offset)` | `bool` | Whether the character at `offset` is inside a comment. |
 | `isInsideStringOrComment(int offset, [EditingSyntax? syntax])` | `bool` | Whether text typed at caret position `offset`, between `code[offset - 1]` and `code[offset]`, would land inside a string or comment. |
-| `matchingBracket(…)` | `int` | Offset of the bracket matching the one at `offset`, or `-1` if the character at `offset` is not a bracket in code, or has no match within `limit` characters. |
+| `matchingBracket(int offset, {String? brackets, int limit = 1 << 20})` | `int` | Offset of the bracket matching the one at `offset`, or `-1` if the character at `offset` is not a bracket in code, or has no match within `limit` characters. |
 | `toHtml([HtmlRenderer renderer = const HtmlRenderer()])` | `String` | Renders the result as HTML. See `HtmlRenderer` for options. |
-
-<details>
-<summary><code>HighlightResult.fromBuffers</code>: more</summary>
-
-Engines use this, and so can code that moves results between isolates.
-`ends` and `stacks` must have at least `tokenCount` entries. Pass
-`lineStarts` if they are already known.
-
-</details>
 
 <details>
 <summary><code>isInsideStringOrComment</code>: more</summary>
@@ -101,9 +101,10 @@ the end of a line comment or of an unterminated string is inside.
 <summary><code>matchingBracket</code>: more</summary>
 
 `brackets` lists pairs as consecutive opening and closing characters,
-as in `EditingSyntax.brackets`. Brackets inside strings and comments
-are skipped, so `f(")")` matches correctly. The search walks tokens,
-jumping over a whole string or comment at once.
+and defaults to the `language`'s `EditingSyntax.brackets`. Brackets
+inside strings and comments are skipped, so `f(")")` matches
+correctly. The search walks tokens, jumping over a whole string or
+comment at once.
 
 </details>
 
@@ -133,18 +134,10 @@ the outside in, such as `string > interpolation > keyword`. Stack `0` is
 the root and has no scope. A parent always has a smaller id than its
 children, so renderers can resolve styles in a single forward pass.
 
-```dart
-ScopeTable()
-```
-
-Creates an empty table containing only the root stack.
-
 | Member | Type | Description |
 |---|---|---|
 | `static root` | `int` | Id of the root stack, which has no scope. |
 | `stackCount` | `int` | Number of stacks, including the root. |
-| `nameId(String name)` | `int` | Returns the id of scope `name`, adding it if needed. |
-| `push(int stack, String name)` | `int` | Returns the stack made of `stack` with scope `name` pushed on top. |
 | `parentOf(int stack)` | `int` | Parent of `stack`, or `-1` for the root. |
 | `scopeOf(int stack)` | `String?` | Innermost scope of `stack`, or `null` for the root. |
 | `scopesOf(int stack)` | `List<String>` | Scopes of `stack` from the outermost to the innermost. |

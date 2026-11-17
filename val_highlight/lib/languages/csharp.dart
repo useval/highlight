@@ -21,7 +21,7 @@ const csharpLanguage = Grammar(
     // Raw strings (C# 11): three or more quotes, closed by the same count.
     // With `$$`, interpolations are `{{…}}` and single braces are text.
     RegionRule(
-      begin: r'\$\$+("{3,})',
+      begin: r'(?<!\$)\$\$+("{3,})',
       end: r'\1',
       scope: Scopes.string,
       endReferencesBegin: true,

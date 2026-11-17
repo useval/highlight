@@ -30,10 +30,10 @@ languages named inside the code, such as Markdown code fences.
 | Field | Type | Description |
 |---|---|---|
 | `registry` | `LanguageRegistry?` | Languages for embedded regions named in the code. |
-| `lastRescannedLines` | `int` | Lines re-scanned by the last `update`, for diagnostics. |
 
 | Member | Type | Description |
 |---|---|---|
+| `lastRescannedLines` | `int` | Lines re-scanned by the last `update`, for diagnostics. |
 | `result` | `HighlightResult` | The current result. |
 | `language` | `Grammar` | The current language. Setting it re-highlights everything. *Settable.* |
 | `update(String text)` | `HighlightResult` | Updates the document to `text` and returns the new result. |

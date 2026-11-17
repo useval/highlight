@@ -175,6 +175,17 @@ void main() {
       expect(result.matchingBracket(99), -1);
     });
 
+    test('defaults to the language\'s brackets', () {
+      const angles = Grammar(
+        name: 'angles',
+        editing: EditingSyntax(brackets: '<>'),
+        rules: [],
+      );
+      final result = const Highlighter().highlight('<a(b>', language: angles);
+      expect(result.matchingBracket(0), 4);
+      expect(result.matchingBracket(2), -1);
+    });
+
     test('custom pairs and a search limit', () {
       final result = _dart('<a<b>>');
       expect(result.matchingBracket(0), -1);

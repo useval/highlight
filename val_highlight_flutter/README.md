@@ -146,11 +146,11 @@ Actions(
 
 For a plain `TextField`, add
 `CodeEditingFormatter(controller: controller)` to its `inputFormatters` to
-get the same typing behaviour.
+get the same typing behavior.
 
 Flutter lays out a text field's whole text on every change, and styled runs
-make that slower. So for documents over 300 lines, `CodeField` colours only
-the visible lines plus a margin, and the coloured window follows scrolling.
+make that slower. So for documents over 300 lines, `CodeField` colors only
+the visible lines plus a margin, and the colored window follows scrolling.
 
 `HighlightTextController` also works in a plain `TextField` for short
 documents. For long ones, use `CodeField`, or set `controller.window`
@@ -223,7 +223,7 @@ Frame timings on a MacBook, in profile mode:
 | Type in a plain `TextField`, same text, no highlighting | 17.4 / 17.6 ms | 120 of 120 |
 | Scroll a 2,000-line `CodeField` | 3.7 / 7.1 ms | 15 of 926 |
 
-The missed frames while scrolling a `CodeField` happen when its coloured
+The missed frames while scrolling a `CodeField` happen when its colored
 window moves, which makes Flutter lay out the whole field again.
 
 ## 🧪 Example

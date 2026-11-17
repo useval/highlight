@@ -35,7 +35,7 @@ fallback:
 ```dart
 final registry = LanguageRegistry(
   [dartLanguage, jsonLanguage, yamlLanguage],
-  plainTextLanguage,
+  fallback: plainTextLanguage,
 );
 registry.add(bashLanguage, aliases: ['terminal']);
 ```
@@ -86,10 +86,10 @@ const detector = LanguageDetector();
 
 final detection = detector.detect('def f(x):\n    return x * 2\n', allLanguages);
 detection?.language; // pythonLanguage
-detection?.reason;   // 'content'
+detection?.reason;   // DetectionReason.content
 
-detector.detect('', allLanguages, fileName: 'src/lib.rs')?.reason;  // 'file name'
-detector.detect('#!/usr/bin/env python3\n…', allLanguages)?.reason; // 'shebang'
+detector.detect('', allLanguages, fileName: 'src/lib.rs')?.reason;  // DetectionReason.fileName
+detector.detect('#!/usr/bin/env python3\n…', allLanguages)?.reason; // DetectionReason.shebang
 detector.detect('hello there', allLanguages);                        // null
 ```
 

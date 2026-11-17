@@ -1,6 +1,6 @@
 import '../val_highlight.dart';
 
-/// A high-contrast light theme: every colour has at least 7:1 contrast.
+/// A high-contrast light theme: every color has at least 7:1 contrast.
 const highContrastLightTheme = ValTheme(
   name: 'high-contrast-light',
   root: Style(color: 0xFF000000, background: 0xFFFFFFFF),

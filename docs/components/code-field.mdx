@@ -70,7 +70,7 @@ input. Text an input method is still composing is never changed.
 
 ## Configure editing
 
-Turn single behaviours off with a `CodeEditing`, or all of them with
+Turn single behaviors off with a `CodeEditing`, or all of them with
 `CodeEditing.none`:
 
 ```dart
@@ -159,11 +159,11 @@ is one undo step.
 
 Flutter lays out a text field's whole text on every change, and styled runs
 make that slower. So for a document of more than `styleAllBelow` lines (300
-by default), `CodeField` colours only the visible lines plus `margin` lines
-on each side (150 by default), and the rest is plain text. The coloured
+by default), `CodeField` colors only the visible lines plus `margin` lines
+on each side (150 by default), and the rest is plain text. The colored
 window follows scrolling — the field's own, or that of a scroll view around
 it. Moving the window lays the whole field out again, so while you scroll it
-moves only when the visible lines come close to its edge, and it is centred
+moves only when the visible lines come close to its edge, and it is centered
 again once scrolling stops.
 
 ## API reference

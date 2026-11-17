@@ -258,6 +258,20 @@ void main() {
       expect(registry.forFileName('noext'), isNull);
     });
 
+    test('adding a language again only adds aliases', () {
+      final registry = LanguageRegistry([a])..add(a, aliases: ['again']);
+      expect(registry.languages, [a]);
+      expect(registry.lookup('again'), same(a));
+    });
+
+    test('falls back for unknown names and file names', () {
+      const b = Grammar(name: 'beta', rules: []);
+      final registry = LanguageRegistry([a], fallback: b);
+      expect(registry.resolve('nope'), same(b));
+      expect(registry.resolveFileName('x.unknown'), same(b));
+      expect(registry.resolve('al'), same(a));
+    });
+
     test('highlightByName throws for unknown names', () {
       final highlighter = Highlighter(registry: LanguageRegistry([a]));
       expect(highlighter.highlightByName('x', name: 'al').language, same(a));

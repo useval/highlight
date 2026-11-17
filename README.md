@@ -43,14 +43,14 @@ to HTML (best of 5 runs, on a MacBook):
 
 | Lines | Highlight + HTML |
 |---|---|
-| 600 | 1.5 ms |
-| 2,400 | 4.3 ms |
-| 9,600 | 13.9 ms |
+| 600 | 1.6 ms |
+| 2,400 | 4.4 ms |
+| 9,600 | 14.4 ms |
 
 `just bench-languages` measures about 256 KB of realistic source per
 language on native code. It averages about 43 MB/s, from 30 MB/s (HTML) to
-64 MB/s (Markdown). `just bench-js` runs the same test compiled to
-JavaScript, where it averages about 62 MB/s.
+62 MB/s (Markdown). `just bench-js` runs the same test compiled to
+JavaScript, where it averages about 55 MB/s.
 
 With incremental highlighting, one keystroke in the 9,600-line file takes
 about 0.4 ms. Frame timings for scrolling and typing in Flutter are in the
@@ -61,7 +61,7 @@ about 0.4 ms. Frame timings for scrolling and typing in Flutter are in the
 
 - **One pass, no copying.** The scanner walks the source by offset, never
   copies it, and time grows in step with input size.
-- **First-character dispatch.** Each rule's pattern is analysed once to find
+- **First-character dispatch.** Each rule's pattern is analyzed once to find
   the characters it can start with. The scanner skips positions where no
   rule can start, and tries only the rules that can. Rules anchored with `^`
   are tried only at line starts. States with a rule that can start almost

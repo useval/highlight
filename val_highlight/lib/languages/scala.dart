@@ -25,7 +25,7 @@ const scalaLanguage = Grammar(
     // Interpolated strings: s"…", f"…", raw"…", and custom ones.
     QuotedString(
       '"""',
-      prefix: r'[A-Za-z_]\w*',
+      prefix: r'(?<![\w$])[A-Za-z_]\w*',
       escape: null,
       multiline: true,
       lastInRun: true,
@@ -41,7 +41,7 @@ const scalaLanguage = Grammar(
     ),
     QuotedString(
       '"',
-      prefix: r'[A-Za-z_]\w*',
+      prefix: r'(?<![\w$])[A-Za-z_]\w*',
       rules: [IncludeRule('interpolation')],
     ),
     QuotedString('"'),

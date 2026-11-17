@@ -23,7 +23,7 @@ Each picture is `CodeView` drawing this sample in one theme:
 
 Import one from `package:val_highlight/themes/<file>`, or all of them, with
 the list `allThemes`, from `themes/all.dart`. The package's tests check every
-built-in theme: each colour has a contrast ratio of at least 4.5:1 against
+built-in theme: each color has a contrast ratio of at least 4.5:1 against
 its background (WCAG AA), 7:1 in the two high-contrast themes; every theme
 styles the same scopes as `lightTheme`; and `dark` matches the background.
 
@@ -100,7 +100,7 @@ final mine = lightTheme.extend(
 
 ## Build a theme
 
-Colours are ARGB integers, so a theme can be `const`. A token's style is its
+Colors are ARGB integers, so a theme can be `const`. A token's style is its
 scopes' styles merged from the outside in, over `root`, so unset fields
 inherit.
 
@@ -122,16 +122,17 @@ const myTheme = ValTheme(
 
 `Style` has `color`, `background`, `bold`, `italic`, `underline` and
 `strikethrough`. Set `dark: true` on a dark theme: the widgets choose their
-line-highlight colours by it.
+line-highlight colors by it.
 
-Scope lookup cascades: a token in `keyword.control.flow` uses that scope's
-style if the theme has one, then `keyword.control`, then `keyword`. A new
-scope from your own grammar rules needs only a theme entry. The
+A dotted scope builds on its prefixes: a token in `keyword.control.flow`
+takes the theme's `keyword` style, then `keyword.control` over it, then
+`keyword.control.flow`. So a new scope from your own grammar rules is
+styled by its prefix until you give it a theme entry. The
 [standard scopes](/docs/reference/scopes/) are constants on `Scopes`.
 
 ## Import a VS Code theme
 
-`ValTheme.fromVsCodeJson` reads the text of a VS Code colour theme file —
+`ValTheme.fromVsCodeJson` reads the text of a VS Code color theme file —
 comments and trailing commas allowed — and `ValTheme.fromVsCode` the decoded
 JSON object.
 

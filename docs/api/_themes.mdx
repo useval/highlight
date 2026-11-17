@@ -4,8 +4,9 @@
 
 A color theme: a `root` style plus a style per scope.
 
-Scope lookup cascades: `title.function.call` tries `title.function.call`,
-then `title.function`, then `title`.
+A scope's style builds on those of its dotted prefixes: `title.function`
+takes the fields set for `title`, then those set for `title.function`.
+This is how CSS classes from `toCss` combine too.
 
 ```dart
 const ValTheme({
@@ -29,7 +30,7 @@ Creates a theme.
 |---|---|---|
 | `ValTheme.fromVsCode(Map<String, Object?> json, {String? name})` | `ValTheme` | Builds a theme from a decoded VS Code color theme (the JSON object of a `*-color-theme.json` file). |
 | `ValTheme.fromVsCodeJson(String source, {String? name})` | `ValTheme` | Like `ValTheme.fromVsCode`, from the text of a theme file. Comments and trailing commas (JSONC) are allowed. |
-| `lookup(String scope)` | `Style?` | Style for `scope` alone, using the cascade, without inheritance. |
+| `lookup(String scope)` | `Style?` | Style for `scope` alone, without inheriting from enclosing scopes: the styles of `a`, `a.b` and `a.b.c` merged in that order for `a.b.c`, or `null` if none is set. |
 | `resolve(ScopeTable table)` | `List<Style>` | Effective style of every stack in `table`, indexed by stack id. |
 | `copyWith({…})` | `ValTheme` | Returns a copy with the given fields replaced. |
 | `extend({String? name, Style? root, Map<String, Style>? styles})` | `ValTheme` | Returns a theme built on this one. |

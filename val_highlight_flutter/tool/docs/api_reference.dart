@@ -69,6 +69,7 @@ const pages = <String, List<String>>{
     'UnknownLanguageException',
     'LanguageDetector',
     'Detection',
+    'DetectionReason',
     'allLanguages',
     'allLanguagesRegistry',
   ],
@@ -90,10 +91,6 @@ const pages = <String, List<String>>{
     'Annotation',
     'Preprocessor',
     'CommonRules',
-    'cKeywords',
-    'cTypes',
-    'cLiterals',
-    'cCommonRules',
     'EditingSyntax',
     'GrammarException',
   ],
@@ -197,6 +194,8 @@ String _page(List<String> names, Map<String, String> sources) {
     switch (decl.kind) {
       case 'class':
         _class(out, name, decl.source, decl.start);
+      case 'enum':
+        _enum(out, name, decl.source, decl.start);
       case 'typedef':
         out
           ..writeln(_mdx(_docAbove(decl.source, decl.start)))
@@ -243,6 +242,7 @@ _Decl _find(String name, Map<String, String> sources) {
       '^(?:abstract |final |base |sealed |interface )*class $name\\b',
       multiLine: true,
     ),
+    'enum': RegExp('^enum $name\\b', multiLine: true),
     'typedef': RegExp('^typedef $name\\b', multiLine: true),
     'const': RegExp('^const $name = ', multiLine: true),
     'function': RegExp('^[\\w<>?, ()]+ $name\\(', multiLine: true),
@@ -406,6 +406,33 @@ void _class(StringBuffer out, String name, String source, int start) {
       );
     }
     _more(out, rows);
+  }
+}
+
+void _enum(StringBuffer out, String name, String source, int start) {
+  out.writeln(_mdx(_docAbove(source, start)));
+  final open = _indexOutside(source, '{', start);
+  final body = source.substring(open + 1, _matching(source, open));
+  final values = <(String, String)>[];
+  final doc = <String>[];
+  for (final line in body.split('\n').map((l) => l.trim())) {
+    if (line.startsWith('///')) {
+      doc.add(line.substring(3).trim());
+    } else if (RegExp(r'^\w+[,;]?$').firstMatch(line) case final m?) {
+      values.add((m[0]!.replaceAll(RegExp('[,;]'), ''), doc.join('\n')));
+      doc.clear();
+    }
+  }
+  out
+    ..writeln()
+    ..writeln('```dart')
+    ..writeln('enum $name { ${values.map((v) => v.$1).join(', ')} }')
+    ..writeln('```')
+    ..writeln()
+    ..writeln('| Value | Description |')
+    ..writeln('|---|---|');
+  for (final (value, doc) in values) {
+    out.writeln('| `$value` | ${_cell(doc)} |');
   }
 }
 

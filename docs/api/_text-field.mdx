@@ -29,7 +29,7 @@ as Markdown code fences.
 
 | Member | Type | Description |
 |---|---|---|
-| `window` | `({int first, int last})?` | Zero-based lines to colour, or `null` for all of them. *Settable.* |
+| `window` | `({int first, int last})?` | Zero-based lines to color, or `null` for all of them. *Settable.* |
 | `language` | `Grammar` | The language of the text. Setting it re-highlights everything. *Settable.* |
 | `theme` | `ValTheme?` | The theme, or `null` to follow the app. *Settable.* |
 | `result` | `HighlightResult` | The highlight result for the current text. |
@@ -39,7 +39,7 @@ as Markdown code fences.
 
 Laying out a text field with many thousands of styled runs is slow, so
 for large documents only the visible lines, plus a margin, need
-colours. `CodeField` sets this automatically as you scroll.
+colors. `CodeField` sets this automatically as you scroll.
 
 </details>
 
@@ -49,7 +49,7 @@ Applies `CodeEditing` to text typed into a field driven by a
 `HighlightTextController`.
 
 `CodeField` installs one automatically. Add one to a plain `TextField`'s
-`inputFormatters` to get the same behaviour there:
+`inputFormatters` to get the same behavior there:
 
 ```dart
 TextField(
@@ -77,5 +77,5 @@ Creates a formatter for `controller`.
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `controller` | `HighlightTextController` | *required* | The controller whose highlighting tells strings and comments apart. |
-| `editing` | `CodeEditing` | `const CodeEditing()` | The behaviour to apply. |
+| `editing` | `CodeEditing` | `const CodeEditing()` | The behavior to apply. |
 | `indent` | `String` | `'  '` | One level of indentation, for Enter. |

@@ -84,7 +84,10 @@ const jsRepository = <String, List<Rule>>{
   'regexp': [
     TokenRule(
       r'(?<=(?:^|[(,=:\[!&|?{};+\-*%<>~^]|\breturn|\btypeof|\bcase)\s*)'
-      r'/(?![*/])(?:[^/\\\[\n]|\\.|\[(?:[^\]\\\n]|\\.)*\])+/[dgimsuvy]*',
+      // A class may hold `/`. The length caps keep a line full of `[/]`
+      // linear, since a literal can start at every one of its slashes.
+      r'/(?![*/])(?:[^/\\\[\n]|\\.|\[(?:[^\]\\\n]|\\.){0,200}\]){1,300}'
+      r'/[dgimsuvy]*',
       scope: Scopes.regexp,
     ),
   ],

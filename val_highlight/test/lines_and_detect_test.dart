@@ -48,7 +48,7 @@ void main() {
     test('file name wins', () {
       final d = detector.detect('x', allLanguages, fileName: 'a/b.PY');
       expect(d?.language, same(pythonLanguage));
-      expect(d?.reason, 'file name');
+      expect(d?.reason, DetectionReason.fileName);
     });
 
     test('shebang', () {

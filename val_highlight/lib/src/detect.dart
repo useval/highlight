@@ -3,10 +3,26 @@ import 'grammar/grammar.dart';
 import 'highlighter.dart';
 import 'registry.dart';
 
+/// Which check picked a [Detection]'s language.
+enum DetectionReason {
+  /// The file name or extension.
+  fileName,
+
+  /// The `#!` first line.
+  shebang,
+
+  /// The content score.
+  content,
+}
+
 /// A detected language and how confident the detector is.
 final class Detection {
   /// Creates a detection result.
-  const Detection(this.language, this.score, {this.reason = 'content'});
+  const Detection(
+    this.language,
+    this.score, {
+    this.reason = DetectionReason.content,
+  });
 
   /// The detected language.
   final Grammar language;
@@ -15,11 +31,11 @@ final class Detection {
   /// candidates for the same input.
   final double score;
 
-  /// Why this language won: `file name`, `shebang` or `content`.
-  final String reason;
+  /// Which check picked this language.
+  final DetectionReason reason;
 
   @override
-  String toString() => 'Detection(${language.name}, $score, $reason)';
+  String toString() => 'Detection(${language.name}, $score, ${reason.name})';
 }
 
 /// Guesses the language of a piece of code.
@@ -75,7 +91,11 @@ final class LanguageDetector {
     if (fileName != null) {
       final byFile = LanguageRegistry(languages).forFileName(fileName);
       if (byFile != null) {
-        return Detection(byFile, double.infinity, reason: 'file name');
+        return Detection(
+          byFile,
+          double.infinity,
+          reason: DetectionReason.fileName,
+        );
       }
     }
 
@@ -87,7 +107,11 @@ final class LanguageDetector {
           if (RegExp(
             '(^|[/\\s])${RegExp.escape(name)}(\\s|\$|[0-9.])',
           ).hasMatch(shebang)) {
-            return Detection(language, double.infinity, reason: 'shebang');
+            return Detection(
+              language,
+              double.infinity,
+              reason: DetectionReason.shebang,
+            );
           }
         }
       }

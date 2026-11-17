@@ -120,7 +120,12 @@ Base constructor for rules.
 Matches `pattern` and marks the match with `scope`.
 
 `captures` maps capture group numbers inside `pattern` to scopes. Captured
-groups must appear in order and must not overlap.
+groups must appear in order and must not overlap. Each captured text is
+located by searching the match after the previous capture, so it must
+not also occur earlier in that stretch: in `\w+\.(\w+)` on `ab.a`, the
+capture `a` would mark the first `a`. Where that can happen, match only
+the part to scope and put the context in a lookaround, as in
+`(?<=\w\.)\w+`.
 
 ```dart
 const TokenRule(
@@ -244,7 +249,8 @@ compiled.
 
 The built-in blocks cover what most languages repeat: comments, strings,
 numbers, operators and annotations, so most grammars need no regular
-expressions. Extend this class to make your own blocks.
+expressions. Extend this class to make your own blocks; subclasses must
+be `final`, `base` or `sealed`.
 
 ```dart
 const BlockRule()
@@ -409,17 +415,18 @@ Creates a number block.
 Runs of operator characters, such as `+`, `==` or `>>=`.
 
 ```dart
-const Operators([
-  String chars = '+-*/%=<>!&|^~?:',
+const Operators(
+  String chars, {
   String scope = Scopes.operator,
-])
+})
 ```
 
-Creates an operator block matching runs of `chars`.
+Creates an operator block matching runs of `chars`, such as
+`'+-*/%=<>!&|^~?:'`.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `chars` | `String` | `'+-*/%=<>!&\|^~?:'` | Characters that make up operators. |
+| `chars` | `String` | *required* | Characters that make up operators. |
 | `scope` | `String` | `Scopes.operator` | Scope of operators. |
 
 ### `Annotation`
@@ -428,10 +435,10 @@ Annotations, attributes and decorators, such as `@override` or
 `@app.route`.
 
 ```dart
-const Annotation([
+const Annotation({
   String sigil = '@',
   String scope = Scopes.meta,
-])
+})
 ```
 
 Creates an annotation block starting with `sigil`.
@@ -447,10 +454,10 @@ Preprocessor lines such as `#include <x>` or `#define X 1`, including
 lines continued with a trailing backslash.
 
 ```dart
-const Preprocessor([
+const Preprocessor({
   String sigil = '#',
   String scope = Scopes.meta,
-])
+})
 ```
 
 Creates a preprocessor block starting with `sigil`.
@@ -471,38 +478,6 @@ Common heuristics for identifiers that are not keywords, for use in
 | `static functionCall` | `TokenRule` | An identifier followed by `(` or `<T>(` is a function. |
 | `static memberCall` | `TokenRule` | After a `.`, a called name is a function (`list.add(`). |
 | `static member` | `TokenRule` | After a `.`, any other name is a plain member, never a keyword. |
-
-### `cKeywords`
-
-C keywords (C23 included).
-
-```dart
-const List<String> cKeywords
-```
-
-### `cTypes`
-
-C built-in and standard types.
-
-```dart
-const List<String> cTypes
-```
-
-### `cLiterals`
-
-C literals.
-
-```dart
-const List<String> cLiterals
-```
-
-### `cCommonRules`
-
-Rules shared by C, C++ and Objective-C.
-
-```dart
-const List<Rule> cCommonRules
-```
 
 ### `EditingSyntax`
 

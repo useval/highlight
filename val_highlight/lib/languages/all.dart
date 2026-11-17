@@ -186,4 +186,4 @@ const allLanguages = <Grammar>[
 /// name, and for Markdown code fences. Unknown names fall back to
 /// [genericLanguage].
 LanguageRegistry allLanguagesRegistry() =>
-    LanguageRegistry(allLanguages, genericLanguage);
+    LanguageRegistry(allLanguages, fallback: genericLanguage);

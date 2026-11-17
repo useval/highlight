@@ -1,5 +1,5 @@
 import '../advanced.dart';
-import 'c.dart';
+import '../src/languages/c_family.dart';
 
 /// C++ (C++23).
 const cppLanguage = Grammar(
@@ -24,11 +24,11 @@ const cppLanguage = Grammar(
     ),
     ...cCommonRules,
     // Attributes: [[nodiscard]], [[likely]].
-    TokenRule(r'\[\[[^\]\n]*\]\]', scope: Scopes.meta),
+    TokenRule(r'\[\[[^\[\]\n]*\]\]', scope: Scopes.meta),
     CommonRules.memberCall,
     CommonRules.member,
     // `std::`, `detail::` — qualifiers are namespaces or types.
-    TokenRule(r'[A-Za-z_]\w*(?=::)', scope: Scopes.type),
+    TokenRule(r'(?<!\w)[A-Za-z_]\w*(?=::)', scope: Scopes.type),
     KeywordRule(
       {
         Scopes.keyword: [

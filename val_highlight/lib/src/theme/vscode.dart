@@ -244,7 +244,7 @@ String stripJsonc(String source) {
   while (i < n) {
     final c = source.codeUnitAt(i);
     if (c == 0x22) {
-      // A string: copy it whole, honouring escapes.
+      // A string: copy it whole, honoring escapes.
       final start = i++;
       while (i < n && source.codeUnitAt(i) != 0x22) {
         if (source.codeUnitAt(i) == 0x5C) i++;

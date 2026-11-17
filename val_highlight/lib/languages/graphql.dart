@@ -22,7 +22,7 @@ const graphqlLanguage = Grammar(
     Numbers(hex: false, binary: false, octal: false, separator: null),
     // Field and argument names before `:`, even keyword-like ones such as
     // `input:`.
-    TokenRule(r'[A-Za-z_]\w*(?=[ \t]*:)', scope: Scopes.property),
+    TokenRule(r'(?<!\w)[A-Za-z_]\w*(?=[ \t]*:)', scope: Scopes.property),
     KeywordRule(
       {
         Scopes.keyword: [

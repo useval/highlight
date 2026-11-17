@@ -15,7 +15,7 @@ dependencies:
   flutter:
     sdk: flutter
   material_ui: ^1.0.1
-  val_highlight: ^0.1.1
+  val_highlight: ^1.0.0
 
 dev_dependencies:
   analyzer: ">=12.0.0 <15.0.0"

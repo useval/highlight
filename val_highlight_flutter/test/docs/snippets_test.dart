@@ -205,4 +205,75 @@ void main() {
     );
     expect(myTheme.lookup('keyword.control.flow')?.bold, isTrue);
   });
+  testWidgets('streaming.mdx', (tester) async {
+    const reply = 'Try this:\n\n```dart\nvoid main() => print("hi");\n```\n';
+    for (var i = 1; i <= reply.length; i += 7) {
+      await tester.pumpWidget(
+        _app(StreamingCode(text: reply.substring(0, i.clamp(0, reply.length)))),
+      );
+    }
+    await tester.pumpWidget(_app(const StreamingCode(text: reply)));
+    final rich = tester.widget<RichText>(
+      find.descendant(
+        of: find.byType(StreamingCode),
+        matching: find.byType(RichText),
+      ),
+    );
+    expect(rich.text.toPlainText(), reply);
+  });
+
+  testWidgets('troubleshooting.mdx', (tester) async {
+    final highlighter = CodeHighlighter(registry: allLanguagesRegistry());
+    final controller = HighlightTextController(
+      language: markdownLanguage,
+      registry: allLanguagesRegistry(),
+    );
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _app(CodeView(source, language: dartLanguage, highlighter: highlighter)),
+    );
+    final preloading = CodeHighlighter.shared.preload([
+      dartLanguage,
+      jsonLanguage,
+    ]);
+    await tester.pumpAndSettle();
+    await preloading;
+    expect(find.byType(CodeView), findsOneWidget);
+  });
+}
+
+class StreamingCode extends StatefulWidget {
+  const StreamingCode({super.key, required this.text});
+
+  final String text;
+
+  @override
+  State<StreamingCode> createState() => _StreamingCodeState();
+}
+
+class _StreamingCodeState extends State<StreamingCode> {
+  late final _document = IncrementalHighlighter(
+    language: markdownLanguage,
+    registry: allLanguagesRegistry(),
+    text: widget.text,
+  );
+  final _styles = CodeStyles(darkTheme);
+
+  @override
+  void didUpdateWidget(StreamingCode oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _document.update(widget.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        style: _styles.rootStyle(
+          const TextStyle(fontFamily: 'monospace', fontSize: 14),
+        ),
+        children: documentSpans(_document.result, _styles),
+      ),
+    );
+  }
 }

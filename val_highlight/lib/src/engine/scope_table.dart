@@ -7,8 +7,7 @@ import 'dart:typed_data';
 /// the root and has no scope. A parent always has a smaller id than its
 /// children, so renderers can resolve styles in a single forward pass.
 final class ScopeTable {
-  /// Creates an empty table containing only the root stack.
-  ScopeTable();
+  ScopeTable._();
 
   /// Id of the root stack, which has no scope.
   static const int root = 0;
@@ -28,8 +27,7 @@ final class ScopeTable {
   /// Number of stacks, including the root.
   int get stackCount => _parents.length;
 
-  /// Returns the id of scope [name], adding it if needed.
-  int nameId(String name) {
+  int _nameId(String name) {
     final existing = _nameIds[name];
     if (existing != null) return existing;
     final id = _names.length;
@@ -38,9 +36,8 @@ final class ScopeTable {
     return id;
   }
 
-  /// Returns the stack made of [stack] with scope [name] pushed on top.
-  int push(int stack, String name) {
-    final scope = nameId(name);
+  int _push(int stack, String name) {
+    final scope = _nameId(name);
     final key = stack * 65536 + scope;
     final existing = _stackIds[key];
     if (existing != null) return existing;
@@ -114,4 +111,14 @@ final class ScopeTable {
     }
     _kindCount = count;
   }
+}
+
+/// A new table containing only the root stack. Engine-only; not exported.
+ScopeTable newScopeTable() => ScopeTable._();
+
+/// Adding stacks. Engine-only; not exported, so a table handed to users
+/// cannot change under the results that share it.
+extension ScopeTableBuilder on ScopeTable {
+  /// Returns the stack made of [stack] with scope [name] pushed on top.
+  int push(int stack, String name) => _push(stack, name);
 }

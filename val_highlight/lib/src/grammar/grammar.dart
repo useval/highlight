@@ -216,7 +216,12 @@ sealed class Rule {
 /// Matches [pattern] and marks the match with [scope].
 ///
 /// [captures] maps capture group numbers inside [pattern] to scopes. Captured
-/// groups must appear in order and must not overlap.
+/// groups must appear in order and must not overlap. Each captured text is
+/// located by searching the match after the previous capture, so it must
+/// not also occur earlier in that stretch: in `\w+\.(\w+)` on `ab.a`, the
+/// capture `a` would mark the first `a`. Where that can happen, match only
+/// the part to scope and put the context in a lookaround, as in
+/// `(?<=\w\.)\w+`.
 final class TokenRule extends Rule {
   /// Creates a token rule.
   const TokenRule(this.pattern, {this.scope, this.captures = const {}});

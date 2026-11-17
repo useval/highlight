@@ -4,7 +4,7 @@ import 'package:val_highlight/val_highlight.dart';
 
 import 'highlight_text_controller.dart';
 
-/// Editing behaviour for `CodeField`: what typing, Enter and Backspace do
+/// Editing behavior for `CodeField`: what typing, Enter and Backspace do
 /// beyond inserting text.
 ///
 /// Brackets, quotes and comment markers come from the language's
@@ -17,10 +17,10 @@ import 'highlight_text_controller.dart';
 /// )
 /// ```
 ///
-/// Use [CodeEditing.none] to turn every behaviour off.
+/// Use [CodeEditing.none] to turn every behavior off.
 @immutable
 class CodeEditing {
-  /// Creates editing behaviour. Everything is on by default.
+  /// Creates editing behavior. Everything is on by default.
   const CodeEditing({
     this.autoIndent = true,
     this.autoClose = true,
@@ -125,7 +125,7 @@ class ToggleCommentIntent extends Intent {
 /// [HighlightTextController].
 ///
 /// `CodeField` installs one automatically. Add one to a plain [TextField]'s
-/// `inputFormatters` to get the same behaviour there:
+/// `inputFormatters` to get the same behavior there:
 ///
 /// ```dart
 /// TextField(
@@ -150,7 +150,7 @@ class CodeEditingFormatter extends TextInputFormatter {
   /// The controller whose highlighting tells strings and comments apart.
   final HighlightTextController controller;
 
-  /// The behaviour to apply.
+  /// The behavior to apply.
   CodeEditing editing;
 
   /// One level of indentation, for Enter.

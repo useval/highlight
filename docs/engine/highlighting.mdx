@@ -111,10 +111,9 @@ highlight its fenced code; see
 
 ## Results across isolates
 
-`HighlightResult.fromBuffers` rebuilds a result from its raw lists
-(`rawEnds`, `rawStacks`), for code that moves results between isolates.
-`CodeHighlighter` in `val_highlight_flutter` already highlights large inputs
-in a background isolate.
+A `HighlightResult` can be sent to another isolate as it is, so highlighting
+can run in the background with `Isolate.run`. `CodeHighlighter` in
+`val_highlight_flutter` already does this for large inputs.
 
 ## API reference
 

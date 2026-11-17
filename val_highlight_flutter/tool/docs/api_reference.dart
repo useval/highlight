@@ -35,6 +35,7 @@ const pages = <String, List<String>>{
   'code-view': [
     'CodeView',
     'CodeToken',
+    'CodeLineDetails',
     'CodeGutterBuilder',
     'CodeLineBuilder',
     'CodeSpanBuilder',
@@ -73,7 +74,7 @@ const pages = <String, List<String>>{
     'allLanguages',
     'allLanguagesRegistry',
   ],
-  'themes': ['ValTheme', 'Style', 'CodeTheme', 'allThemes'],
+  'themes': ['ValTheme', 'Style', 'CodeTheme', 'CodeThemeData', 'allThemes'],
   'grammar': [
     'Grammar',
     'Rule',
@@ -652,7 +653,7 @@ String _constructor(
   List<_Param> params,
   Map<String, String> types,
 ) {
-  const superTypes = {'key': 'Key?', 'text': 'String?'};
+  const superTypes = {'key': 'Key?', 'text': 'String?', 'child': 'Widget'};
   final name = header.substring(0, header.indexOf('('));
   final lines = <String>[];
   var group = '';

@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:val_highlight/languages/all.dart';
 import 'package:val_highlight/themes/dark.dart';
@@ -54,11 +55,55 @@ void main() {
     expect(_colorOf(tester, ' x '), _c(lightTheme.root.color!));
   });
 
-  testWidgets('follows dark brightness', (tester) async {
+  testWidgets('follows the platform brightness', (tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    await tester.pumpWidget(
+      _app(const CodeView('final x = 1;', language: dartLanguage)),
+    );
+    expect(
+      _colorOf(tester, 'final'),
+      _c(darkTheme.lookup(Scopes.keyword)!.color!),
+    );
+  });
+
+  testWidgets('CodeTheme sets the brightness and the themes', (tester) async {
+    final custom = lightTheme.extend(
+      styles: {Scopes.keyword: const Style(color: 0xFF123456)},
+    );
     await tester.pumpWidget(
       _app(
-        const CodeView('final x = 1;', language: dartLanguage),
-        theme: ThemeData(brightness: Brightness.dark),
+        CodeTheme(
+          data: CodeThemeData(light: custom, brightness: Brightness.light),
+          child: const CodeView('final x;', language: dartLanguage),
+        ),
+      ),
+    );
+    expect(_colorOf(tester, 'final'), const Color(0xFF123456));
+
+    await tester.pumpWidget(
+      _app(
+        const CodeTheme(
+          data: CodeThemeData(brightness: Brightness.dark),
+          child: CodeView('final x;', language: dartLanguage),
+        ),
+      ),
+    );
+    expect(
+      _colorOf(tester, 'final'),
+      _c(darkTheme.lookup(Scopes.keyword)!.color!),
+    );
+
+    await tester.pumpWidget(
+      _app(
+        CodeTheme(
+          data: CodeThemeData(light: custom),
+          child: const CodeView(
+            'final x;',
+            language: dartLanguage,
+            theme: darkTheme,
+          ),
+        ),
       ),
     );
     expect(
@@ -67,27 +112,21 @@ void main() {
     );
   });
 
-  testWidgets('CodeTheme extension and widget theme override', (tester) async {
-    final custom = lightTheme.extend(
-      styles: {Scopes.keyword: const Style(color: 0xFF123456)},
-    );
+  testWidgets('works without any Material ancestor', (tester) async {
     await tester.pumpWidget(
-      _app(
-        const CodeView('final x;', language: dartLanguage),
-        theme: ThemeData(extensions: [CodeTheme(light: custom)]),
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (context, _) => const CodeView(
+          'final x = 1;\nfinal y = 2;',
+          language: dartLanguage,
+          lineNumbers: true,
+        ),
       ),
     );
-    expect(_colorOf(tester, 'final'), const Color(0xFF123456));
-
-    await tester.pumpWidget(
-      _app(
-        const CodeView('final x;', language: dartLanguage, theme: darkTheme),
-        theme: ThemeData(extensions: [CodeTheme(light: custom)]),
-      ),
-    );
+    expect(tester.takeException(), isNull);
     expect(
       _colorOf(tester, 'final'),
-      _c(darkTheme.lookup(Scopes.keyword)!.color!),
+      _c(lightTheme.lookup(Scopes.keyword)!.color!),
     );
   });
 
@@ -119,10 +158,12 @@ void main() {
           lineNumbers: true,
           highlightedLines: const {2},
           highlightColor: const Color(0xFFFF0000),
-          gutterBuilder: (context, number, highlighted) =>
-              SizedBox(width: 30, child: Text(highlighted ? '>' : '$number')),
+          gutterBuilder: (context, line) => SizedBox(
+            width: 30,
+            child: Text(line.highlighted ? '>' : '${line.lineNumber}'),
+          ),
           lineBuilder: (context, line, child) =>
-              KeyedSubtree(key: ValueKey('line$line'), child: child),
+              KeyedSubtree(key: ValueKey('line${line.line}'), child: child),
         ),
       ),
     );
@@ -382,5 +423,64 @@ void main() {
       expect(controller.result.language, same(jsonLanguage));
       controller.dispose();
     });
+  });
+  testWidgets('rows are tall enough at a large text scale', (tester) async {
+    final source = List.generate(50, (i) => 'line $i').join('\n');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: _app(
+          SizedBox(
+            height: 400,
+            child: CodeView(
+              source,
+              language: plainTextLanguage,
+              virtualizeAbove: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+    final row = tester.getSize(find.text('line 0').first);
+    final text = tester.renderObject<RenderParagraph>(
+      find.text('line 0').first,
+    );
+    expect(text.textSize.height, lessThanOrEqualTo(row.height + 0.5));
+    expect(row.height, closeTo(14 * 2 * 1.5, 0.5));
+  });
+
+  testWidgets('code stays left to right in a right-to-left app', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: _app(const CodeView('final x = 1;', language: dartLanguage)),
+      ),
+    );
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.byType(CodeView),
+        matching: find.byType(RichText),
+      ),
+    );
+    expect(paragraph.textDirection, TextDirection.ltr);
+  });
+
+  testWidgets('screen readers skip the line numbers', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        const CodeView(
+          'alpha\nbeta',
+          language: plainTextLanguage,
+          lineNumbers: true,
+          firstLineNumber: 41,
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel(RegExp('41')), findsNothing);
+    expect(find.bySemanticsLabel(RegExp('alpha')), findsOneWidget);
+    semantics.dispose();
   });
 }

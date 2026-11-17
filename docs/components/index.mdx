@@ -42,7 +42,12 @@ in a light Material 3 app, so the picture and the code always agree. The
 generator draws `monospace` with JetBrains Mono, and turns off its
 ligatures so `=>` shows as typed.
 
-The widgets take their app-wide defaults — the light and dark themes, the
-code text style, and for `CodeView` its padding and line numbers — from a
-`CodeTheme` set once on your `ThemeData`. See
+The widgets take their app-wide defaults — the light and dark themes and
+which one to use, the code text style, line numbers, and `CodeView`'s
+padding — from a `CodeTheme` above them. See
 [Themes](/docs/themes/#app-wide-defaults).
+
+`CodeView`, `HighlightTextController` and the rendering functions need only
+Flutter's widgets layer. `CodeField` is built on `material_ui` and comes from
+`package:val_highlight_flutter/material.dart`; see
+[which library to import](/docs/getting-started/#which-library-to-import).

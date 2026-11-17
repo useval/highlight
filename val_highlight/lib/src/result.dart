@@ -87,6 +87,24 @@ final class HighlightResult {
   /// Start offset of line [line].
   int lineStart(int line) => _lineStarts[line];
 
+  /// The line holding [offset]. An offset at a line break belongs to the
+  /// line the break ends; offsets before the start or past the end belong
+  /// to the first or last line.
+  int lineAt(int offset) {
+    final starts = _lineStarts;
+    var low = 0;
+    var high = starts.length - 1;
+    while (low < high) {
+      final mid = (low + high + 1) >> 1;
+      if (starts[mid] <= offset) {
+        low = mid;
+      } else {
+        high = mid - 1;
+      }
+    }
+    return low;
+  }
+
   /// End offset of line [line], excluding its `\n` or `\r\n`.
   int lineEnd(int line) {
     var end = line + 1 < _lineStarts.length

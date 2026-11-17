@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart'
+    show FlutterError, FlutterErrorDetails, listEquals;
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:val_highlight/languages/generic.dart';
 import 'package:val_highlight/languages/plaintext.dart';
 import 'package:val_highlight/val_highlight.dart';
@@ -12,14 +13,50 @@ import 'code_styles.dart';
 import 'code_theme.dart';
 import 'spans.dart';
 
-/// Builds the gutter cell for [lineNumber]. Return a fixed-width widget so
-/// rows stay aligned.
+/// Builds the gutter cell for [line]. Return a fixed-width widget so rows
+/// stay aligned.
 typedef CodeGutterBuilder =
-    Widget Function(BuildContext context, int lineNumber, bool highlighted);
+    Widget Function(BuildContext context, CodeLineDetails line);
 
-/// Wraps the row for zero-based [line]. [child] is the default row.
+/// Wraps the row for [line]. [child] is the default row.
 typedef CodeLineBuilder =
-    Widget Function(BuildContext context, int line, Widget child);
+    Widget Function(BuildContext context, CodeLineDetails line, Widget child);
+
+/// One line of a [CodeView], as passed to [CodeView.gutterBuilder] and
+/// [CodeView.lineBuilder].
+@immutable
+final class CodeLineDetails {
+  /// Creates the details of a line.
+  const CodeLineDetails({
+    required this.line,
+    required this.lineNumber,
+    required this.highlighted,
+  });
+
+  /// Zero-based index of the line in the code.
+  final int line;
+
+  /// Number shown in the gutter: [line] plus [CodeView.firstLineNumber].
+  final int lineNumber;
+
+  /// Whether [lineNumber] is in [CodeView.highlightedLines].
+  final bool highlighted;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CodeLineDetails &&
+      other.line == line &&
+      other.lineNumber == lineNumber &&
+      other.highlighted == highlighted;
+
+  @override
+  int get hashCode => Object.hash(line, lineNumber, highlighted);
+
+  @override
+  String toString() =>
+      'CodeLineDetails(line: $line, lineNumber: $lineNumber, '
+      'highlighted: $highlighted)';
+}
 
 /// Builds the span for one [token], replacing the default. [style] is the
 /// token's themed style (`null` for plain text). Return a [TextSpan] with
@@ -34,7 +71,7 @@ typedef CodeSpanBuilder =
 /// One piece of highlighted code, as passed to [CodeView.onTokenTap] and
 /// [CodeView.spanBuilder]. Pieces never cross a line break.
 @immutable
-class CodeToken {
+final class CodeToken {
   /// Creates a token.
   const CodeToken({
     required this.text,
@@ -72,10 +109,14 @@ class CodeToken {
 /// CodeView(source, language: dartLanguage)
 /// ```
 ///
-/// Everything else is optional. The theme follows the app's brightness
-/// (see [CodeTheme] for app-wide defaults). Results are cached, and inputs
-/// above [CodeHighlighter.isolateThreshold] are highlighted in a background
+/// Everything else is optional. The theme follows the brightness (see
+/// [CodeTheme] for app-wide defaults). Results are cached, and inputs above
+/// [CodeHighlighter.isolateThreshold] are highlighted in a background
 /// isolate while plain text is shown.
+///
+/// Code is always laid out left to right, even in a right-to-left app. To
+/// let people select and copy it, put it — or the page around it — inside
+/// a `SelectionArea`; line numbers are never selected.
 ///
 /// Short code renders as one text block. Code with more than
 /// [virtualizeAbove] lines, placed where its height is bounded, renders one
@@ -89,14 +130,13 @@ class CodeView extends StatefulWidget {
     this.detectLanguages = const [],
     this.fallbackLanguage = genericLanguage,
     this.theme,
-    this.textStyle,
+    this.style,
     this.padding,
     this.lineNumbers,
     this.firstLineNumber = 1,
     this.highlightedLines = const {},
     this.highlightColor,
     this.wrap = false,
-    this.selectable = true,
     this.highlighter,
     this.virtualizeAbove = 1000,
     this.gutterBuilder,
@@ -125,15 +165,16 @@ class CodeView extends StatefulWidget {
   /// Color theme. Defaults to [CodeTheme] or the built-in light/dark theme.
   final ValTheme? theme;
 
-  /// Text style merged over the default monospace style.
-  final TextStyle? textStyle;
+  /// Text style merged over the default code style
+  /// ([CodeTheme.textStyleOf]).
+  final TextStyle? style;
 
-  /// Padding inside the background. Defaults to [CodeTheme.padding], or 16
-  /// on every side.
+  /// Padding inside the background. Defaults to [CodeThemeData.padding],
+  /// or 16 on every side.
   final EdgeInsetsGeometry? padding;
 
-  /// Whether to show line numbers. Defaults to [CodeTheme.lineNumbers], or
-  /// `false`.
+  /// Whether to show line numbers. Defaults to
+  /// [CodeThemeData.lineNumbers], or `false`.
   final bool? lineNumbers;
 
   /// Number shown for the first line.
@@ -147,9 +188,6 @@ class CodeView extends StatefulWidget {
 
   /// Whether long lines wrap. When `false`, code scrolls horizontally.
   final bool wrap;
-
-  /// Whether the code can be selected and copied.
-  final bool selectable;
 
   /// Highlighter to use. Defaults to [CodeHighlighter.shared].
   final CodeHighlighter? highlighter;
@@ -166,7 +204,8 @@ class CodeView extends StatefulWidget {
   /// A widget shown above the code, such as a title or copy button.
   final Widget? header;
 
-  /// Vertical scroll controller for the lazy list.
+  /// Vertical scroll controller for the lazy list. Only attached while the
+  /// code is laid out lazily (see [virtualizeAbove]).
   final ScrollController? scrollController;
 
   /// Called when a token is tapped, such as an identifier to jump to.
@@ -253,11 +292,28 @@ class _CodeViewState extends State<CodeView> {
     }
     _result = highlighter.cached(code, language);
     if (_result != null) return;
-    highlighter.highlight(code, language).then((result) {
-      if (mounted && generation == _generation) {
-        setState(() => _result = result);
-      }
-    });
+    highlighter
+        .highlight(code, language)
+        .then(
+          (result) {
+            if (mounted && generation == _generation) {
+              setState(() => _result = result);
+            }
+          },
+          onError: (Object error, StackTrace stack) {
+            // The code stays plain; report the failure like a build error.
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'val_highlight_flutter',
+                context: ErrorDescription(
+                  'while highlighting code for CodeView',
+                ),
+              ),
+            );
+          },
+        );
   }
 
   HighlightResult get _current =>
@@ -273,15 +329,15 @@ class _CodeViewState extends State<CodeView> {
     if (_styles?.theme != theme) _styles = CodeStyles(theme);
     final styles = _styles!;
     final codeTheme = CodeTheme.maybeOf(context);
-    final base = styles.rootStyle(
-      CodeTheme.textStyleOf(context, widget.textStyle),
-    );
+    final base = styles.rootStyle(CodeTheme.textStyleOf(context, widget.style));
     final layout = _Layout(
       result: _current,
       styles: styles,
       base: base,
       strut: StrutStyle.fromTextStyle(base, forceStrutHeight: true),
-      lineHeight: (base.fontSize ?? 14) * (base.height ?? 1.2),
+      lineHeight:
+          MediaQuery.textScalerOf(context).scale(base.fontSize ?? 14) *
+          (base.height ?? 1.2),
       lineNumbers: widget.lineNumbers ?? codeTheme?.lineNumbers ?? false,
       highlightColor:
           widget.highlightColor ??
@@ -297,11 +353,13 @@ class _CodeViewState extends State<CodeView> {
         Widget content = Padding(
           padding:
               widget.padding ?? codeTheme?.padding ?? const EdgeInsets.all(16),
-          child: LayoutBuilder(
-            builder: (context, constraints) => _body(layout, constraints),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: LayoutBuilder(
+              builder: (context, constraints) => _body(layout, constraints),
+            ),
           ),
         );
-        if (widget.selectable) content = SelectionArea(child: content);
         if (widget.header != null) {
           content = Column(
             mainAxisSize: MainAxisSize.min,
@@ -313,7 +371,7 @@ class _CodeViewState extends State<CodeView> {
           );
         }
         return ColoredBox(
-          color: background == null ? Colors.transparent : Color(background),
+          color: Color(background ?? 0x00000000),
           child: content,
         );
       },
@@ -392,8 +450,8 @@ class _CodeViewState extends State<CodeView> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectionContainer.disabled(
-          child: Column(
+        _gutter(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               for (var line = 0; line < result.lineCount; line++)
@@ -441,11 +499,8 @@ class _CodeViewState extends State<CodeView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (layout.lineNumbers) ...[
-            SelectionContainer.disabled(
-              child: SizedBox(
-                width: gutterWidth,
-                child: _gutterCell(layout, line),
-              ),
+            _gutter(
+              SizedBox(width: gutterWidth, child: _gutterCell(layout, line)),
             ),
             const SizedBox(width: 16),
           ],
@@ -455,7 +510,8 @@ class _CodeViewState extends State<CodeView> {
       if (widget.highlightedLines.contains(number)) {
         child = ColoredBox(color: layout.highlightColor, child: child);
       }
-      return widget.lineBuilder?.call(context, line, child) ?? child;
+      final builder = widget.lineBuilder;
+      return builder == null ? child : builder(context, _details(line), child);
     }
 
     Widget list;
@@ -545,12 +601,24 @@ class _CodeViewState extends State<CodeView> {
     return spans;
   }
 
+  CodeLineDetails _details(int line) {
+    final number = widget.firstLineNumber + line;
+    return CodeLineDetails(
+      line: line,
+      lineNumber: number,
+      highlighted: widget.highlightedLines.contains(number),
+    );
+  }
+
+  /// Line numbers are not part of the code: never selected, and not read
+  /// out by screen readers.
+  static Widget _gutter(Widget child) =>
+      SelectionContainer.disabled(child: ExcludeSemantics(child: child));
+
   Widget _gutterCell(_Layout layout, int line) {
     final number = widget.firstLineNumber + line;
     final builder = widget.gutterBuilder;
-    if (builder != null) {
-      return builder(context, number, widget.highlightedLines.contains(number));
-    }
+    if (builder != null) return builder(context, _details(line));
     // Line numbers never wrap, even if the gutter is a pixel too narrow.
     return Text(
       '$number',

@@ -381,4 +381,32 @@ void main() {
       expect(toggle('a', 0, 5), isNull);
     });
   });
+  test(
+    'a new formatter for the same controller keeps the auto-closed pair',
+    () {
+      final controller = HighlightTextController(
+        text: 'f',
+        language: dartLanguage,
+      )..selection = const TextSelection.collapsed(offset: 1);
+      TextEditingValue type(String char) {
+        final value = controller.value;
+        final at = value.selection.start;
+        // A new formatter for every edit, as a build method would make.
+        return controller.value = CodeEditingFormatter(controller: controller)
+            .formatEditUpdate(
+              value,
+              TextEditingValue(
+                text: value.text.replaceRange(at, at, char),
+                selection: TextSelection.collapsed(offset: at + 1),
+              ),
+            );
+      }
+
+      type('(');
+      expect(controller.text, 'f()');
+      type(')');
+      expect(controller.text, 'f()');
+      expect(controller.selection.baseOffset, 3);
+    },
+  );
 }

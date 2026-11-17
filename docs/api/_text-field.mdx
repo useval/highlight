@@ -10,7 +10,9 @@ TextField(controller: controller, maxLines: null, style: monospace);
 ```
 
 Edits are highlighted incrementally: only the lines an edit can affect
-are re-scanned, so typing stays fast in large documents.
+are re-scanned, so typing stays fast in large documents. A plain
+`TextField` still lays out and colors its whole text on every change;
+for long text use `CodeField`, which colors only the lines on screen.
 
 ```dart
 HighlightTextController({
@@ -23,25 +25,15 @@ HighlightTextController({
 
 Creates a controller for `language`.
 
-`theme` defaults to `CodeTheme` or the built-in theme for the app's
-brightness. `registry` resolves languages named inside the text, such
-as Markdown code fences.
+`theme` defaults to `CodeTheme`'s theme for the current brightness.
+`registry` resolves languages named inside the text, such as Markdown
+code fences.
 
 | Member | Type | Description |
 |---|---|---|
-| `window` | `({int first, int last})?` | Zero-based lines to color, or `null` for all of them. *Settable.* |
 | `language` | `Grammar` | The language of the text. Setting it re-highlights everything. *Settable.* |
-| `theme` | `ValTheme?` | The theme, or `null` to follow the app. *Settable.* |
+| `theme` | `ValTheme?` | The theme, or `null` to follow `CodeTheme`. *Settable.* |
 | `result` | `HighlightResult` | The highlight result for the current text. |
-
-<details>
-<summary><code>window</code>: more</summary>
-
-Laying out a text field with many thousands of styled runs is slow, so
-for large documents only the visible lines, plus a margin, need
-colors. `CodeField` sets this automatically as you scroll.
-
-</details>
 
 ### `CodeEditingFormatter`
 
@@ -63,6 +55,10 @@ It reacts to text changes rather than key presses, so it works the same
 with hardware keyboards, on-screen keyboards and voice input. Text being
 composed by an input method is never changed. Each change it makes is a
 single edit, so one undo reverts it.
+
+What it needs to remember between edits, such as which closers it
+inserted, is kept on the `controller`, so creating a new formatter in
+each build is fine.
 
 ```dart
 CodeEditingFormatter({

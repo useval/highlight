@@ -32,8 +32,12 @@
   every edit re-highlights only what it can affect.
 - **Native rendering** — plain Flutter text, no WebView and no platform
   code. Works on Android, iOS, macOS, Windows, Linux and the web.
-- **Follows your app** — light and dark themes switch with the app, and
-  `CodeTheme` sets defaults once for every code block.
+- **Any design system** — the main library needs only Flutter's widgets
+  layer, so it works with `package:flutter/material.dart`, `material_ui`,
+  Cupertino or your own widgets. `CodeField`, built on `material_ui`, has
+  its own import.
+- **Follows your app** — light and dark themes switch with the brightness,
+  and `CodeTheme` sets defaults once for every code block.
 - **Interactive** — tap handlers and custom spans per token, for
   jump-to-definition, links and tooltips.
 
@@ -55,6 +59,14 @@ This package re-exports the core API of
 themes are separate imports under `package:val_highlight/languages/` and
 `package:val_highlight/themes/`, so an app ships only what it uses.
 
+| Import | Gives you |
+|---|---|
+| `package:val_highlight_flutter/val_highlight_flutter.dart` | `CodeView`, `HighlightTextController`, `CodeTheme` and the rest; needs only Flutter's widgets layer. |
+| `package:val_highlight_flutter/material.dart` | All of that, plus `CodeField`, which needs a `material_ui` `MaterialApp`. |
+
+Upgrading from 0.x? See
+[Upgrading to 1.0](https://github.com/useval/highlight/blob/main/docs/upgrading.mdx).
+
 ## 📄 CodeView
 
 ```dart
@@ -73,8 +85,8 @@ CodeView(
   `gutterBuilder`.
 - **Highlighted lines** — `highlightedLines`, `highlightColor`.
 - **Wrapping** — `wrap: true`, or scroll long lines horizontally.
-- **Selection and copying** — on by default (`selectable`); line numbers are
-  never copied.
+- **Selection and copying** — inside a `SelectionArea`; line numbers are
+  never copied, and screen readers skip them.
 - **Custom rendering** — `lineBuilder` wraps each row, `header` adds a title
   bar or copy button, `spanBuilder` replaces any token's span.
 - **Tappable tokens** — `onTokenTap` receives each token's text, offsets,
@@ -91,12 +103,14 @@ CodeView(
 ## ⌨️ CodeField
 
 ```dart
+import 'package:val_highlight_flutter/material.dart';
+
 final controller = HighlightTextController(language: dartLanguage);
 
 CodeField(controller: controller, expands: true)
 ```
 
-`CodeField` is a `TextField` for code:
+`CodeField` is a `material_ui` `TextField` for code:
 
 - monospace, no autocorrect or smart quotes;
 - brackets and quotes close themselves, typing a closer steps over it, and
@@ -106,7 +120,7 @@ CodeField(controller: controller, expands: true)
   or `:`, and moves the closer of `{|}` onto its own line;
 - Tab and Shift+Tab indent and outdent (`indent` sets the unit);
 - Ctrl+/ (Cmd+/ on Apple platforms) comments and uncomments lines;
-- the bracket at the caret and its match are outlined;
+- the bracket at the caret and its match get a background;
 - each edit re-scans only the lines it can affect.
 
 Brackets, quotes and comment markers come from the language
@@ -149,16 +163,16 @@ For a plain `TextField`, add
 get the same typing behavior.
 
 Flutter lays out a text field's whole text on every change, and styled runs
-make that slower. So for documents over 300 lines, `CodeField` colors only
-the visible lines plus a margin, and the colored window follows scrolling.
+make that slower. So for documents over 300 lines (`styleAllBelow`),
+`CodeField` colors only the visible lines plus `styleMargin` lines on each
+side, and the colored window follows scrolling.
 
-`HighlightTextController` also works in a plain `TextField` for short
-documents. For long ones, use `CodeField`, or set `controller.window`
-yourself.
+`HighlightTextController` also works in a plain `TextField`, in any design
+system, for short documents. For long ones, use `CodeField`.
 
 ## 🎨 Themes
 
-The theme follows the app's brightness: `lightTheme` or `darkTheme` by
+The theme follows the platform's brightness: `lightTheme` or `darkTheme` by
 default. Choose any of the eight built-in themes, a VS Code theme, or your
 own:
 
@@ -166,19 +180,20 @@ own:
 CodeView(source, language: dartLanguage, theme: midnightTheme)
 ```
 
-Set app-wide defaults once:
+Set app-wide defaults once with a `CodeTheme`. In `MaterialApp.builder` it
+can follow the app's own light and dark mode:
 
 ```dart
 MaterialApp(
-  theme: ThemeData(
-    extensions: [
-      CodeTheme(
-        light: sepiaTheme,
-        dark: dimTheme,
-        textStyle: const TextStyle(fontFamily: 'JetBrains Mono'),
-        lineNumbers: true,
-      ),
-    ],
+  builder: (context, child) => CodeTheme(
+    data: CodeThemeData(
+      light: sepiaTheme,
+      dark: dimTheme,
+      brightness: Theme.of(context).brightness,
+      textStyle: const TextStyle(fontFamily: 'JetBrains Mono'),
+      lineNumbers: true,
+    ),
+    child: child!,
   ),
 )
 ```
@@ -233,7 +248,7 @@ editor, and a large file rendered lazily.
 
 ## Built by Val
 
-`val_highlight_flutter` is part of [Val](https://useval.io), the live visual
+`val_highlight_flutter` is part of [Val](https://useval.ai), the live visual
 layer for AI agents.
 
 ## 💬 Community

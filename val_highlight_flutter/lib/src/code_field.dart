@@ -10,8 +10,6 @@ import 'code_theme.dart';
 import 'editor_decorations.dart';
 import 'highlight_text_controller.dart';
 
-export 'code_editing.dart' show indentText, newlineKeepingIndent, outdentLines;
-
 /// A code editor: a multi-line [TextField] driven by a
 /// [HighlightTextController], which stays fast on large documents.
 ///
@@ -32,9 +30,13 @@ export 'code_editing.dart' show indentText, newlineKeepingIndent, outdentLines;
 ///
 /// Laying out a text field is proportional to its styled runs, so for
 /// documents longer than [styleAllBelow] lines only the visible lines, plus
-/// [margin] lines on each side, are colored. The window follows scrolling
+/// [styleMargin] lines on each side, are colored. The window follows scrolling
 /// (of the field itself or of an enclosing scroll view) and is computed from
 /// the laid-out text, so wrapped lines are handled exactly.
+///
+/// The field is built on `material_ui`'s [TextField], so it needs a
+/// `material_ui` `MaterialApp` (or `Material`) above it. Code is always
+/// laid out left to right, even in a right-to-left app.
 class CodeField extends StatefulWidget {
   /// Creates a code editor.
   const CodeField({
@@ -55,13 +57,13 @@ class CodeField extends StatefulWidget {
     this.scrollController,
     this.textAlignVertical,
     this.styleAllBelow = 300,
-    this.margin = 150,
+    this.styleMargin = 150,
     this.indent = '  ',
     this.editing = const CodeEditing(),
     this.shortcuts,
     this.inputFormatters,
     this.undoController,
-    this.lineNumbers = false,
+    this.lineNumbers,
     this.firstLineNumber = 1,
     this.gutterStyle,
     this.highlightedLines = const {},
@@ -110,8 +112,9 @@ class CodeField extends StatefulWidget {
   /// Documents with at most this many lines are colored in full.
   final int styleAllBelow;
 
-  /// Lines colored beyond each edge of the visible area.
-  final int margin;
+  /// Lines colored beyond each edge of the visible area, once the document
+  /// is longer than [styleAllBelow] lines.
+  final int styleMargin;
 
   /// Text inserted by Tab and removed by Shift+Tab, such as two spaces or
   /// `'\t'`. Enter keeps the current line's indentation, adding one level
@@ -127,7 +130,7 @@ class CodeField extends StatefulWidget {
   final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// Formatters applied after the editing behavior, such as a length
-  /// limit.
+  /// limit. Edits made by shortcuts, such as Tab, go through them too.
   final List<TextInputFormatter>? inputFormatters;
 
   /// Controls the field's undo history, as in [TextField.undoController].
@@ -135,8 +138,9 @@ class CodeField extends StatefulWidget {
   /// comment, an indent — is a single undo step.
   final UndoHistoryController? undoController;
 
-  /// Whether to show line numbers in a gutter.
-  final bool lineNumbers;
+  /// Whether to show line numbers in a gutter. Defaults to
+  /// [CodeThemeData.lineNumbers], or `false`.
+  final bool? lineNumbers;
 
   /// Number shown for the first line.
   final int firstLineNumber;
@@ -163,18 +167,25 @@ class CodeField extends StatefulWidget {
 
   /// The default [shortcuts]: Tab, Shift+Tab, and Ctrl+/ (Cmd+/ on macOS
   /// and iOS).
-  static Map<ShortcutActivator, Intent> get defaultShortcuts {
-    final apple =
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.iOS;
-    return {
-      const SingleActivator(LogicalKeyboardKey.tab): const IndentCodeIntent(),
-      const SingleActivator(LogicalKeyboardKey.tab, shift: true):
-          const OutdentCodeIntent(),
-      SingleActivator(LogicalKeyboardKey.slash, meta: apple, control: !apple):
-          const ToggleCommentIntent(),
-    };
-  }
+  static Map<ShortcutActivator, Intent> get defaultShortcuts =>
+      defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.iOS
+      ? _appleShortcuts
+      : _shortcuts;
+
+  static const Map<ShortcutActivator, Intent> _shortcuts = {
+    SingleActivator(LogicalKeyboardKey.tab): IndentCodeIntent(),
+    SingleActivator(LogicalKeyboardKey.tab, shift: true): OutdentCodeIntent(),
+    SingleActivator(LogicalKeyboardKey.slash, control: true):
+        ToggleCommentIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _appleShortcuts = {
+    SingleActivator(LogicalKeyboardKey.tab): IndentCodeIntent(),
+    SingleActivator(LogicalKeyboardKey.tab, shift: true): OutdentCodeIntent(),
+    SingleActivator(LogicalKeyboardKey.slash, meta: true):
+        ToggleCommentIntent(),
+  };
 
   @override
   State<CodeField> createState() => _CodeFieldState();
@@ -189,6 +200,10 @@ class _CodeFieldState extends State<CodeField> {
   GutterDigits? _digits;
   GutterDigits? _currentDigits;
   int _digitCount = 0;
+
+  // Whether the gutter is shown, as of the last build: the widget's
+  // setting, or CodeTheme's.
+  bool _lineNumbers = false;
 
   late final Map<Type, Action<Intent>> _actions = {
     IndentCodeIntent: Action<IndentCodeIntent>.overridable(
@@ -258,11 +273,11 @@ class _CodeFieldState extends State<CodeField> {
     if (!identical(old.controller, widget.controller)) {
       old.controller.removeListener(_onChanged);
       widget.controller.addListener(_onChanged);
+    }
+    if (!identical(old.controller, widget.controller) ||
+        old.editing != widget.editing ||
+        old.indent != widget.indent) {
       _formatter = _newFormatter();
-    } else {
-      _formatter
-        ..editing = widget.editing
-        ..indent = widget.indent;
     }
   }
 
@@ -291,7 +306,7 @@ class _CodeFieldState extends State<CodeField> {
   void _onChanged() {
     _schedule();
     // The gutter widens when the line count gains a digit.
-    if (widget.lineNumbers && _digitsFor() != _digitCount) setState(() {});
+    if (_lineNumbers && _digitsFor() != _digitCount) setState(() {});
   }
 
   /// A font finished loading, so the text was laid out again: lay out the
@@ -352,22 +367,23 @@ class _CodeFieldState extends State<CodeField> {
     final bottom = editable
         .getPositionForPoint(visible.bottomRight - const Offset(1, 1))
         .offset;
-    final firstVisible = _lineOf(result.lineStart, lines, top);
-    final lastVisible = _lineOf(result.lineStart, lines, bottom);
+    final firstVisible = result.lineAt(top);
+    final lastVisible = result.lineAt(bottom);
 
     // Moving the window re-lays out the whole field, so keep it while the
     // visible lines stay clear of its edges; while scrolling, only move it
     // when they get close. Once scrolling stops, re-center it.
     final current = controller.window;
-    final slack = settled ? widget.margin ~/ 2 : widget.margin ~/ 5;
+    final margin = widget.styleMargin;
+    final slack = settled ? margin ~/ 2 : margin ~/ 5;
     if (current != null &&
         (current.first == 0 || firstVisible - current.first >= slack) &&
         (current.last >= lines - 1 || current.last - lastVisible >= slack)) {
       return;
     }
     controller.window = (
-      first: math.max(0, firstVisible - widget.margin),
-      last: math.min(lines - 1, lastVisible + widget.margin),
+      first: math.max(0, firstVisible - margin),
+      last: math.min(lines - 1, lastVisible + margin),
     );
   }
 
@@ -378,20 +394,6 @@ class _CodeFieldState extends State<CodeField> {
     final box = _outer?.context.notificationContext?.findRenderObject();
     if (box is! RenderBox || !box.attached || !box.hasSize) return null;
     return box.localToGlobal(Offset.zero) & box.size;
-  }
-
-  static int _lineOf(int Function(int) lineStart, int lines, int offset) {
-    var low = 0;
-    var high = lines - 1;
-    while (low < high) {
-      final mid = (low + high + 1) >> 1;
-      if (lineStart(mid) <= offset) {
-        low = mid;
-      } else {
-        high = mid - 1;
-      }
-    }
-    return low;
   }
 
   static RenderEditable? _findEditable(RenderObject? object) {
@@ -410,12 +412,19 @@ class _CodeFieldState extends State<CodeField> {
         !value.isComposingRangeValid;
   }
 
-  /// Applies an edit made by a shortcut, as the user's own.
+  /// Applies an edit made by a shortcut, as the user's own: through
+  /// [CodeField.inputFormatters], as typed text would go.
   void _apply(TextEditingValue? edited) {
     if (edited == null) return;
-    final changed = edited.text != widget.controller.text;
-    widget.controller.value = edited;
-    if (changed) widget.onChanged?.call(edited.text);
+    final old = widget.controller.value;
+    var value = edited;
+    for (final formatter
+        in widget.inputFormatters ?? const <TextInputFormatter>[]) {
+      value = formatter.formatEditUpdate(old, value);
+    }
+    final changed = value.text != old.text;
+    widget.controller.value = value;
+    if (changed) widget.onChanged?.call(value.text);
   }
 
   /// Enter keeps the indentation. Typed line breaks reach the formatter
@@ -449,6 +458,8 @@ class _CodeFieldState extends State<CodeField> {
 
   @override
   Widget build(BuildContext context) {
+    _lineNumbers =
+        widget.lineNumbers ?? CodeTheme.maybeOf(context)?.lineNumbers ?? false;
     _schedule(requestFrame: false);
     Widget field = Focus(
       canRequestFocus: false,
@@ -462,19 +473,20 @@ class _CodeFieldState extends State<CodeField> {
       child: field,
     );
     final decorated =
-        widget.lineNumbers ||
+        _lineNumbers ||
         widget.highlightCurrentLine ||
         widget.highlightedLines.isNotEmpty ||
         widget.editing.matchBrackets;
-    if (!decorated) return field;
-    return _decorate(context, field);
+    if (decorated) field = _decorate(context, field);
+    return Directionality(textDirection: TextDirection.ltr, child: field);
   }
 
   Widget _decorate(BuildContext context, Widget field) {
     final theme = CodeTheme.resolve(context, widget.controller.theme);
     final base = CodeTheme.textStyleOf(context, widget.style);
     final foreground = theme.root.color == null
-        ? base.color ?? (theme.dark ? Colors.white : Colors.black)
+        ? base.color ??
+              (theme.dark ? const Color(0xFFFFFFFF) : const Color(0xFF000000))
         : Color(theme.root.color!);
 
     var gutterWidth = 0.0;
@@ -482,7 +494,7 @@ class _CodeFieldState extends State<CodeField> {
     const leading = 8.0;
     GutterDigits? digits;
     GutterDigits? current;
-    if (widget.lineNumbers) {
+    if (_lineNumbers) {
       final scaler = MediaQuery.textScalerOf(context);
       final style = base
           .copyWith(color: foreground.withValues(alpha: 0.45))

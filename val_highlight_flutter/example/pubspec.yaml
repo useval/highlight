@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   material_ui: ^1.0.1
   val_highlight: ^1.0.0
-  val_highlight_flutter: ^0.1.2
+  val_highlight_flutter: ^1.0.0
 
 dev_dependencies:
   flutter_test:

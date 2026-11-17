@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:val_highlight/languages/all.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 
 RenderEditable _editable(WidgetTester tester) {
   RenderEditable? found;

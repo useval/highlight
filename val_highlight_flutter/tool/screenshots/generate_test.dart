@@ -23,7 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:val_highlight/languages/all.dart';
 import 'package:val_highlight/themes/all.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 
 import 'examples/code_field/editor.dart' as code_field_editor;
 import 'examples/code_view/basic.dart' as code_view_basic;
@@ -480,15 +480,16 @@ class _Preview extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-        extensions: const [
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
+      builder: (context, child) => CodeTheme(
+        data: CodeThemeData(
+          brightness: Theme.of(context).brightness,
           // JetBrains Mono draws `=>` as an arrow; show the source as typed.
-          CodeTheme(
-            textStyle: TextStyle(fontFeatures: [FontFeature.disable('calt')]),
+          textStyle: const TextStyle(
+            fontFeatures: [FontFeature.disable('calt')],
           ),
-        ],
+        ),
+        child: child!,
       ),
       home: SingleChildScrollView(
         child: Align(
@@ -583,12 +584,16 @@ class _Showcase extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
         brightness: theme.dark ? Brightness.dark : Brightness.light,
-        extensions: const [
+      ),
+      builder: (context, child) => CodeTheme(
+        data: CodeThemeData(
+          brightness: Theme.of(context).brightness,
           // JetBrains Mono draws `=>` as an arrow; show the source as typed.
-          CodeTheme(
-            textStyle: TextStyle(fontFeatures: [FontFeature.disable('calt')]),
+          textStyle: const TextStyle(
+            fontFeatures: [FontFeature.disable('calt')],
           ),
-        ],
+        ),
+        child: child!,
       ),
       home: Align(
         alignment: Alignment.topLeft,

@@ -29,6 +29,10 @@ major version.
 * `HighlightResult.matchingBracket` uses the language's
   `EditingSyntax.brackets` unless `brackets` is given.
 
+### Added
+
+* `HighlightResult.lineAt`, the line holding an offset.
+
 ### Fixed
 
 * Highlighting time no longer grows with the square of the input on long

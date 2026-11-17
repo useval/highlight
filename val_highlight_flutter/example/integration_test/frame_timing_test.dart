@@ -7,7 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:val_highlight/languages/dart.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 import 'package:val_highlight_flutter_example/samples.g.dart';
 
 String _dartLines(int lines) {

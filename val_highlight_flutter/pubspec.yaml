@@ -1,6 +1,6 @@
 name: val_highlight_flutter
-description: "Flutter widgets for syntax-highlighted code: CodeView for display and CodeField for editing, with 55 languages, themes and smooth large files."
-version: 0.1.2
+description: "Flutter widgets for syntax-highlighted code: CodeView to show it and CodeField to edit it, with 55 languages, themes and smooth large files."
+version: 1.0.0
 homepage: https://github.com/useval/highlight
 repository: https://github.com/useval/highlight/tree/main/val_highlight_flutter
 issue_tracker: https://github.com/useval/highlight/issues

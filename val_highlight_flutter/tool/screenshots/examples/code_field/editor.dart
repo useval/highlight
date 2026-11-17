@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:val_highlight/languages/python.dart';
-import 'package:val_highlight_flutter/val_highlight_flutter.dart';
+import 'package:val_highlight_flutter/material.dart';
 
 const source = '''
 from dataclasses import dataclass

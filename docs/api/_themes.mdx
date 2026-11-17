@@ -106,20 +106,69 @@ Creates a style.
 
 ### `CodeTheme`
 
-App-wide defaults for code widgets, set once on `ThemeData.extensions`.
+Sets `CodeThemeData` for the code widgets below it.
+
+It works in any app, whatever its design system. Put one above your
+app's content, for example in `MaterialApp.builder`, so it can follow
+the app's own brightness:
 
 ```dart
 MaterialApp(
-  theme: ThemeData(extensions: [CodeTheme(light: myTheme)]),
+  builder: (context, child) => CodeTheme(
+    data: CodeThemeData(
+      light: sepiaTheme,
+      dark: dimTheme,
+      brightness: Theme.of(context).brightness,
+    ),
+    child: child!,
+  ),
 )
 ```
+
+Without a `CodeTheme`, the widgets use `lightTheme` or `darkTheme` by
+the platform's brightness.
+
+```dart
+const CodeTheme({
+  Key? key,
+  required CodeThemeData data,
+  required Widget child,
+})
+```
+
+Provides `data` to the code widgets in `child`.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `data` | `CodeThemeData` | *required* | The defaults. |
+
+| Member | Type | Description |
+|---|---|---|
+| `static maybeOf(BuildContext context)` | `CodeThemeData?` | The nearest `CodeThemeData`, if any. |
+| `static of(BuildContext context)` | `CodeThemeData` | The nearest `CodeThemeData`, or the default one. |
+| `static brightnessOf(BuildContext context)` | `Brightness` | The brightness the code widgets use: `CodeThemeData.brightness`, or the platform's. |
+| `static resolve(BuildContext context, [ValTheme? override])` | `ValTheme` | The `ValTheme` to use: `override` if given, otherwise the default for `brightnessOf`. |
+| `static textStyleOf(BuildContext context, [TextStyle? override])` | `TextStyle` | The default code text style: monospace, merged with `CodeThemeData.textStyle` and then `override`. |
+
+<details>
+<summary><code>static textStyleOf</code>: more</summary>
+
+Letter and word spacing are fixed at zero so an app-wide text theme
+cannot stretch code or its line numbers.
+
+</details>
+
+### `CodeThemeData`
+
+App-wide defaults for the code widgets, provided by a `CodeTheme`.
 
 Anything set directly on a widget wins over these defaults.
 
 ```dart
-const CodeTheme({
+const CodeThemeData({
   ValTheme? light,
   ValTheme? dark,
+  Brightness? brightness,
   TextStyle? textStyle,
   EdgeInsetsGeometry? padding,
   bool? lineNumbers,
@@ -130,25 +179,25 @@ Creates code defaults.
 
 | Field | Type | Description |
 |---|---|---|
-| `light` | `ValTheme?` | Theme used when the app is light. Defaults to `lightTheme`. |
-| `dark` | `ValTheme?` | Theme used when the app is dark. Defaults to `darkTheme`. |
+| `light` | `ValTheme?` | Theme used when `brightness` is light. Defaults to `lightTheme`. |
+| `dark` | `ValTheme?` | Theme used when `brightness` is dark. Defaults to `darkTheme`. |
+| `brightness` | `Brightness?` | Whether to use `light` or `dark`. Defaults to the platform's brightness, from `MediaQuery`. Set it from your app's theme when the app does not follow the platform: |
 | `textStyle` | `TextStyle?` | Base text style for code, merged over the default monospace style. |
-| `padding` | `EdgeInsetsGeometry?` | Padding around code blocks. |
-| `lineNumbers` | `bool?` | Whether code blocks show line numbers. |
+| `padding` | `EdgeInsetsGeometry?` | Padding around code in `CodeView`. |
+| `lineNumbers` | `bool?` | Whether `CodeView` and `CodeField` show line numbers. |
+
+<details>
+<summary><code>brightness</code>: more</summary>
+
+```dart
+CodeThemeData(brightness: Theme.of(context).brightness)
+```
+
+</details>
 
 | Member | Type | Description |
 |---|---|---|
-| `static maybeOf(BuildContext context)` | `CodeTheme?` | The nearest `CodeTheme`, if any. |
-| `static resolve(BuildContext context, [ValTheme? override])` | `ValTheme` | The `ValTheme` to use: `override` if given, otherwise the app default for the current brightness. |
-| `static textStyleOf(BuildContext context, [TextStyle? override])` | `TextStyle` | The default code text style: monospace, merged with `CodeTheme` and then `override`. |
-
-<details>
-<summary><code>static textStyleOf</code>: more</summary>
-
-Letter and word spacing are fixed at zero so an app-wide text theme
-cannot stretch code or its line numbers.
-
-</details>
+| `copyWith({…})` | `CodeThemeData` | Returns a copy with the given fields replaced. |
 
 ### `allThemes`
 

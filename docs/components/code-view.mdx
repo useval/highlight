@@ -31,9 +31,17 @@ CodeView(source, language: dartLanguage)
 ```
 
 Give it the source and a language; every other parameter is optional. With
-the defaults, the theme follows the app's brightness, the code is selectable,
-long lines scroll sideways, and the code sits in 16 pixels of the theme's
-background color.
+the defaults, the theme follows the platform's brightness (or a
+[`CodeTheme`](/docs/themes/#app-wide-defaults)), long lines scroll sideways,
+and the code sits in 16 pixels of the theme's background color. Code is
+always laid out left to right, even in a right-to-left app.
+
+To let people select and copy the code, put it — or the page around it —
+in a `SelectionArea`:
+
+```dart
+SelectionArea(child: CodeView(source, language: dartLanguage))
+```
 
 ## Examples
 
@@ -52,27 +60,33 @@ background color.
 longer file, and `highlightedLines` takes the numbers as shown in the gutter.
 Without `highlightColor`, highlighted lines get a translucent band: black at
 8% opacity in a light theme, white at 13% in a dark one. Line numbers are
-never selected, so copying the code never copies them.
+never selected, so copying the code never copies them, and screen readers
+skip them.
 
-To draw the gutter yourself, pass a `gutterBuilder`. It gets the line number
-as shown and whether that line is highlighted, and is only used while
-`lineNumbers` is on. Return a fixed-width widget so the rows stay aligned:
+To draw the gutter yourself, pass a `gutterBuilder`. It gets a
+`CodeLineDetails` — the zero-based `line`, its `lineNumber` as shown, and
+whether it is `highlighted` — and is only used while `lineNumbers` is on.
+Return a fixed-width widget so the rows stay aligned:
 
 ```dart
 CodeView(
   source,
   language: dartLanguage,
   lineNumbers: true,
-  gutterBuilder: (context, lineNumber, highlighted) => SizedBox(
+  gutterBuilder: (context, line) => SizedBox(
     width: 32,
     child: Text(
-      '$lineNumber',
+      '${line.lineNumber}',
       textAlign: TextAlign.right,
-      style: TextStyle(fontWeight: highlighted ? FontWeight.bold : null),
+      style: TextStyle(fontWeight: line.highlighted ? FontWeight.bold : null),
     ),
   ),
 )
 ```
+
+`lineBuilder` wraps each row the same way, with the row as `child` — for a
+gesture detector per line, say. Setting it lays the code out one row per
+line.
 
 :::note
 Placed where its height is bounded, such as in an `Expanded`, a `CodeView`
@@ -237,9 +251,9 @@ CodeHighlighter.shared.preload([dartLanguage, kotlinLanguage, jsonLanguage]);
 ## Themes and text style
 
 `theme` picks a `ValTheme` for one view; without it, `CodeView` follows
-`CodeTheme` and the app's brightness. `textStyle` is merged over the default
-code style — `monospace` at 14 pixels with a line height of 1.5 — for
-example to set a font family. See [Themes](/docs/themes/).
+`CodeTheme` and the brightness. `style` is merged over the default code
+style — `monospace` at 14 pixels with a line height of 1.5 — for example to
+set a font family. See [Themes](/docs/themes/).
 
 ## API reference
 
